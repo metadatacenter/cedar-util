@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# counter.py: Utility to count the number of instances of different types in a CEDAR ISA-ImmPort model data dump
+# Syntax: counter.py input.json output.csv
+
 import json
 import sys
 import csv
