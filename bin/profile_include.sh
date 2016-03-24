@@ -39,6 +39,7 @@ alias gokk='cd $KEYCLOAK_HOME/bin'
 #CEDAR util aliases
 alias cedargs='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
+alias cedarenv='set | grep -a CEDAR_'
 
 #Maven aliases
 alias mi='mvn install'
