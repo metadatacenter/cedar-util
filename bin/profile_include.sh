@@ -63,6 +63,7 @@ alias killkk="kill `ps ax | grep \"[k]eycloak/standalone\" | awk '{print $1}'`";
 #CEDAR server aliases
 alias killbypid='kill `cat RUNNING_PID`'
 alias starteditor='goeditor && gulp &'
+alias killeditor='kill `pgrep gulp`'
 
 alias startrepo='gorepo && mp2r &'
 alias killrepo='gorepoplay && killbypid'
