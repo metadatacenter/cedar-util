@@ -1,5 +1,7 @@
 #Shell aliases
 alias ls='ls -laGp'
+alias cls='clear'
+alias hi='history'
 
 #Colors for ls
 export CLICOLOR=1
@@ -37,7 +39,8 @@ alias goeditor='cd $CEDAR_HOME/cedar-template-editor'
 alias gokk='cd $KEYCLOAK_HOME/bin'
 
 #CEDAR util aliases
-alias cedargs='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
+alias cedargstatus='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
+alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
 
@@ -57,7 +60,7 @@ alias m2cleancedar='rm -rf ~/.m2/repository/org/metadatacenter/*'
 alias startnginx='sudo nginx'
 alias stopnginx='sudo nginx -s stop'
 alias restartnginx='sudo nginx -s stop && sudo nginx'
-alias startkk='$KEYCLOAK_HOME/bin/standalone.sh'
+alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
 alias killkk="kill `ps ax | grep \"[k]eycloak/standalone\" | awk '{print $1}'`";
 
 #CEDAR server aliases
