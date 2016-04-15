@@ -1,3 +1,4 @@
+#!/bin/bash
 #Shell aliases
 alias ls='ls -laGp'
 alias cls='clear'
@@ -18,6 +19,7 @@ alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goserverutils='cd $CEDAR_HOME/cedar-server-utils'
 
+alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
 alias gorepo='cd $CEDAR_HOME/cedar-repo-server'
 alias goresource='cd $CEDAR_HOME/cedar-resource-server'
 alias goschema='cd $CEDAR_HOME/cedar-schema-server'
@@ -26,6 +28,7 @@ alias goterminology='cd $CEDAR_HOME/cedar-terminology-server/cedar-terminology-s
 alias gouser='cd $CEDAR_HOME/cedar-user-server'
 alias govaluerecommender='cd $CEDAR_HOME/cedar-valuerecommender-server/cedar-valuerecommender-server-play'
 
+alias gofolderplay='gofolder && cd cedar-folder-server-play'
 alias gorepoplay='gorepo && cd cedar-repo-server-play'
 alias goresourceplay='goresource && cd cedar-resource-server-play'
 alias goschemaplay='goschema && cd cedar-schema-server-play'
@@ -68,6 +71,8 @@ alias killbypid='kill `cat RUNNING_PID`'
 alias starteditor='goeditor && gulp &'
 alias killeditor='kill `pgrep gulp`'
 
+alias startfolder='gofolder && mp2r &'
+alias killfolder='gofolderplay && killbypid'
 alias startrepo='gorepo && mp2r &'
 alias killrepo='gorepoplay && killbypid'
 alias startresource='goresource && mp2r &'

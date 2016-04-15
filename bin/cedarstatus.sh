@@ -29,6 +29,7 @@ checkStatus Repo port=9002
 checkStatus Schema port=9003
 checkStatus ValueRecommender port=9006
 checkStatus Resource port=9007
+checkStatus Folder port=9008
 echo ---
 checkStatus MongoDB mongod
 checkStatus NGINX nginx:

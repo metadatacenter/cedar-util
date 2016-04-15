@@ -25,6 +25,7 @@ function pullRepo {
 pullRepo cedar-auth
 pullRepo cedar-conf
 pullRepo cedar-docs
+pullRepo cedar-folder-server
 pullRepo cedar-parent
 pullRepo cedar-project
 pullRepo cedar-repo-server

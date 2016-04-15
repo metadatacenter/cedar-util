@@ -25,6 +25,7 @@ function checkRepo {
 checkRepo cedar-auth
 checkRepo cedar-conf
 checkRepo cedar-docs
+checkRepo cedar-folder-server
 checkRepo cedar-parent
 checkRepo cedar-project
 checkRepo cedar-repo-server
