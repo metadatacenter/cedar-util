@@ -32,6 +32,7 @@ checkStatus Resource port=9007
 checkStatus Folder port=9008
 echo ---
 checkStatus MongoDB mongod
+checkStatus Elasticsearch elasticsearch
 checkStatus NGINX nginx:
 checkStatus Keycloak keycloak/standalone
 checkStatus Gulp gulp
