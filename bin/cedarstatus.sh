@@ -5,7 +5,7 @@ echo Checking all CEDAR servers
 echo ---------------------------------------------
 echo
 
-format="CEDAR %-20s:%-10s (%-20s)\n"
+format="CEDAR %-20s:%-10s (%-30s)\n"
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 NORMAL=$(tput sgr0)
@@ -32,7 +32,8 @@ checkStatus Resource port=9007
 checkStatus Folder port=9008
 echo ---
 checkStatus MongoDB mongod
-checkStatus Elasticsearch elasticsearch
+checkStatus Elasticsearch org.elasticsearch.bootstrap
+checkStatus Kibana kibana
 checkStatus NGINX nginx:
 checkStatus Keycloak keycloak/standalone
 checkStatus Gulp gulp
