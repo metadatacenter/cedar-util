@@ -1,1 +1,1 @@
-Project containing CEDAR-related utilities
+Project containing CEDAR-related utilities.
