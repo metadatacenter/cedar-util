@@ -91,3 +91,5 @@ alias killvaluerecommender='govaluerecommenderplay && killbypid'
 alias killall='killfolder; killrepo; killresource; killschema; killtemplate; killterminology; killuser; killvaluerecommender'
 
 alias startall='startfolder; startrepo; startresource; startschema; starttemplate; startterminology; startuser; startvaluerecommender'
+
+alias startinfra='mongod &; elasticsearch &; kibana &; startkk; startnginx'

@@ -21,9 +21,9 @@ function checkStatus {
 }
 
 
+echo ---
 checkStatus Template port=9001
 checkStatus User port=9005
-echo ---
 checkStatus Terminology port=9004
 checkStatus Repo port=9002
 checkStatus Schema port=9003
@@ -36,4 +36,6 @@ checkStatus Elasticsearch org.elasticsearch.bootstrap
 checkStatus Kibana kibana
 checkStatus NGINX nginx:
 checkStatus Keycloak keycloak/standalone
+checkStatus Neo4j Neo4j
+echo ---
 checkStatus Gulp gulp
