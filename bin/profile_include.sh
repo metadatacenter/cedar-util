@@ -19,6 +19,9 @@ alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goserverutils='cd $CEDAR_HOME/cedar-server-utils'
 
+alias goprojectconfig='cd $CEDAR_HOME/cedar-project-config'
+alias goadmintools='cd $CEDAR_HOME/cedar-admin-tools'
+
 alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
 alias gorepo='cd $CEDAR_HOME/cedar-repo-server'
 alias goresource='cd $CEDAR_HOME/cedar-resource-server'
