@@ -19,6 +19,9 @@ alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goserverutils='cd $CEDAR_HOME/cedar-server-utils'
 
+alias goprojectconfig='cd $CEDAR_HOME/cedar-project-config'
+alias goadmintools='cd $CEDAR_HOME/cedar-admin-tools'
+
 alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
 alias gorepo='cd $CEDAR_HOME/cedar-repo-server'
 alias goresource='cd $CEDAR_HOME/cedar-resource-server'
@@ -46,6 +49,7 @@ alias cedargstatus='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
 alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
+alias cedarat='$CEDAR_HOME/cedar-admin-tools/dist/cedar-admin-tools.sh'
 
 #Maven aliases
 alias mi='mvn install'
@@ -88,6 +92,7 @@ alias killuser='gouserplay && killbypid'
 alias startvaluerecommender='govaluerecommender && mp2r &'
 alias killvaluerecommender='govaluerecommenderplay && killbypid'
 
-alias killall='killfolder; killrepo; killresource; killschema; killtemplate; killterminology; killuser; killvaluerecommender'
+alias killall='$CEDAR_HOME/cedar-util/bin/killall.sh'
+alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
-alias startall='startfolder; startrepo; startresource; startschema; starttemplate; startterminology; startuser; startvaluerecommender'
+alias startinfra='mongod &; elasticsearch &; kibana &; startkk; startnginx'

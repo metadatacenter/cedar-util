@@ -38,3 +38,5 @@ pullRepo cedar-terminology-server
 pullRepo cedar-user-server
 pullRepo cedar-util
 pullRepo cedar-valuerecommender-server
+pullRepo cedar-admin-tools
+pullRepo cedar-project-config
