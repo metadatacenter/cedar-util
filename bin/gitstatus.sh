@@ -39,5 +39,4 @@ checkRepo cedar-user-server
 checkRepo cedar-util
 checkRepo cedar-valuerecommender-server
 checkRepo cedar-admin-tools
-checkRepo cedar-project-config
 
