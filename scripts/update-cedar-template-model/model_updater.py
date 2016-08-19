@@ -109,7 +109,7 @@ def delete_field_dot_notation(tree, path, field_name):
 def update_value_field(resource, resource_type):
     """Updates the value field from _value to the JSON-LD @value"""
 
-    if (resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE or resource_type == FIELD_TYPE) :
+    if (resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE or resource_type == FIELD_TYPE or resource_type == STATIC_FIELD_TYPE) :
         # Delete @context._value
         delete_field_jsonpath(resource, '$..@context._value', None)
         # Delete @context.properties._value
@@ -156,6 +156,7 @@ INSTANCES_COLLECTION = 'template-instances'
 TEMPLATE_TYPE = 'Template'
 ELEMENT_TYPE = 'TemplateElement'
 FIELD_TYPE = 'TemplateField'
+STATIC_FIELD_TYPE = 'StaticTemplateField'
 INSTANCE_TYPE = 'TemplateInstance'
 RESOURCE_COLLECTIONS = [TEMPLATES_COLLECTION, ELEMENTS_COLLECTION, FIELDS_COLLECTION, INSTANCES_COLLECTION]
 
