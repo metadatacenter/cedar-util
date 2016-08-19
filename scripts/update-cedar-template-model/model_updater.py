@@ -77,10 +77,24 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
     - path using dot notation (e.g., 'person.name.firstName')
     - current field name (only when path is an array)
     - new name for the field"""
-    path_list = path.split(".")
     tmp = tree
-    for i in range(0,len(path_list)-1):
-        tmp = tmp[path_list[i]]
+    path_list = path.split(".")
+    enum = enumerate(path_list)
+    for i, p in enum:
+        if type(tmp) is not list:
+            tmp = tmp[p]
+        else:
+            # Option 1: Array of objects (e.g. [ {...}, {...}, {...} ])
+            # - If there is a position in the path after the array, we assume that it will be an object
+            if (i+1) < len(path_list):
+                current_pos = path_list[i]
+                next_pos = path_list[i+1]
+                # access to the array position (e.g., x in [x])
+                tmp = tmp[int(current_pos[1])]
+                next(enum)
+            # Option 1: Array of strings (e.g. ["a", "b", "c"])
+            # - Do nothing here, the code below will take care of this option
+                 
     if type(tmp) is list:
         if old_name in tmp:
             tmp.remove(old_name)
@@ -128,7 +142,7 @@ def update_value_field(resource, resource_type):
         raise Exception('Invalid resource type')
 
 
-def update_model(resource):
+def update_model(resource, index, total):
     """This is the main method to update the CEDAR Template Model"""
 
     if '@type' in resource:
@@ -138,7 +152,7 @@ def update_model(resource):
     
     resource_id = resource['@id']
     
-    print('Resource: ' + resource_type + ' (id: ' + resource_id + ')')
+    print('Resource: ' + resource_type + ' (id: ' + resource_id + ') (' + str(index) + '/' + str(total) + ')')
     print(' Updating _value to @value...')
     update_value_field(resource, resource_type)
 
@@ -187,8 +201,10 @@ if choice is True:
     for collection in RESOURCE_COLLECTIONS:
         resources = db[collection].find()
         resources_number[collection] = resources.count()
+        j=0
         for resource in resources:
-            update_model(resource)
+            j=j+1
+            update_model(resource, j, resources_number[collection])
             # Replace document in the DB with the updated version
             db[collection].replace_one({'_id':resource['_id']}, resource)
 
