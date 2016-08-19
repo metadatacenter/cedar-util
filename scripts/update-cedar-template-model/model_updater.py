@@ -42,10 +42,7 @@ def confirm(prompt=None, resp=False):
     if prompt is None:
         prompt = 'Confirm'
 
-    if resp:
-        prompt = '%s [%s]|%s: ' % (prompt, 'y', 'n')
-    else:
-        prompt = '%s [%s]|%s: ' % (prompt, 'n', 'y')
+    prompt = '%s [%s/%s]: ' % (prompt, 'y', 'n')
         
     while True:
         ans = raw_input(prompt)
@@ -150,7 +147,8 @@ def update_model(resource):
 # Constants
 VERSION = '08-16-2016'
 DB_NAME = 'cedar'
-UPDATED_DB_NAME = 'cedar-updated'
+UPDATED_DB_NAME = DB_NAME + '-updated'
+OLD_DB_NAME = DB_NAME + '-old'
 TEMPLATES_COLLECTION = 'templates'
 ELEMENTS_COLLECTION = 'template-elements'
 FIELDS_COLLECTION = 'template-fields'
@@ -198,13 +196,18 @@ if choice is True:
         print('   ' + n + ': ' + str(resources_number[n]))
     print('\nThe updated resources have been stored into the \'' + UPDATED_DB_NAME + '\' database')
 
+    choice = confirm('Do you want to rename the DBs as follows?\n 1)\'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'\n 2)\'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'\n', False)
 
-
-
-
-
-
-
+    if choice is True:
+        # rename DB_NAME to OLD_DB_NAME
+        print('Renaming \'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'...')
+        client.admin.command('copydb', fromdb=DB_NAME, todb=OLD_DB_NAME)
+        client.drop_database(DB_NAME)
+        # rename UPDATED_DB_NAME to DB_NAME
+        print('Renaming \'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'...')
+        client.admin.command('copydb', fromdb=UPDATED_DB_NAME, todb=DB_NAME)
+        client.drop_database(UPDATED_DB_NAME)
+        print('Finished renaming the DBs')
 
 
 
