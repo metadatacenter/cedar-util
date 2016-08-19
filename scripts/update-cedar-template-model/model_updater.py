@@ -81,6 +81,9 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
     path_list = path.split(".")
     enum = enumerate(path_list)
     for i, p in enum:
+        # Loop while i < sizeOfList - 1
+        if (i+1)>=len(path_list):
+            break
         if type(tmp) is not list:
             tmp = tmp[p]
         else:
@@ -94,13 +97,16 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
                 next(enum)
             # Option 1: Array of strings (e.g. ["a", "b", "c"])
             # - Do nothing here, the code below will take care of this option
-                 
+    
     if type(tmp) is list:
         if old_name in tmp:
             tmp.remove(old_name)
             tmp.append(new_name)
             print('  - Renamed: ' + path + '(' + old_name + ') to ' + path + '(' + new_name + ')')
+
     else:
+        print(tmp)
+        print(path_list[-1])
         # Note that path_list[-1] is the last element in the list
         tmp[new_name]=tmp[path_list[-1]] 
         del tmp[path_list[-1]]
