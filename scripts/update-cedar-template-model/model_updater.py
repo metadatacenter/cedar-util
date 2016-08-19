@@ -201,6 +201,7 @@ if choice is True:
     if choice is True:
         # rename DB_NAME to OLD_DB_NAME
         print('Renaming \'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'...')
+        client.drop_database(OLD_DB_NAME)
         client.admin.command('copydb', fromdb=DB_NAME, todb=OLD_DB_NAME)
         client.drop_database(DB_NAME)
         # rename UPDATED_DB_NAME to DB_NAME
