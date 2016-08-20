@@ -5,16 +5,10 @@
 # model_updater.py: Utility to update CEDAR resources stored in a MongoDB database
 
 import json
-
-# import os.path
-# import uuid
-# import time
-# import datetime
 import sys
 from pymongo import MongoClient
 from pprint import pprint
 from jsonpath_rw import jsonpath, parse
-# from easydict import EasyDict as edict
 
 ### FUNCTION definitions ###
 
