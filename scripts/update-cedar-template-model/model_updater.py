@@ -80,10 +80,12 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
     tmp = tree
     path_list = path.split(".")
     enum = enumerate(path_list)
+    # Set tmp to be the last object in the path
     for i, p in enum:
         # Loop while i < sizeOfList - 1
         if (i+1)>=len(path_list):
             break
+
         if type(tmp) is not list:
             tmp = tmp[p]
         else:
@@ -94,7 +96,8 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
                 next_pos = path_list[i+1]
                 # access to the array position (e.g., x in [x])
                 tmp = tmp[int(current_pos[1])]
-                next(enum)
+                # next(enum)
+                # print('Moved to next!!!')
             # Option 1: Array of strings (e.g. ["a", "b", "c"])
             # - Do nothing here, the code below will take care of this option
     
@@ -103,10 +106,7 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
             tmp.remove(old_name)
             tmp.append(new_name)
             print('  - Renamed: ' + path + '(' + old_name + ') to ' + path + '(' + new_name + ')')
-
     else:
-        print(tmp)
-        print(path_list[-1])
         # Note that path_list[-1] is the last element in the list
         tmp[new_name]=tmp[path_list[-1]] 
         del tmp[path_list[-1]]
