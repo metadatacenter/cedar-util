@@ -95,7 +95,8 @@ def rename_field_dot_notation(tree, path, old_name, new_name):
                 current_pos = path_list[i]
                 next_pos = path_list[i+1]
                 # access to the array position (e.g., x in [x])
-                tmp = tmp[int(current_pos[1])]
+                position = int(current_pos[1:-1])
+                tmp = tmp[position]
                 # next(enum)
                 # print('Moved to next!!!')
             # Option 1: Array of strings (e.g. ["a", "b", "c"])
@@ -143,10 +144,10 @@ def update_value_field(resource, resource_type):
     elif (resource_type == INSTANCE_TYPE):
         # Delete @context._value
         delete_field_jsonpath(resource, '$..@context._value', None)
+        # Update _value to @value
         rename_field_jsonpath(resource, '$.._value', None, '@value')
     else:
         raise Exception('Invalid resource type')
-
 
 def update_model(resource, index, total):
     """This is the main method to update the CEDAR Template Model"""
