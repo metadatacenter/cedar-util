@@ -34,9 +34,9 @@ checkRepo cedar-schema-server
 checkRepo cedar-server-utils
 checkRepo cedar-template-editor
 checkRepo cedar-template-server
+checkRepo cedar-templates
 checkRepo cedar-terminology-server
 checkRepo cedar-user-server
 checkRepo cedar-util
 checkRepo cedar-valuerecommender-server
 checkRepo cedar-admin-tools
-

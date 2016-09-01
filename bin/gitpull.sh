@@ -34,6 +34,7 @@ pullRepo cedar-schema-server
 pullRepo cedar-server-utils
 pullRepo cedar-template-editor
 pullRepo cedar-template-server
+pullRepo cedar-templates
 pullRepo cedar-terminology-server
 pullRepo cedar-user-server
 pullRepo cedar-util

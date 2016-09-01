@@ -33,6 +33,7 @@ switchToRepo cedar-schema-server $@
 switchToRepo cedar-server-utils $@
 switchToRepo cedar-template-editor $@
 switchToRepo cedar-template-server $@
+switchToRepo cedar-templates $@
 switchToRepo cedar-terminology-server $@
 switchToRepo cedar-user-server $@
 switchToRepo cedar-util $@
