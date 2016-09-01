@@ -22,6 +22,7 @@ function checkRepo {
 	fi
 }
 
+checkRepo cedar-admin-tools
 checkRepo cedar-auth
 checkRepo cedar-conf
 checkRepo cedar-docs
@@ -39,4 +40,3 @@ checkRepo cedar-terminology-server
 checkRepo cedar-user-server
 checkRepo cedar-util
 checkRepo cedar-valuerecommender-server
-checkRepo cedar-admin-tools

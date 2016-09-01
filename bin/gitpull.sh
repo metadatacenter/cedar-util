@@ -22,6 +22,7 @@ function pullRepo {
 	fi
 }
 
+pullRepo cedar-admin-tools
 pullRepo cedar-auth
 pullRepo cedar-conf
 pullRepo cedar-docs
@@ -39,4 +40,3 @@ pullRepo cedar-terminology-server
 pullRepo cedar-user-server
 pullRepo cedar-util
 pullRepo cedar-valuerecommender-server
-pullRepo cedar-admin-tools
