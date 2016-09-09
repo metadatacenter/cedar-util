@@ -13,7 +13,6 @@ alias gocedar='cd $CEDAR_HOME'
 alias goparent='cd $CEDAR_HOME/cedar-parent'
 alias goproject='cd $CEDAR_HOME/cedar-project'
 
-alias goauth='cd $CEDAR_HOME/cedar-auth'
 alias goutil='cd $CEDAR_HOME/cedar-util'
 alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'

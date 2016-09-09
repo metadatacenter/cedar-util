@@ -21,7 +21,7 @@ function switchToRepo {
 	git -C "$CEDAR_HOME$1" pull
 }
 
-switchToRepo cedar-auth $@
+switchToRepo cedar-admin-tools $@
 switchToRepo cedar-conf $@
 switchToRepo cedar-docs $@
 switchToRepo cedar-folder-server $@
@@ -33,8 +33,8 @@ switchToRepo cedar-schema-server $@
 switchToRepo cedar-server-utils $@
 switchToRepo cedar-template-editor $@
 switchToRepo cedar-template-server $@
+switchToRepo cedar-templates $@
 switchToRepo cedar-terminology-server $@
 switchToRepo cedar-user-server $@
 switchToRepo cedar-util $@
 switchToRepo cedar-valuerecommender-server $@
-switchToRepo cedar-admin-tools $@
