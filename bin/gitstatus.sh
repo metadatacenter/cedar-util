@@ -23,7 +23,6 @@ function checkRepo {
 }
 
 checkRepo cedar-admin-tools
-checkRepo cedar-auth
 checkRepo cedar-conf
 checkRepo cedar-docs
 checkRepo cedar-folder-server

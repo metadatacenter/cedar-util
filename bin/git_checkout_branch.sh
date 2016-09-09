@@ -22,7 +22,6 @@ function switchToRepo {
 }
 
 switchToRepo cedar-admin-tools $@
-switchToRepo cedar-auth $@
 switchToRepo cedar-conf $@
 switchToRepo cedar-docs $@
 switchToRepo cedar-folder-server $@

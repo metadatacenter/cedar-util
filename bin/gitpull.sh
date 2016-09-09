@@ -23,7 +23,6 @@ function pullRepo {
 }
 
 pullRepo cedar-admin-tools
-pullRepo cedar-auth
 pullRepo cedar-conf
 pullRepo cedar-docs
 pullRepo cedar-folder-server
