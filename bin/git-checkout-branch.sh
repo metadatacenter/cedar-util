@@ -1,6 +1,6 @@
 #!/bin/bash
-source $CEDAR_HOME$1/cedar-util/bin/include-colors-and-header.sh "Switching and pulling $@ branch"
-source $CEDAR_HOME$1/cedar-util/bin/include-repo-list.sh
+source $CEDAR_HOME/cedar-util/bin/include-colors-and-header.sh "Switching and pulling $@ branch"
+source $CEDAR_HOME/cedar-util/bin/include-repo-list.sh
 
 format="\n\nSwitching Git repo ${GREEN}%-20s${NORMAL} : (%-60s)\n"
 
