@@ -1,13 +1,7 @@
 #!/bin/bash
-clear
-echo ---------------------------------------------
-echo Checking all CEDAR repos for changes
-echo ---------------------------------------------
-echo
+source $CEDAR_HOME$1/cedar-util/bin/include-colors-and-header.sh "Checking all CEDAR repos for changes"
+source $CEDAR_HOME$1/cedar-util/bin/include-repo-list.sh
 
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-NORMAL=$(tput sgr0)
 format="\n\nChecking Git repo status ${GREEN}%-20s${NORMAL} : (%-60s)\n"
 
 function checkRepo {
@@ -22,20 +16,7 @@ function checkRepo {
 	fi
 }
 
-checkRepo cedar-admin-tools
-checkRepo cedar-conf
-checkRepo cedar-docs
-checkRepo cedar-folder-server
-checkRepo cedar-parent
-checkRepo cedar-project
-checkRepo cedar-repo-server
-checkRepo cedar-resource-server
-checkRepo cedar-schema-server
-checkRepo cedar-server-utils
-checkRepo cedar-template-editor
-checkRepo cedar-template-server
-checkRepo cedar-templates
-checkRepo cedar-terminology-server
-checkRepo cedar-user-server
-checkRepo cedar-util
-checkRepo cedar-valuerecommender-server
+for i in "${CEDAR_REPOS[@]}"
+do
+   checkRepo $i
+done

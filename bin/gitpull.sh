@@ -1,13 +1,7 @@
 #!/bin/bash
-clear
-echo ---------------------------------------------
-echo Pulling all CEDAR repos
-echo ---------------------------------------------
-echo
+source $CEDAR_HOME$1/cedar-util/bin/include-colors-and-header.sh "Pulling all CEDAR repos"
+source $CEDAR_HOME$1/cedar-util/bin/include-repo-list.sh
 
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-NORMAL=$(tput sgr0)
 format="\n\nPulling Git repo status ${GREEN}%-20s${NORMAL} : (%-60s)\n"
 
 function pullRepo {
@@ -22,20 +16,7 @@ function pullRepo {
 	fi
 }
 
-pullRepo cedar-admin-tools
-pullRepo cedar-conf
-pullRepo cedar-docs
-pullRepo cedar-folder-server
-pullRepo cedar-parent
-pullRepo cedar-project
-pullRepo cedar-repo-server
-pullRepo cedar-resource-server
-pullRepo cedar-schema-server
-pullRepo cedar-server-utils
-pullRepo cedar-template-editor
-pullRepo cedar-template-server
-pullRepo cedar-templates
-pullRepo cedar-terminology-server
-pullRepo cedar-user-server
-pullRepo cedar-util
-pullRepo cedar-valuerecommender-server
+for i in "${CEDAR_REPOS[@]}"
+do
+   pullRepo $i
+done

@@ -1,13 +1,7 @@
 #!/bin/bash
-clear
-echo ---------------------------------------------
-echo Switching and pulling $@ branch
-echo ---------------------------------------------
-echo
+source $CEDAR_HOME$1/cedar-util/bin/include-colors-and-header.sh "Switching and pulling $@ branch"
+source $CEDAR_HOME$1/cedar-util/bin/include-repo-list.sh
 
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-NORMAL=$(tput sgr0)
 format="\n\nSwitching Git repo ${GREEN}%-20s${NORMAL} : (%-60s)\n"
 
 function switchToRepo {
@@ -21,20 +15,7 @@ function switchToRepo {
 	git -C "$CEDAR_HOME$1" pull
 }
 
-switchToRepo cedar-admin-tools $@
-switchToRepo cedar-conf $@
-switchToRepo cedar-docs $@
-switchToRepo cedar-folder-server $@
-switchToRepo cedar-parent $@
-switchToRepo cedar-project $@
-switchToRepo cedar-repo-server $@
-switchToRepo cedar-resource-server $@
-switchToRepo cedar-schema-server $@
-switchToRepo cedar-server-utils $@
-switchToRepo cedar-template-editor $@
-switchToRepo cedar-template-server $@
-switchToRepo cedar-templates $@
-switchToRepo cedar-terminology-server $@
-switchToRepo cedar-user-server $@
-switchToRepo cedar-util $@
-switchToRepo cedar-valuerecommender-server $@
+for i in "${CEDAR_REPOS[@]}"
+do
+   switchToRepo $i $@
+done
