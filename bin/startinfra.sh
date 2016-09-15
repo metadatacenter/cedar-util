@@ -8,5 +8,5 @@ echo
 mongod &
 elasticsearch &
 kibana &
-startkk
-startnginx
+$KEYCLOAK_HOME/bin/standalone.sh &
+sudo nginx
