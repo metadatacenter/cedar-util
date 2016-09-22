@@ -94,4 +94,4 @@ alias killvaluerecommender='govaluerecommenderplay && killbypid'
 alias killall='$CEDAR_HOME/cedar-util/bin/killall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
-alias startinfra='mongod &; elasticsearch &; kibana &; startkk; startnginx'
+alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
