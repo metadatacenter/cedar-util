@@ -22,14 +22,15 @@ function checkStatus {
 
 
 echo ---
-checkStatus Template port=9001
-checkStatus User port=9005
-checkStatus Terminology port=9004
-checkStatus Repo port=9002
-checkStatus Schema port=9003
-checkStatus ValueRecommender port=9006
-checkStatus Resource port=9007
 checkStatus Folder port=9008
+checkStatus Group port=9009
+checkStatus User port=9005
+checkStatus Repo port=9002
+checkStatus Resource port=9007
+checkStatus Schema port=9003
+checkStatus Template port=9001
+checkStatus Terminology port=9004
+checkStatus ValueRecommender port=9006
 echo ---
 checkStatus MongoDB mongod
 checkStatus Elasticsearch org.elasticsearch.bootstrap

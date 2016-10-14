@@ -10,6 +10,7 @@ source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 
 killfolder
 killrepo
+killgroup
 killresource
 killschema
 killtemplate
