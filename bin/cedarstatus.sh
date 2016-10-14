@@ -23,7 +23,7 @@ function checkStatus {
 
 echo ---
 checkStatus Folder port=9008
-checkStatus Permission port=9009
+checkStatus Group port=9009
 checkStatus User port=9005
 checkStatus Repo port=9002
 checkStatus Resource port=9007
