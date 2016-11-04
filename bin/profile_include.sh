@@ -69,7 +69,7 @@ alias startnginx='sudo nginx'
 alias stopnginx='sudo nginx -s stop'
 alias restartnginx='sudo nginx -s stop && sudo nginx'
 alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
-alias killkk="kill `ps ax | grep \"keycloak/standalone\" | awk '{print $1}'`";
+alias killkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
 
 #CEDAR server aliases
 alias killbypid='kill `cat RUNNING_PID`'
