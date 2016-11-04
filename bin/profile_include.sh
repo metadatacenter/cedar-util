@@ -68,6 +68,9 @@ alias stopnginx='sudo nginx -s stop'
 alias restartnginx='sudo nginx -s stop && sudo nginx'
 alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
 alias killkk="kill `ps ax | grep \"[k]eycloak/standalone\" | awk '{print $1}'`";
+alias stopmongo="kill `ps ax | grep \"[m]ongod\" | awk '{print $1}'`";
+alias stopkibana="kill `ps ax | grep \"[k]ibana\" | awk '{print $1}'`";
+alias stopelastic="kill `ps ax | grep \"[e]lastic\" | awk '{print $1}'`";
 
 #CEDAR server aliases
 alias killbypid='kill `cat RUNNING_PID`'
@@ -95,3 +98,4 @@ alias killall='$CEDAR_HOME/cedar-util/bin/killall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
 alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
+alias stopinfra='$CEDAR_HOME/cedar-util/bin/stopinfra.sh'
