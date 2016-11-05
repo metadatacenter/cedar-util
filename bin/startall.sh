@@ -9,6 +9,7 @@ shopt -s expand_aliases
 source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 
 startfolder
+startgroup
 startrepo
 startresource
 startschema
