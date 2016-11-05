@@ -70,6 +70,9 @@ alias stopnginx='sudo nginx -s stop'
 alias restartnginx='sudo nginx -s stop && sudo nginx'
 alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
 alias killkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
+alias stopmongo='$CEDAR_HOME/cedar-util/bin/killmongo.sh'
+alias stopkibana='$CEDAR_HOME/cedar-util/bin/killkibana.sh'
+alias stopelastic='$CEDAR_HOME/cedar-util/bin/killelastic.sh'
 
 #CEDAR server aliases
 alias killbypid='kill `cat RUNNING_PID`'
@@ -99,3 +102,4 @@ alias killall='$CEDAR_HOME/cedar-util/bin/killall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
 alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
+alias stopinfra='$CEDAR_HOME/cedar-util/bin/stopinfra.sh'
