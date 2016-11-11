@@ -1,19 +1,15 @@
 #!/bin/bash
 clear
 echo ---------------------------------------------
-echo Starting Play enabled CEDAR microservices
+echo Stopping CEDAR infrastructure services
 echo ---------------------------------------------
 echo
 
 shopt -s expand_aliases
 source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 
-startfolder
-startgroup
-startrepo
-startresource
-startschema
-starttemplate
-startterminology
-startuser
-startvaluerecommender
+killkk
+stopnginx
+stopmongo
+stopelastic
+stopkibana
