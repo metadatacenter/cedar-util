@@ -8,6 +8,9 @@ alias hi='history'
 export CLICOLOR=1
 export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 
+#Common CEDAR locations
+export CEDAR_UTIL_BIN=$CEDAR_HOME/cedar-util/bin
+
 #CEDAR location aliases
 alias gocedar='cd $CEDAR_HOME'
 alias goparent='cd $CEDAR_HOME/cedar-parent'
@@ -81,14 +84,14 @@ alias killeditor='kill `pgrep gulp`'
 
 alias startfolder='gofolder && mp2r &'
 alias killfolder='gofolderplay && killbypid'
-alias startgroup='gogroup && mp2r &'
-alias killgroup='gogroupplay && killbypid'
+alias startgroup='$CEDAR_UTIL_BIN/start-dw-server.sh group 9209 &'
+alias stopgroup='$CEDAR_UTIL_BIN/stop-dw-server.sh 9209'
 alias startrepo='gorepo && mp2r &'
 alias killrepo='gorepoplay && killbypid'
 alias startresource='goresource && mp2r &'
 alias killresource='goresourceplay && killbypid'
-alias startschema='goschema && mp2r &'
-alias killschema='goschemaplay && killbypid'
+alias startschema='$CEDAR_UTIL_BIN/start-dw-server.sh schema 9203 &'
+alias stopschema='$CEDAR_UTIL_BIN/stop-dw-server.sh 9203'
 alias starttemplate='gotemplate && mp2r &'
 alias killtemplate='gotemplateplay && killbypid'
 alias startterminology='goterminology && mp2r &'
@@ -98,7 +101,7 @@ alias killuser='gouserplay && killbypid'
 alias startvaluerecommender='govaluerecommender && mp2r &'
 alias killvaluerecommender='govaluerecommenderplay && killbypid'
 
-alias killall='$CEDAR_HOME/cedar-util/bin/killall.sh'
+alias stopall='$CEDAR_HOME/cedar-util/bin/stopall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
 alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
