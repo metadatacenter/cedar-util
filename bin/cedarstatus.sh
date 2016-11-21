@@ -66,10 +66,10 @@ checkStatus Terminology port=9004
 checkStatus ValueRecommender port=9006
 printf "$header" '--- Infrastructure --------'
 checkStatus MongoDB mongod
-checkHttpResponse Elasticsearch 9200 '200\sOK'
+checkHttpResponse Elasticsearch 9200 'HTTP/1.1\s200\sOK'
 checkHttpResponse Kibana 5601 'kbn-name:\skibana'
 checkHttpResponse NGINX 80 'Server:\snginx'
 checkHttpResponse Keycloak 8080 'Server:\sWildFly'
 checkHttpResponse Neo4j 7474 'Server:\sJetty'
 printf "$header" '--- Development Front End -'
-checkStatus Gulp gulp
+checkHttpResponse Gulp 4200 'HTTP/1.1\s200\sOK'
