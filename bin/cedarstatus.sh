@@ -22,13 +22,20 @@ function checkStatus {
 }
 
 function checkHealth {
-        if curl -I -s http://localhost:$2/healthcheck | grep "200 OK" > /dev/null 2>&1
+        ok=1
+        lookFor='HTTP/1.1\s200\sOK'
+        if curl -I -s http://localhost:$2/healthcheck | grep $lookFor > /dev/null 2>&1
         then
                 status="${GREEN}Running${NORMAL}"
         else
                 status="${RED}Stopped${NORMAL}"
+                ok=0
         fi
-        printf "$format" $1 $status 'healthCheck' $2 ' '
+        printf "$format" $1 $status 'healthCheck' $2 $lookFor
+        if ((ok == 0));
+        then
+                reportError $1 $2
+        fi
 }
 
 function checkHttpResponse {
@@ -43,17 +50,29 @@ function checkHttpResponse {
         printf "$format" $1 $status 'httpResponse' $2 $3
         if ((ok == 0));
         then
-                echo ---------- $1 ERROR
-                echo 'http://localhost:'$2
-                curl -I http://localhost:$2
-                echo --------------------------------------
+                reportError $1 $2
         fi
 }
 
+function printLine {
+        printf $1'%.0s' {1..93}
+        printf '\n'
+}
 
-echo ----------------------------------------------------------------------------------------
+function reportError {
+        printLine '.'
+        echo -- ERROR IN $1
+        echo -- 'http://localhost:'$2
+        curl -I http://localhost:$2
+        printLine '^'
+}
+
+printLine '='
+
 printf "$header" 'Server' 'Status' 'CheckedFor' 'Port' 'Value'
-echo ----------------------------------------------------------------------------------------
+
+printLine '\x2D'
+
 printf "$header" '--- Microservices ---------'
 checkStatus Folder port=9008
 checkHealth Group 9109
@@ -73,3 +92,5 @@ checkHttpResponse Keycloak 8080 'Server:\sWildFly'
 checkHttpResponse Neo4j 7474 'Server:\sJetty'
 printf "$header" '--- Development Front End -'
 checkHttpResponse Gulp 4200 'HTTP/1.1\s200\sOK'
+
+printLine '='
