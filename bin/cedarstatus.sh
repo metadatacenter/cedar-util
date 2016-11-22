@@ -55,14 +55,16 @@ function checkHttpResponse {
 }
 
 function printLine {
-        printf $1'%.0s' {1..93}
+        printf '|'
+        printf $1'%.0s' {1..91}
+        printf '|'
         printf '\n'
 }
 
 function reportError {
         printLine '.'
-        echo -- ERROR IN $1
-        echo -- 'http://localhost:'$2
+        echo '  -- ERROR IN '$1
+        echo '  -- http://localhost:'$2
         curl -I http://localhost:$2
         printLine '^'
 }
