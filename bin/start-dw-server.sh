@@ -1,4 +1,5 @@
 #!/bin/bash
+#-verbose:class \
 java \
   -Dkeycloak.config.path="$CEDAR_HOME/keycloak.json" \
   -DSTOP.PORT=$2 -DSTOP.KEY="StopMe" \

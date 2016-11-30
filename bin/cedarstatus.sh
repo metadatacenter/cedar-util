@@ -79,7 +79,7 @@ printf "$header" '--- Microservices ---------'
 checkStatus Folder port=9008
 checkHealth Group 9109
 checkStatus User port=9005
-checkStatus Repo port=9002
+checkHealth Repo 9102
 checkStatus Resource port=9007
 checkHealth Schema 9103
 checkStatus Template port=9001
