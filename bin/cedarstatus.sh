@@ -5,8 +5,8 @@ echo Checking all CEDAR servers
 echo ---------------------------------------------
 echo
 
-format="| %-27s| %-20s| %-15s| %10s | %-20s|\n"
-header="| %-27s| %-9s| %-15s| %10s | %-20s|\n"
+format="| %-27s| %-19s| %-12s|%5s| %-18s|\n"
+header="| %-27s| %-8s| %-12s|%5s| %-18s|\n"
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 NORMAL=$(tput sgr0)
@@ -56,7 +56,7 @@ function checkHttpResponse {
 
 function printLine {
         printf '|'
-        printf $1'%.0s' {1..91}
+        printf $1'%.0s' {1..78}
         printf '|'
         printf '\n'
 }
@@ -78,7 +78,7 @@ printLine '\x2D'
 printf "$header" '--- Microservices ---------'
 checkStatus Folder port=9008
 checkHealth Group 9109
-checkStatus User port=9005
+checkHealth User 9105
 checkHealth Repo 9102
 checkStatus Resource port=9007
 checkHealth Schema 9103

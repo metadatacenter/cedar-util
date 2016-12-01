@@ -15,5 +15,5 @@ killresource
 stopschema
 killtemplate
 killterminology
-killuser
+stopuser
 killvaluerecommender
