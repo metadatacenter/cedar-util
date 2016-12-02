@@ -76,7 +76,7 @@ printf "$header" 'Server' 'Status' 'CheckedFor' 'Port' 'Value'
 printLine '\x2D'
 
 printf "$header" '--- Microservices ---------'
-checkStatus Folder port=9008
+checkHealth Folder 9108
 checkHealth Group 9109
 checkHealth User 9105
 checkHealth Repo 9102
