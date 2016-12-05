@@ -62,6 +62,7 @@ function printLine {
 }
 
 function reportError {
+return
         printLine '.'
         echo '  -- ERROR IN '$1
         echo '  -- http://localhost:'$2
