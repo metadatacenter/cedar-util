@@ -83,7 +83,7 @@ checkHealth User 9105
 checkHealth Repo 9102
 checkStatus Resource port=9007
 checkHealth Schema 9103
-checkStatus Template port=9001
+checkHealth Template 9101
 checkStatus Terminology port=9004
 checkStatus ValueRecommender port=9006
 printf "$header" '--- Infrastructure --------'

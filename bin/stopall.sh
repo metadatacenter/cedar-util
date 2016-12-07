@@ -13,7 +13,7 @@ stoprepo
 stopgroup
 killresource
 stopschema
-killtemplate
+stoptemplate
 killterminology
 stopuser
 killvaluerecommender
