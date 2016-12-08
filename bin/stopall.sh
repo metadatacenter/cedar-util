@@ -11,7 +11,7 @@ source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 stopfolder
 stoprepo
 stopgroup
-killresource
+stopresource
 stopschema
 stoptemplate
 killterminology

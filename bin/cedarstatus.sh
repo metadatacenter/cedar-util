@@ -81,7 +81,7 @@ checkHealth Folder 9108
 checkHealth Group 9109
 checkHealth User 9105
 checkHealth Repo 9102
-checkStatus Resource port=9007
+checkHealth Resource 9107
 checkHealth Schema 9103
 checkHealth Template 9101
 checkStatus Terminology port=9004
