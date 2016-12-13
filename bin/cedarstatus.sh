@@ -85,7 +85,7 @@ checkHealth Resource 9107
 checkHealth Schema 9103
 checkHealth Template 9101
 checkStatus Terminology port=9004
-checkStatus ValueRecommender port=9006
+checkHealth ValueRecommender 9106
 printf "$header" '--- Infrastructure --------'
 checkStatus MongoDB mongod
 checkHttpResponse Elasticsearch 9200 'HTTP/1.1\s200\sOK'

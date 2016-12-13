@@ -16,4 +16,4 @@ stopschema
 stoptemplate
 killterminology
 stopuser
-killvaluerecommender
+stopvaluerecommender
