@@ -3,8 +3,8 @@
 source $CEDAR_HOME$1/cedar-util/bin/include-repo-list.sh
 
 function show_branch {
-	branch=$(git rev-parse --abbrev-ref HEAD)
 	cd $CEDAR_HOME$1
+	branch=$(git rev-parse --abbrev-ref HEAD)
 	printf "  (%s) %s\n" $branch $1
 }
 
