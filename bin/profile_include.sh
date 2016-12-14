@@ -47,6 +47,7 @@ alias gokk='cd $KEYCLOAK_HOME/bin'
 
 #CEDAR util aliases
 alias cedargstatus='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
+alias cedargbranches='$CEDAR_HOME/cedar-util/bin/gitbranches.sh'
 alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
