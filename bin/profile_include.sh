@@ -30,7 +30,7 @@ alias gorepo='cd $CEDAR_HOME/cedar-repo-server'
 alias goresource='cd $CEDAR_HOME/cedar-resource-server'
 alias goschema='cd $CEDAR_HOME/cedar-schema-server'
 alias gotemplate='cd $CEDAR_HOME/cedar-template-server'
-alias goterminology='cd $CEDAR_HOME/cedar-terminology-server/cedar-terminology-server-play'
+alias goterminology='cd $CEDAR_HOME/cedar-terminology-server'
 alias gouser='cd $CEDAR_HOME/cedar-user-server'
 alias govaluerecommender='cd $CEDAR_HOME/cedar-valuerecommender-server'
 
