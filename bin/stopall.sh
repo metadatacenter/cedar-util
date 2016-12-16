@@ -14,6 +14,6 @@ stopgroup
 stopresource
 stopschema
 stoptemplate
-killterminology
+stopterminology
 stopuser
 stopvaluerecommender
