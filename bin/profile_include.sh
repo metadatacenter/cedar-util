@@ -61,15 +61,14 @@ alias startnginx='sudo nginx'
 alias stopnginx='sudo nginx -s stop'
 alias restartnginx='sudo nginx -s stop && sudo nginx'
 alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
-alias killkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
+alias stopk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
 alias stopmongo='$CEDAR_HOME/cedar-util/bin/killmongo.sh'
 alias stopkibana='$CEDAR_HOME/cedar-util/bin/killkibana.sh'
 alias stopelastic='$CEDAR_HOME/cedar-util/bin/killelastic.sh'
 
 #CEDAR server aliases
-alias killbypid='kill `cat RUNNING_PID`'
 alias starteditor='goeditor && gulp &'
-alias killeditor='kill `pgrep gulp`'
+alias stopeditor='kill `pgrep gulp`'
 
 alias startfolder='$CEDAR_UTIL_BIN/start-dw-server.sh folder 9208 &'
 alias stopfolder='$CEDAR_UTIL_BIN/stop-dw-server.sh 9208'
