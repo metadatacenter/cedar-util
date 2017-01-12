@@ -8,12 +8,12 @@ echo
 shopt -s expand_aliases
 source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 
-killfolder
-killrepo
-killgroup
-killresource
-killschema
-killtemplate
-killterminology
-killuser
-killvaluerecommender
+stopfolder
+stoprepo
+stopgroup
+stopresource
+stopschema
+stoptemplate
+stopterminology
+stopuser
+stopvaluerecommender
