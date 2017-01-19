@@ -1,8 +1,8 @@
 #!/bin/bash
 clear
-echo ---------------------------------------------
-echo Starting Play enabled CEDAR microservices
-echo ---------------------------------------------
+echo -----------------------------------------------
+echo Starting Dropwizard enabled CEDAR microservices
+echo -----------------------------------------------
 echo
 
 shopt -s expand_aliases
