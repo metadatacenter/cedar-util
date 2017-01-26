@@ -11,7 +11,7 @@
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-util</artifactId>
-  <version>0.9.1</version>
+  <version>0.9.${parsedVersion.nextIncrementalVersion}-SNAPSHOT</version>
   <name>CEDAR Utilities</name>
   <packaging>pom</packaging>
 
