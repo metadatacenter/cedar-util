@@ -22,7 +22,7 @@ alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goservercore='cd $CEDAR_HOME/cedar-server-core-library'
 
 alias goprojectconfig='cd $CEDAR_HOME/cedar-project-config'
-alias goadmintools='cd $CEDAR_HOME/cedar-admin-tools'
+alias goadmintool='cd $CEDAR_HOME/cedar-admin-tool'
 
 alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
 alias gogroup='cd $CEDAR_HOME/cedar-group-server'
@@ -34,6 +34,8 @@ alias goterminology='cd $CEDAR_HOME/cedar-terminology-server'
 alias gouser='cd $CEDAR_HOME/cedar-user-server'
 alias govaluerecommender='cd $CEDAR_HOME/cedar-valuerecommender-server'
 
+alias goeventlistener='cd $CEDAR_HOME/cedar-keycloak-event-listener'
+
 alias goeditor='cd $CEDAR_HOME/cedar-template-editor'
 
 alias gokk='cd $KEYCLOAK_HOME/bin'
@@ -44,7 +46,7 @@ alias cedargbranches='$CEDAR_HOME/cedar-util/bin/gitbranches.sh'
 alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
-alias cedarat='$CEDAR_HOME/cedar-admin-tools/dist/cedar-admin-tools.sh'
+alias cedarat='$CEDAR_HOME/cedar-admin-tool/dist/cedar-admin-tool.sh'
 
 #Maven aliases
 alias mi='mvn install'
