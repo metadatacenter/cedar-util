@@ -47,6 +47,8 @@ alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
 alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
 alias cedarat='$CEDAR_HOME/cedar-admin-tool/dist/cedar-admin-tool.sh'
+alias cedargcheckout='$CEDAR_HOME/cedar-util/bin/git-checkout-branch.sh'
+
 
 #Maven aliases
 alias mi='mvn install'
