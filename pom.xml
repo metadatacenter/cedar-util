@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>0.8.7-SNAPSHOT</version>
+    <version>0.9.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-util</artifactId>
-  <version>0.9.${parsedVersion.nextIncrementalVersion}-SNAPSHOT</version>
+  <version>0.9.3-SNAPSHOT</version>
   <name>CEDAR Utilities</name>
   <packaging>pom</packaging>
 
