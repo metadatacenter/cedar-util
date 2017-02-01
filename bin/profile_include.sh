@@ -33,6 +33,7 @@ alias gotemplate='cd $CEDAR_HOME/cedar-template-server'
 alias goterminology='cd $CEDAR_HOME/cedar-terminology-server'
 alias gouser='cd $CEDAR_HOME/cedar-user-server'
 alias govaluerecommender='cd $CEDAR_HOME/cedar-valuerecommender-server'
+alias goworker='cd $CEDAR_HOME/cedar-worker-server'
 
 alias goeventlistener='cd $CEDAR_HOME/cedar-keycloak-event-listener'
 
@@ -93,6 +94,8 @@ alias startuser='$CEDAR_UTIL_BIN/start-dw-server.sh user 9205 &'
 alias stopuser='$CEDAR_UTIL_BIN/stop-dw-server.sh 9205'
 alias startvaluerecommender='$CEDAR_UTIL_BIN/start-dw-server.sh valuerecommender 9206 &'
 alias stopvaluerecommender='$CEDAR_UTIL_BIN/stop-dw-server.sh 9206'
+alias startworker='$CEDAR_UTIL_BIN/start-dw-server.sh worker 9210 &'
+alias stopworker='$CEDAR_UTIL_BIN/stop-dw-server.sh 9210'
 
 alias stopall='$CEDAR_HOME/cedar-util/bin/stopall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'

@@ -17,3 +17,4 @@ stoptemplate
 stopterminology
 stopuser
 stopvaluerecommender
+stopworker
