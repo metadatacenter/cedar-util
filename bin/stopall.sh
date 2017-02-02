@@ -17,4 +17,5 @@ stoptemplate
 stopterminology
 stopuser
 stopvaluerecommender
+stopsubmission
 stopworker

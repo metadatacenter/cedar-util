@@ -102,7 +102,8 @@ checkHealth Schema 9103
 checkHealth Template 9101
 checkHealth Terminology 9104
 checkHealth ValueRecommender 9106
-checkHealth Worker 9110
+checkHealth Submission 9110
+checkHealth Worker 9111
 printf "$header" '--- Infrastructure --------'
 checkOpenedPort MongoDB 27017
 checkHttpResponse Elasticsearch 9200 'HTTP/1.1\s200\sOK'

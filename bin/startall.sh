@@ -17,4 +17,5 @@ starttemplate
 startterminology
 startuser
 startvaluerecommender
+startsubmission
 startworker
