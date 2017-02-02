@@ -33,6 +33,8 @@ alias gotemplate='cd $CEDAR_HOME/cedar-template-server'
 alias goterminology='cd $CEDAR_HOME/cedar-terminology-server'
 alias gouser='cd $CEDAR_HOME/cedar-user-server'
 alias govaluerecommender='cd $CEDAR_HOME/cedar-valuerecommender-server'
+alias gosubmission='cd $CEDAR_HOME/cedar-submission-server'
+alias goworker='cd $CEDAR_HOME/cedar-worker-server'
 
 alias goeventlistener='cd $CEDAR_HOME/cedar-keycloak-event-listener'
 
@@ -93,9 +95,15 @@ alias startuser='$CEDAR_UTIL_BIN/start-dw-server.sh user 9205 &'
 alias stopuser='$CEDAR_UTIL_BIN/stop-dw-server.sh 9205'
 alias startvaluerecommender='$CEDAR_UTIL_BIN/start-dw-server.sh valuerecommender 9206 &'
 alias stopvaluerecommender='$CEDAR_UTIL_BIN/stop-dw-server.sh 9206'
+alias startsubmission='$CEDAR_UTIL_BIN/start-dw-server.sh submission 9210 &'
+alias stopsubmission='$CEDAR_UTIL_BIN/stop-dw-server.sh 9210'
+alias startworker='$CEDAR_UTIL_BIN/start-dw-server.sh worker 9211 &'
+alias stopworker='$CEDAR_UTIL_BIN/stop-dw-server.sh 9211'
 
 alias stopall='$CEDAR_HOME/cedar-util/bin/stopall.sh'
 alias startall='$CEDAR_HOME/cedar-util/bin/startall.sh'
 
 alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
 alias stopinfra='$CEDAR_HOME/cedar-util/bin/stopinfra.sh'
+
+alias ij="'/Applications/IntelliJ IDEA.app/Contents/MacOS/idea'"
