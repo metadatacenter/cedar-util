@@ -27,6 +27,7 @@ FIELD_TYPE = 'TemplateField'
 STATIC_FIELD_TYPE = 'StaticTemplateField'
 INSTANCE_TYPE = 'TemplateInstance'
 RESOURCE_COLLECTIONS = [TEMPLATES_COLLECTION, ELEMENTS_COLLECTION, FIELDS_COLLECTION, INSTANCES_COLLECTION]
+BIOPORTAL_PREFIX = 'http://data.bioontology.org'
 
 ### Main program ###
 print(' -----------------------------')
@@ -47,6 +48,8 @@ for collection in RESOURCE_COLLECTIONS:
     print('   ' + collection + ': ' + str(db[collection].find().count()))
 print
 
+print('\nCounting...\n')
+
 count_resources = {}
 count_field_types = {}
 for collection in RESOURCE_COLLECTIONS:
@@ -66,12 +69,16 @@ for collection in RESOURCE_COLLECTIONS:
         if resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE:
             for match in parse('$..items.enum').find(resource):
                 enum_value = match.value[0]
-                if enum_value.startswith('http://data.bioontology.org'):
+                if enum_value.startswith(BIOPORTAL_PREFIX):
                     count = count + 1
         elif resource_type == INSTANCE_TYPE:
-             for match in parse('$..@type').find(resource):
-                if match.value.startswith('http://data.bioontology.org'):
-                    count = count + 1
+            for match in parse('$..@type').find(resource):
+                if type(match.value) is list:
+		    for v in match.value:
+		        if v.startswith(BIOPORTAL_PREFIX):
+                    	    count = count + 1
+                elif match.value.startswith(BIOPORTAL_PREFIX):
+		    count = count + 1
 
         if count > 0:
             count_resources[resource_type] = count_resources[resource_type] + 1
