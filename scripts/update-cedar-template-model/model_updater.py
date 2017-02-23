@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Created: 2016-Aug-16
-# Last update: 2016-Aug-16
+# Last update: 2017-Feb-22
 # model_updater.py: Utility to update CEDAR resources stored in a MongoDB database
 
 import json
@@ -121,6 +121,43 @@ def delete_field_dot_notation(tree, path, field_name):
         del tmp[path_list[-1]]
         print('  - Deleted: ' + path)
 
+def create_field_dot_notation(tree, path, field_name, field_value):
+    """renames a json field using dot notation
+    Input: 
+    - json tree
+    - path where the field should be created(e.g., 'person.name.firstName')
+    - field to be created
+    - field value"""
+    tmp = tree
+    path_list = path.split(".")
+    enum = enumerate(path_list)
+    # Set tmp to be the last object in the path
+    for i, p in enum:
+        # Loop while i < sizeOfList - 1
+        if (i+1)>=len(path_list):
+            break
+
+        if type(tmp) is not list:
+            tmp = tmp[p]
+        else:
+            # Option 1: Array of objects (e.g. [ {...}, {...}, {...} ])
+            # - If there is a position in the path after the array, we assume that it will be an object
+            if (i+1) < len(path_list):
+                current_pos = path_list[i]
+                next_pos = path_list[i+1]
+                # access to the array position (e.g., x in [x])
+                position = int(current_pos[1:-1])
+                tmp = tmp[position]
+                # next(enum)
+                # print('Moved to next!!!')
+            # Option 1: Array of strings (e.g. ["a", "b", "c"])
+            # - Do nothing here, the code below will take care of this option
+    
+    if type(tmp) is not list:
+        # Note that path_list[-1] is the last element in the list
+        tmp[field_name] = field_value
+        print('  - Created: ' + path + '.' + field_name + ': ' + field_value)
+
 def update_value_field(resource, resource_type):
     """Updates the value field from _value to the JSON-LD @value"""
 
@@ -143,6 +180,18 @@ def update_value_field(resource, resource_type):
     else:
         raise Exception('Invalid resource type')
 
+# NEW FUNCTION
+def update_value_to_id(resource, resource_type):
+    """ Updates @value to @id when @value contains a controlled term (only for instances)
+        Issue (8) in https://github.com/metadatacenter/cedar-project/issues/185"""
+
+    if resource_type == INSTANCE_TYPE:
+        print(' Updating @value to @id and adding @type: @id...') 
+        # Find all nodes that have _valueLabel and replace @value by @id
+        for match in parse('$.._valueLabel.`parent`.@value').find(resource):
+            rename_field_dot_notation(resource, str(match.full_path), '@value', '@id')
+            create_field_dot_notation(resource, str(match.full_path), '@type', '@id')
+
 def update_model(resource, index, total):
     """This is the main method to update the CEDAR Template Model"""
 
@@ -154,16 +203,15 @@ def update_model(resource, index, total):
     resource_id = resource['@id']
     
     print('Resource: ' + resource_type + ' (id: ' + resource_id + ') (' + str(index) + '/' + str(total) + ')')
-    print(' Updating _value to @value...')
-    update_value_field(resource, resource_type)
+    update_value_to_id(resource, resource_type)
 
 ### end of FUNCTION definitions ###
 
 # Constants
-VERSION = '08-16-2016'
+VERSION = '2_23_2017'
 DB_NAME = 'cedar'
-UPDATED_DB_NAME = DB_NAME + '-updated'
-OLD_DB_NAME = DB_NAME + '-old'
+UPDATED_DB_NAME = DB_NAME + '-updated-' + VERSION
+OLD_DB_NAME = DB_NAME + '-old-' + VERSION
 TEMPLATES_COLLECTION = 'templates'
 ELEMENTS_COLLECTION = 'template-elements'
 FIELDS_COLLECTION = 'template-fields'
@@ -197,7 +245,14 @@ if choice is True:
     client.admin.command('copydb', fromdb=DB_NAME, todb=UPDATED_DB_NAME)
 
     db = client[UPDATED_DB_NAME]
-    
+
+    # Count existing resources
+    print('\nNumber of resources:')
+    for collection in RESOURCE_COLLECTIONS:
+        print('   ' + collection + ': ' + str(db[collection].find().count()))
+    print
+     
+    # Update resources
     resources_number = {}
     for collection in RESOURCE_COLLECTIONS:
         resources = db[collection].find()
@@ -209,10 +264,8 @@ if choice is True:
             # Replace document in the DB with the updated version
             db[collection].replace_one({'_id':resource['_id']}, resource)
 
-    print('\nDone! Number of resources updated:')
-    for n in resources_number: 
-        print('   ' + n + ': ' + str(resources_number[n]))
-    print('\nThe updated resources have been stored into the \'' + UPDATED_DB_NAME + '\' database')
+    print('\nUpdate finished.')
+    print('\nThe updated resources have been stored into the \'' + UPDATED_DB_NAME + '\' database.')
 
     choice = confirm('Do you want to rename the DBs as follows?\n 1)\'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'\n 2)\'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'\n', False)
 
