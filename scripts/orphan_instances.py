@@ -51,7 +51,6 @@ def confirm(prompt=None, resp=False):
             return False
 
 def template_exists(template_id):
-    print('Template found?')
     result = db[TEMPLATES_COLLECTION].find_one({"@id": template_id})
     if result is not None:
         return True
