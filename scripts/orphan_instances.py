@@ -57,10 +57,14 @@ def template_exists(template_id):
     else:
         return False
 
+def remove_instance(instance_id):
+    print('Removing instance: ' + instance_id)
+    db[INSTANCES_COLLECTION].remove({"@id": instance_id})
+
 ### end of FUNCTION definitions ###
 
 # Constants
-VERSION = '2_23_2017'
+VERSION = '2_23_2017b'
 DB_NAME = 'cedar'
 UPDATED_DB_NAME = DB_NAME + '-updated-' + VERSION
 OLD_DB_NAME = DB_NAME + '-old-' + VERSION
@@ -101,52 +105,42 @@ if choice is True:
     # Count existing instances
     print('\nNumber of instances: ' + str(db[INSTANCES_COLLECTION].find().count()))
 
-    orphan_instances = []
+    orphan_instances_ids = []
     for instance in db[INSTANCES_COLLECTION].find():
         instance_id = instance['@id']
         instance_id = instance['@id']
         template_id = instance['schema:isBasedOn']
         if not template_exists(template_id):
-            orphan_instances.append(instance_id)
+            orphan_instances_ids.append(instance_id)
 
     print('\nList of orphan instances:')
-    if len(orphan_instances) == 0:
+    if len(orphan_instances_ids) == 0:
         print('No orphan instances found!')
     else:
-        for oi in orphan_instances:
-            print(oi)
+        for oi_id in orphan_instances_ids:
+            print(oi_id)
      
-    # # Update resources
-    # resources_number = {}
-    # for collection in RESOURCE_COLLECTIONS:
-    #     resources = db[collection].find()
-    #     resources_number[collection] = resources.count()
-    #     j=0
-    #     for resource in resources:
-    #         j=j+1
-    #         update_model(resource, j, resources_number[collection])
-    #         # Replace document in the DB with the updated version
-    #         db[collection].replace_one({'_id':resource['_id']}, resource)
+    if len(orphan_instances_ids) > 0:
+        choice = confirm('\nDo you want to remove these instances from the database?', False)
+        if choice is True:
+            for oi_id in orphan_instances_ids:
+                remove_instance(oi_id)
 
-    # print('\nUpdate finished.')
-    # print('\nThe updated resources have been stored into the \'' + UPDATED_DB_NAME + '\' database.')
+    print('\nChanges done on the \'' + UPDATED_DB_NAME + '\' database.')
 
-    # choice = confirm('Do you want to rename the DBs as follows?\n 1)\'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'\n 2)\'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'\n', False)
+    choice = confirm('Do you want to rename the DBs as follows?\n 1)\'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'\n 2)\'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'\n', False)
 
-    # if choice is True:
-    #     # rename DB_NAME to OLD_DB_NAME
-    #     print('Renaming \'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'...')
-    #     client.drop_database(OLD_DB_NAME)
-    #     client.admin.command('copydb', fromdb=DB_NAME, todb=OLD_DB_NAME)
-    #     client.drop_database(DB_NAME)
-    #     # rename UPDATED_DB_NAME to DB_NAME
-    #     print('Renaming \'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'...')
-    #     client.admin.command('copydb', fromdb=UPDATED_DB_NAME, todb=DB_NAME)
-    #     client.drop_database(UPDATED_DB_NAME)
-    #     print('Finished renaming the DBs')
-
-
-
+    if choice is True:
+        # rename DB_NAME to OLD_DB_NAME
+        print('Renaming \'' + DB_NAME + '\' to \'' + OLD_DB_NAME + '\'...')
+        client.drop_database(OLD_DB_NAME)
+        client.admin.command('copydb', fromdb=DB_NAME, todb=OLD_DB_NAME)
+        client.drop_database(DB_NAME)
+        # rename UPDATED_DB_NAME to DB_NAME
+        print('Renaming \'' + UPDATED_DB_NAME + '\' to \'' + DB_NAME + '\'...')
+        client.admin.command('copydb', fromdb=UPDATED_DB_NAME, todb=DB_NAME)
+        client.drop_database(UPDATED_DB_NAME)
+        print('Finished renaming the DBs')
 
 
 
