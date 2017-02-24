@@ -20,6 +20,7 @@ alias goutil='cd $CEDAR_HOME/cedar-util'
 alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goservercore='cd $CEDAR_HOME/cedar-server-core-library'
+alias gomodel='cd $CEDAR_HOME/cedar-model-validation-library'
 
 alias goprojectconfig='cd $CEDAR_HOME/cedar-project-config'
 alias goadmintool='cd $CEDAR_HOME/cedar-admin-tool'
