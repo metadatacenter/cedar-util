@@ -42,12 +42,13 @@
                     <div id="cedar-small-logo-wrapper" class="col-xs-12 col-sm-8 col-md-8 col-lg-3"><div id="cedar-small-logo"></div></div>
                     <div id="cedar-intro-text" class="col-xs-12 col-sm-4 col-md-4 col-lg-5">
                         <p style="text-align:justify">
-                            This is an alpha release of the CEDAR Workbench, designed to make better metadata easier.
+                            Thanks for visiting the CEDAR Workbench, your tool for creating better metadata.
                         </p>
                         <p style="text-align:justify">
-                            This initial release addresses rich metadata setup and collection — and stay tuned for more, 
-                            we're extending these capabilities in coming months! For more information, check out our 
-                            <a href="http://metadatacenter.org/tools-training/orientation">CEDAR Orientation</a>.
+                            You can create an account from this page, and immediately start making well-structured metadata.
+                            To learn more about CEDAR, please visit our 
+                            <a href="http://metadatacenter.org/tools-training/orientation">CEDAR Orientation</a>, or get support from the 
+                            <a href="https://mailman.stanford.edu/mailman/listinfo/cedar-incoming">CEDAR Support List</a>.
                         </p>
                     </div>
                 </div>
