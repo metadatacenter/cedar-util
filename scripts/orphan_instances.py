@@ -111,11 +111,12 @@ if choice is True:
         instance_id = instance['@id']
         if 'schema:isBasedOn' in instance:
             template_id = instance['schema:isBasedOn']
+            if not template_exists(template_id):
+                orphan_instances_ids.append(instance_id)
         else:
             print('schema:isBasedOn is missing for instance: ' + instance_id)
-        if not template_exists(template_id):
             orphan_instances_ids.append(instance_id)
-
+        
     print('\nList of orphan instances:')
     if len(orphan_instances_ids) == 0:
         print('No orphan instances found!')
