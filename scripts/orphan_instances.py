@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Created: 2016-Aug-16
-# Last update: 2017-Feb-22
+# Last update: 2017-Feb-27
 # model_updater.py: Utility to update CEDAR resources stored in a MongoDB database
 
 import json
@@ -109,10 +109,14 @@ if choice is True:
     for instance in db[INSTANCES_COLLECTION].find():
         instance_id = instance['@id']
         instance_id = instance['@id']
-        template_id = instance['schema:isBasedOn']
-        if not template_exists(template_id):
+        if 'schema:isBasedOn' in instance:
+            template_id = instance['schema:isBasedOn']
+            if not template_exists(template_id):
+                orphan_instances_ids.append(instance_id)
+        else:
+            print('schema:isBasedOn is missing for instance: ' + instance_id)
             orphan_instances_ids.append(instance_id)
-
+        
     print('\nList of orphan instances:')
     if len(orphan_instances_ids) == 0:
         print('No orphan instances found!')
