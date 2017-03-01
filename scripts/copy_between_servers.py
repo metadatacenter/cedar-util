@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Created:      Oct-31-2016
-# Last updated: Jan-31-2017
+# Last updated: Mar-1-2017
 # copy_between_servers.py: Utility to copy resources between different CEDAR servers.
 # 
 # - It is currently limited to copy a template and, optionally, all its instances 
@@ -13,6 +13,7 @@
 
 import argparse
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import os.path
 import sys
 import jsclean
@@ -23,26 +24,32 @@ import urllib
 
 source_server = "https://resource.staging.metadatacenter.net/"
 target_server = "https://resource.metadatacenter.orgx/"
-source_api_key = "Source API key here"
-target_api_key = "Target API key here"
-target_folder_id_template = "https://repo.metadatacenter.orgx/folders/3d855ac0-dae6-401e-bd0b-6a858d01d535"
-target_folder_id_instances = "https://repo.metadatacenter.orgx/folders/6b7a6775-a621-4539-b8bd-f762077e7f1a"
+source_api_key = "source_api_key"
+target_api_key = "target_api_key"
+target_folder_id_template = "https://repo.metadatacenter.orgx/folders/24368319-ca91-4aef-9d09-ab73a0f7f3b3"
+target_folder_id_instances = "https://repo.metadatacenter.orgx/folders/8231aafe-ab17-4044-aef1-fb8e42930fe2"
 source_template_id = "https://repo.staging.metadatacenter.net/templates/99de8dbb-5e26-4b31-928e-903cbbec517c"
-limit = 100000
+limit_per_call = 500
+# Max number of instances to be created
+max_count = 40000
 
-def main():    
+def main():  
+    # Disable InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)   
+    
     template_json = get_template(source_server, source_template_id, source_api_key)
     target_template_json = post_template(target_server, template_json, target_folder_id_template, target_api_key)
     target_template_id = target_template_json['@id']
-    post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id_instances, limit, source_api_key, target_api_key)
-    print("**** Finished ****")
+    post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id_instances, max_count, limit_per_call, source_api_key, target_api_key)
+    print("**** Done ****")
 
-# Used to delete instances
-# def main():    
-#     templ_id = "https://repo.metadatacenter.orgx/templates/aa9e244e-cb5f-462c-9687-6406e8b8edcf"
-#     limit = 100
-#     delete_instances(target_server, templ_id, limit, target_api_key)
-#     print("**** Finished ****")
+# Used to delete the template and instances created
+# def main():  
+#     # Disable InsecureRequestWarning
+#     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  
+#     templ_id = "https://repo.metadatacenter.orgx/templates/60ff90ee-f683-4072-a0d9-0748f08409f5"
+#     delete_instances(target_server, templ_id, target_api_key)
+#     print("**** Done ****")
 
 def get_template(server, template_id, api_key):
     url = server + "templates/" + urllib.quote(template_id, safe='')
@@ -61,7 +68,7 @@ def get_instance(server, instance_id, api_key):
         'authorization': "apiKey " + api_key
     }
     response = requests.request("GET", url, headers=headers, verify=False)
-    print("GET instance response: " + str(response.status_code))
+    #print("GET instance response: " + str(response.status_code))
     return json.loads(response.text)   
 
 def delete_instance(server, instance_id, api_key):
@@ -72,6 +79,15 @@ def delete_instance(server, instance_id, api_key):
     }
     response = requests.request("DELETE", url, headers=headers, verify=False)
     print("DELETE instance response: " + str(response.status_code))
+
+def delete_template(server, template_id, api_key):
+    url = server + "templates/" + urllib.quote(template_id, safe='')
+    print(url)
+    headers = {
+        'authorization': "apiKey " + api_key
+    }
+    response = requests.request("DELETE", url, headers=headers, verify=False)
+    print("DELETE template response: " + str(response.status_code))
 
 def post_template(server, template, folder_id, api_key):
     # Delete @id field if it exists
@@ -88,41 +104,70 @@ def post_template(server, template, folder_id, api_key):
     #print("POST template response: " + str(response.text))
     return json.loads(response.text)
 
-def get_template_instances(server, template_id, limit, api_key):
-    url = server + "search-deep"
-    querystring = {"derived_from_id": template_id,"offset":limit}
-    headers = {
-        'content-type': "application/json",
-        'authorization': "apiKey " + api_key
-    }
-    response = requests.request("GET", url, headers=headers, params=querystring, verify=False)
-    print("GET template instances response: " + str(response.status_code))
-    response_json = json.loads(response.text)
+def get_template_instances_summary(server, template_id, max_count, limit_per_call, api_key):
+    print('*** Getting instance summaries ***')
+    print('    server: ' + server)
+    print('    template_id: ' + template_id)
+    print('    max_count: ' + str(max_count))
+    print('    limit_per_call: ' + str(limit_per_call))
+    instances_summary = []
+    # Retrieve basic info for instances
+    url_source_search = server + "search-deep"
+    offset = 0
+    if max_count <= limit_per_call:
+        limit_param = max_count
+    else:
+        limit_param = limit_per_call
+    finished = False
+    while not finished:
+        # print('------------')
+        # print('  offset = ' + str(offset))
+        # print('  limit_param = ' + str(limit_param))
+        # print('------------')
+
+        querystring = {"derived_from_id": template_id, "q": "*", "limit": limit_param, "offset": offset}
+        headers = {
+            'content-type': "application/json",
+            'authorization': "apiKey " + api_key
+        }
+        response_instances_summary = requests.request("GET", url_source_search, headers=headers, params=querystring, verify=False)
+        print("    GET instances summary URL: " + str(response_instances_summary.url))
+        print("    GET instances summary response: " + str(response_instances_summary.status_code))
+        response_json = json.loads(response_instances_summary.text)
+        total_count = response_json['totalCount']
+        instances_summary.extend(response_json["resources"])
+
+        offset = offset + limit_param
+
+        if not len(response_json["resources"]):
+            finished = True
+
+        if (offset + limit_param) > max_count:
+            if (offset < max_count):
+                limit_param = max_count - offset
+            else:
+                finished = True
+            
+    print('    Total number of instance summaries retrieved: ' + str(len(instances_summary))) 
+    return instances_summary
+
+def get_template_instances(server, template_id, max_count, limit_per_call, api_key):
+    instances_summary = get_template_instances_summary(server, template_id, max_count, limit_per_call, api_key)
     instances = []
-    for resource in response_json['resources']:
-        instance = get_instance(server, resource['@id'], api_key)
+    for summary in instances_summary:
+        # Retrieve instance
+        instance = get_instance(source_server, summary['@id'], source_api_key)
         instances.append(instance)
     return instances
 
-def post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id, limit, source_api_key, target_api_key):
-    # Retrieve basic info for instances
-    url_source_search = source_server + "search-deep"
-    querystring = {"derived_from_id": source_template_id,"offset":limit}
-    headers = {
-        'content-type': "application/json",
-        'authorization': "apiKey " + source_api_key
-    }
-    response_instances = requests.request("GET", url_source_search, headers=headers, params=querystring, verify=False)
-    print("GET instances response: " + str(response_instances.status_code))
-    response_json = json.loads(response_instances.text)
-    total_count = len(response_json["resources"])
-    print("Number of instances retrieved: " + str(total_count))
+def post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id, max_count, limit_per_call, source_api_key, target_api_key):
+    instances_summary = get_template_instances_summary(source_server, source_template_id, max_count, limit_per_call, source_api_key)
     url_target_instances = target_server + "template-instances"
-    count = 1
-    for resource in response_json['resources']:
-        # Retrieve instance
-        instance = get_instance(source_server, resource['@id'], source_api_key)
-        # Post instance to the target server
+    print('Retrieving full instances and posting them to the target system')
+    total_count = len(instances_summary)
+    count = 0
+    for ins in instances_summary:
+        instance = get_instance(source_server, ins['@id'], source_api_key)
         del instance['@id']
         instance['schema:isBasedOn'] = target_template_id
         querystring = {"folder_id": target_folder_id}
@@ -131,12 +176,16 @@ def post_instances(source_server, target_server, source_template_id, target_temp
             'authorization': "apiKey " + target_api_key
         }
         response = requests.request("POST", url_target_instances, json=instance, headers=headers, params=querystring, verify=False)
-        print("POST instance response: " + str(response.status_code))
+        #print("POST instance response: " + str(response.status_code))
         print("Posted instance no. " + str(count) + " (" + str(float((100*count)/total_count)) + "%)")
         count = count + 1
 
-def delete_instances(server, template_id, limit, api_key):
-    instances_json = get_template_instances(server, template_id, limit, api_key)
+def delete_instances(server, template_id, api_key):
+    print('*** Removing instances ***')
+    print('    server: ' + server);
+    print('    template_id: ' + template_id);
+
+    instances_json = get_template_instances_summary(server, template_id, None, api_key)
     for instance in instances_json:
         delete_instance(server, instance['@id'], api_key)
 
