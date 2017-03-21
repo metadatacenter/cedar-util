@@ -1,15 +1,14 @@
 #!/bin/bash
 clear
-echo ---------------------------------------------
+echo --------------------------------------------------------------------------------
 echo Stopping CEDAR infrastructure services
-echo ---------------------------------------------
+echo --------------------------------------------------------------------------------
 echo
 
-shopt -s expand_aliases
-source $CEDAR_HOME/cedar-util/bin/profile_include.sh
-
-stopkk
-stopnginx
-stopmongo
-stopelastic
-stopkibana
+$CEDAR_HOME/cedar-util/bin/stopmongo.sh
+$CEDAR_HOME/cedar-util/bin/stopelastic.sh
+$CEDAR_HOME/cedar-util/bin/stopkibana.sh
+$CEDAR_HOME/cedar-util/bin/stopneo.sh
+$CEDAR_HOME/cedar-util/bin/stopredis.sh
+$CEDAR_HOME/cedar-util/bin/killkeycloak.sh
+$CEDAR_HOME/cedar-util/bin/stopnginx.sh

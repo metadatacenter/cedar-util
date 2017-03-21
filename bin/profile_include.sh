@@ -65,14 +65,26 @@ alias m2clean='rm -rf ~/.m2/repository/*'
 alias m2cleancedar='rm -rf ~/.m2/repository/org/metadatacenter/*'
 
 #3rd party server aliases
-alias startnginx='sudo nginx'
-alias stopnginx='sudo nginx -s stop'
-alias restartnginx='sudo nginx -s stop && sudo nginx'
-alias startkk='$KEYCLOAK_HOME/bin/standalone.sh &'
-alias stopkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
-alias stopmongo='$CEDAR_HOME/cedar-util/bin/killmongo.sh'
-alias stopkibana='$CEDAR_HOME/cedar-util/bin/killkibana.sh'
-alias stopelastic='$CEDAR_HOME/cedar-util/bin/killelastic.sh'
+alias startnginx='$CEDAR_HOME/cedar-util/bin/startnginx.sh'
+alias stopnginx='$CEDAR_HOME/cedar-util/bin/stopnginx.sh'
+
+alias startkk='$CEDAR_HOME/cedar-util/bin/startkeycloak.sh'
+alias killkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
+
+alias startmongo='$CEDAR_HOME/cedar-util/bin/startmongo.sh'
+alias stopmongo='$CEDAR_HOME/cedar-util/bin/stopmongo.sh'
+
+alias startkibana='$CEDAR_HOME/cedar-util/bin/startkibana.sh'
+alias stopkibana='$CEDAR_HOME/cedar-util/bin/stopkibana.sh'
+
+alias startelastic='$CEDAR_HOME/cedar-util/bin/startelastic.sh'
+alias stopelastic='$CEDAR_HOME/cedar-util/bin/stopelastic.sh'
+
+alias startneo='$CEDAR_HOME/cedar-util/bin/startneo.sh'
+alias stopneo='$CEDAR_HOME/cedar-util/bin/stopneo.sh'
+
+alias startredis='$CEDAR_HOME/cedar-util/bin/startredis.sh'
+alias stopredis='$CEDAR_HOME/cedar-util/bin/stopredis.sh'
 
 #CEDAR server aliases
 alias starteditor='goeditor && gulp &'
