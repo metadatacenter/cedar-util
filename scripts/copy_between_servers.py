@@ -24,10 +24,10 @@ import urllib
 
 source_server = "https://resource.staging.metadatacenter.net/"
 target_server = "https://resource.metadatacenter.orgx/"
-source_api_key = "source_api_key"
-target_api_key = "target_api_key"
-target_folder_id_template = "https://repo.metadatacenter.orgx/folders/24368319-ca91-4aef-9d09-ab73a0f7f3b3"
-target_folder_id_instances = "https://repo.metadatacenter.orgx/folders/8231aafe-ab17-4044-aef1-fb8e42930fe2"
+source_api_key = "<YourApiKey>"
+target_api_key = "<YourApiKey>"
+target_folder_id_template = "https://repo.metadatacenter.orgx/folders/49ea90c8-8fa8-444c-bf86-b0914fbf5f1b"
+target_folder_id_instances = "https://repo.metadatacenter.orgx/folders/9ae00f39-a6f4-4a88-8977-9f4117955f32"
 source_template_id = "https://repo.staging.metadatacenter.net/templates/99de8dbb-5e26-4b31-928e-903cbbec517c"
 limit_per_call = 500
 # Max number of instances to be created
@@ -47,8 +47,8 @@ def main():
 # def main():  
 #     # Disable InsecureRequestWarning
 #     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  
-#     templ_id = "https://repo.metadatacenter.orgx/templates/60ff90ee-f683-4072-a0d9-0748f08409f5"
-#     delete_instances(target_server, templ_id, target_api_key)
+#     templ_id = "https://repo.metadatacenter.orgx/templates/cd292507-4a49-4326-8196-d262255c3507"
+#     delete_instances(target_server, templ_id, max_count, limit_per_call, target_api_key)
 #     print("**** Done ****")
 
 def get_template(server, template_id, api_key):
@@ -180,12 +180,12 @@ def post_instances(source_server, target_server, source_template_id, target_temp
         print("Posted instance no. " + str(count) + " (" + str(float((100*count)/total_count)) + "%)")
         count = count + 1
 
-def delete_instances(server, template_id, api_key):
+def delete_instances(server, template_id, max_count, limit_per_call, api_key):
     print('*** Removing instances ***')
     print('    server: ' + server);
     print('    template_id: ' + template_id);
 
-    instances_json = get_template_instances_summary(server, template_id, None, api_key)
+    instances_json = get_template_instances_summary(server, template_id, max_count, limit_per_call, api_key)
     for instance in instances_json:
         delete_instance(server, instance['@id'], api_key)
 
