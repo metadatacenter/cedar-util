@@ -1,9 +1,8 @@
 #!/bin/bash
 clear
-echo -----------------------------------------------
+echo --------------------------------------------------------------------------------
 echo Stopping Dropwizard enabled CEDAR microservices
-echo -----------------------------------------------
-echo
+echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 shopt -s expand_aliases
 source $CEDAR_HOME/cedar-util/bin/profile_include.sh
