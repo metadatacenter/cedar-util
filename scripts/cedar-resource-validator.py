@@ -108,8 +108,8 @@ def consume(report, **kwargs):
     indicator = "."  # means OK
     if status_code > 200:
         error_message = str(status_code) + " " + output_message["status"]
-        if output_message["message"]:
-            error_message += " - " + output_message["message"][:80] + "..."
+        if detail_message(output_message):
+            error_message += " - " + detail_message(output_message)[:80] + "..."  # get a snippet
         report[error_message].append(resource_id)
         indicator = "X"  # means server error
     else:
@@ -120,6 +120,15 @@ def consume(report, **kwargs):
             indicator = "*"  # means validation error
 
     print(indicator, end="", flush=True)
+
+
+def detail_message(output_message):
+    detail_message = None
+    if "message" in output_message:
+        detail_message = output_message["message"]
+    elif "errorMessage" in output_message:
+        detail_message = output_message["errorMessage"]
+    return detail_message
 
 
 def show(report):
