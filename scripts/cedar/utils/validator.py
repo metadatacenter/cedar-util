@@ -27,7 +27,6 @@ def send_post_request(api_key, request_url, data):
         "Content-Type": "application/json",
         "Authorization": api_key
     }
-    print(request_url)
     response = requests.request("POST", request_url, headers=headers, data=json.dumps(data), verify=False)
     message = json.loads(response.text)
     return response.status_code, message
