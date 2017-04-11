@@ -121,7 +121,7 @@ def remove_empty_fields(tree):
 #############################################
 
 if (len(sys.argv) != 3) or (len(sys.argv) == 3 and sys.argv[1] != '-immport' and sys.argv[1] != '-isa'):
-    print 'Please use the syntax: instances_transformation.py [-immport|-isa] instances_file.json'
+    print('Please use the syntax: instances_transformation.py [-immport|-isa] instances_file.json')
 else:
     print('Transforming instances...')
     data_source = sys.argv[1][1:]
