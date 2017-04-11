@@ -33,12 +33,12 @@ def main():
     json_input = args.input
     json_output = args.output
 
-    print json_output
+    print(json_output)
 
     if directory:
-        print "directory"
+        print("directory")
         if not os.path.exists(json_input):
-            print "Input directory does not exist. Please try again."
+            print("Input directory does not exist. Please try again.")
             sys.exit()
 
         input_files = directory_walk(json_input)
@@ -56,7 +56,7 @@ def main():
                 output_files.append(output_file_name)
 
     elif args_file:
-        print "file"
+        print("file")
         if valid_json_file(json_input, "input"):
             input_files.append(args.input)
 
@@ -109,7 +109,7 @@ def valid_json_file(check_file, check_str):
     elif check_file == "log.txt":
         pass
     else:
-        print "Invalid files in " + check_str + " directory, check all files to convert are .json files(s)"
+        print("Invalid files in " + check_str + " directory, check all files to convert are .json files(s)")
         return False
 
 

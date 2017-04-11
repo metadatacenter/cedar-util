@@ -40,44 +40,44 @@ def validate_fields(file_name, output_name=None, confirmation=False, print_optio
     regex_required_value = regex + "[^\{\}\[\]]*?,\n"
 
     if not valid_json_file(file_name, "input"):
-        print "invalid json file"
+        print("invalid json file")
         exit()
     elif print_option:
-        print "File: ", file_name
+        print("File: ", file_name)
 
     input_file = open(file_name, 'r+')
     f = input_file.read()
 
     untitled = regex_search("untitled", f, True)
     if len(untitled) != 0:
-        print "Find and replace unidentified fields: ", len(untitled)
+        print("Find and replace unidentified fields: ", len(untitled))
 
     input_file.close()
     found = 0
     deleted = 0
 
     if print_option:
-        print "SEARCHING INVALID PROPERTIES"
+        print("SEARCHING INVALID PROPERTIES")
     result_list = regex_search(regex_property, f, True)
 
     if print_option:
-        print "search complete"
+        print("search complete")
     properties_deleted, found, deleted = delete_one(result_list, confirmation, f, found, deleted)
 
     if print_option:
-        print "SEARCHING INVALID VALUES"
+        print("SEARCHING INVALID VALUES")
     result_list = regex_search(regex_required_value, f, False)
 
     if print_option:
-        print "search complete"
+        print("search complete")
     new_string, found, deleted = delete_one(result_list, confirmation, properties_deleted, found, deleted)
 
     if print_option:
-        print "Number of invalid pattern occurrences found: ", found
+        print("Number of invalid pattern occurrences found: ", found)
         if (found == deleted) or confirmation:
-            print "All pattern occurrences deleted. "
+            print("All pattern occurrences deleted. ")
         else:
-            print "Number of pattern occurrences deleted: ", deleted
+            print("Number of pattern occurrences deleted: ", deleted)
 
     if output_name:
         output_file = open(output_name, 'w+')
@@ -94,16 +94,16 @@ def delete_one(result_list, confirmation, f, i, j, print_option=False):
     new_string = f
     for result in result_list:
         if print_option:
-            print
-            print result
-            print
+            print()
+            print(result)
+            print()
         i += 1
         if confirmation:
             new_string, j = user_confirm(re.escape(result), new_string)
         else:
             new_string, n = regex_delete(re.escape(result), new_string)
             if print_option:
-                print "patterns deleted: ", n
+                print("patterns deleted: ", n)
             j = i
     return new_string, i, j
 
@@ -111,11 +111,11 @@ def delete_one(result_list, confirmation, f, i, j, print_option=False):
 def user_confirm(regex, f):
     j = 0
     new_string = f
-    delete = raw_input("Delete this pattern? (Y or N)")
+    delete = input("Delete this pattern? (Y or N)")
     yes_list = ["yes", "Y", "y", "YES", "Yes"]
     if delete in yes_list:
         new_string, n = regex_delete(regex, f)
-        print "deleted patterns: ", n
+        print("deleted patterns: ", n)
         j += 1
     return new_string, j
 
@@ -141,7 +141,7 @@ def valid_json_file(check_file, str_check):
     if check_file.endswith(".json"):
         return True
     else:
-        print "Invalid " + str_check + "file(s), try again with .json files(s)"
+        print("Invalid " + str_check + "file(s), try again with .json files(s)")
         sys.exit()
 
 

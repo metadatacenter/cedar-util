@@ -108,7 +108,7 @@ def move_value_constraints(tree, parent_tree):
 ###
 
 if len(sys.argv) != 2:
-    print 'Please use the syntax: template_update.py template_file.json'
+    print('Please use the syntax: template_update.py template_file.json')
 else:
     print('Updating template...')
     
