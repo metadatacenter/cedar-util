@@ -162,7 +162,7 @@ def show(report):
         message = "Found " + str(report_size) + " validation error(s)."
         message += "\n"
         message += "Details: " + to_json_string(dict(report))
-    print("\r" + message)
+    print("\n" + message)
 
 
 if __name__ == "__main__":

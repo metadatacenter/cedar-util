@@ -138,7 +138,7 @@ def show(report):
         message = "Found " + str(report_size) + " validation error(s)."
         message += "\n"
         message += "Details: " + to_json_string(dict(report))
-    print("\r" + message)
+    print("\n" + message)
 
 
 def report_unknown_type(resource_id, report):
