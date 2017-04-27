@@ -115,7 +115,9 @@ def consume(report, **kwargs):
     else:
         is_valid = output_message["validates"]
         if is_valid == 'false':
-            error_message = ', '.join(output_message["errors"]) # flatten list
+            error_messages = [error_details['message'] + " at " + error_details['location']
+                              for error_details in output_message["errors"]]
+            error_message = ', '.join(error_messages)  # flatten list
             report[error_message].append(resource_id)
             indicator = "*"  # means validation error
 
