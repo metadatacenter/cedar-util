@@ -40,21 +40,21 @@ def main():
 
 def validate_template(api_key, server_address, template_id, report, **kwargs):
     template = get_template(api_key, server_address, template_id)
-    request_url = server_address + "/command/validate?resource_types=template"
+    request_url = server_address + "/command/validate?resource_type=template"
     status_code, server_message = validator.validate_template(api_key, template, request_url=request_url)
     consume(report, template_id, status_code, server_message, **kwargs)
 
 
 def validate_element(api_key, server_address, element_id, report, **kwargs):
     element = get_element(api_key, server_address, element_id)
-    request_url = server_address + "/command/validate?resource_types=element"
+    request_url = server_address + "/command/validate?resource_type=element"
     status_code, server_message = validator.validate_element(api_key, element, request_url=request_url)
     consume(report, element_id, status_code, server_message, **kwargs)
 
 
 def validate_instance(api_key, server_address, instance_id, report, **kwargs):
     instance = get_instance(api_key, server_address, instance_id)
-    request_url = server_address + "/command/validate?resource_types=instance"
+    request_url = server_address + "/command/validate?resource_type=instance"
     status_code, server_message = validator.get_resource(api_key, instance, request_url=request_url)
     consume(report, instance_id, status_code, server_message, **kwargs)
 

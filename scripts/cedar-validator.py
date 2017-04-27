@@ -45,7 +45,7 @@ def validate_template(api_key, server_address, limit, report):
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         template = get_template(api_key, server_address, template_id)
-        request_url = server_address + "/command/validate?resource_types=template"
+        request_url = server_address + "/command/validate?resource_type=template"
         status_code, server_message = validator.validate_template(api_key, template, request_url=request_url)
         consume(report, template_id, status_code, server_message, iteration=index, total_count=total_templates)
 
@@ -55,7 +55,7 @@ def validate_element(api_key, server_address, limit, report):
     total_elements = len(element_ids)
     for index, element_id in enumerate(element_ids, start=1):
         element = get_element(api_key, server_address, element_id)
-        request_url = server_address + "/command/validate?resource_types=element"
+        request_url = server_address + "/command/validate?resource_type=element"
         status_code, server_message = validator.validate_element(api_key, element, request_url=request_url)
         consume(report, element_id, status_code, server_message, iteration=index, total_count=total_elements)
 
@@ -65,7 +65,7 @@ def validate_instance(api_key, server_address, limit, report):
     total_instances = len(instance_ids)
     for index, instance_id in enumerate(instance_ids, start=1):
         instance = get_instance(api_key, server_address, instance_id)
-        request_url = server_address + "/command/validate?resource_types=instance"
+        request_url = server_address + "/command/validate?resource_type=instance"
         status_code, server_message = validator.validate_instance(api_key, instance, request_url=request_url)
         consume(report, instance_id, status_code, server_message, iteration=index, total_count=total_instances)
 
