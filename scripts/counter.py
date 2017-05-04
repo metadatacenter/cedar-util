@@ -10,7 +10,7 @@ import csv
 from pprint import pprint
 
 if (len(sys.argv) != 3):
-    print 'Please use the syntax: counter.py input.json output.csv'
+    print('Please use the syntax: counter.py input.json output.csv')
 else:
     with open(sys.argv[1]) as data_file:
         data = json.load(data_file)
@@ -27,8 +27,8 @@ else:
         # process_count = 0
         # study_group_population_count = 0
         # study_factor_count = 0
-        print ''
-        print '- Study: ' + str(study_count)
+        print('')
+        print('- Study: ' + str(study_count))
 
         publication_count = len(study['hasPublication'])
         print('Publication: ' + str(publication_count))

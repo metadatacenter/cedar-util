@@ -32,7 +32,7 @@ def main():
     # resource = args.resource
 
     if not os.path.exists(directory):
-        print "Input directory does not exist. Please try again."
+        print("Input directory does not exist. Please try again.")
         sys.exit()
 
     url, parameter, headers = create_command(api_key, host_name, folder_id)
@@ -66,14 +66,14 @@ def cedar_post(url, parameter, headers, directory):
             except UnicodeEncodeError:
                 resp_text = "text failed to encode \n\n\n"
             log.write(resp_text)
-            print cur_time + response + resp_headers + resp_text
+            print(cur_time + response + resp_headers + resp_text)
         end = time.time()
 
         elapsed = end - start
         elapsed_message = "\nElapsed time: " + str(elapsed) + "\n"
         log.write(elapsed_message)
         log.write("\n**** Finish upload ****\n")
-        print elapsed_message
+        print(elapsed_message)
 
 
 def create_command(api_key, host_name, folder_id):
