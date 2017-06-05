@@ -11,14 +11,14 @@ RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)
 NORMAL=$(tput sgr0)
 
-function checkOpenedPort {
+function checkOpenPort {
         if nc -z localhost "$2" > /dev/null 2>&1
         then
                 status="${GREEN}Running${NORMAL}"
         else
                 status="${RED}Stopped${NORMAL}"
         fi
-        printf "$format" $1 $status 'openedPort' $2
+        printf "$format" $1 $status 'openPort' $2
 }
 
 function checkHealth {
@@ -105,13 +105,15 @@ checkHealth ValueRecommender 9106
 checkHealth Submission 9110
 checkHealth Worker 9111
 printf "$header" '--- Infrastructure --------'
-checkOpenedPort MongoDB 27017
+checkOpenPort MongoDB 27017
 checkHttpResponse Elasticsearch 9200 'HTTP/1.1\s200\sOK'
 checkHttpResponse Kibana 5601 'kbn-name:\skibana'
 checkHttpResponse NGINX 80 'Server:\snginx'
 checkHttpResponse Keycloak 8080 'Server:\sWildFly'
 checkHttpResponse Neo4j 7474 'Server:\sJetty'
 checkRedisPing Redis-persistent 6379
+checkHttpResponse Redis-Commander 8081 'X-Powered-By:\sEx'
+checkOpenPort MySQL 3306
 #checkRedisPing Redis-non-persistent 6380
 printf "$header" '--- Development Front End -'
 checkHttpResponse Gulp 4200 'HTTP/1.1\s200\sOK'
