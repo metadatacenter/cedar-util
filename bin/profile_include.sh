@@ -16,6 +16,12 @@ alias gocedar='cd $CEDAR_HOME'
 alias goparent='cd $CEDAR_HOME/cedar-parent'
 alias goproject='cd $CEDAR_HOME/cedar-project'
 
+alias godocker='cd $CEDAR_HOME/cedar-docker-deploy/'
+alias gobackend='cd $CEDAR_HOME/cedar-docker-deploy/cedar-backend'
+alias gofrontend='cd $CEDAR_HOME/cedar-docker-deploy/cedar-frontend'
+alias goinfra='cd $CEDAR_HOME/cedar-docker-deploy/cedar-infra'
+alias goinfratools='cd $CEDAR_HOME/cedar-docker-deploy/cedar-infra-tools'
+
 alias goutil='cd $CEDAR_HOME/cedar-util'
 alias goconf='cd $CEDAR_HOME/cedar-conf'
 alias godocs='cd $CEDAR_HOME/cedar-docs'
