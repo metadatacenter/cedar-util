@@ -110,10 +110,9 @@ def consume(report, resource_id, status_code, server_message, **kwargs):
     else:
         is_valid = server_message["validates"]
         if is_valid == 'false':
-            error_messages = [error_details['message'] + " at " + error_details['location']
-                              for error_details in server_message["errors"]]
-            error_message = ', '.join(error_messages) # flatten list
-            report[error_message].append(resource_id)
+            for error_details in server_message["errors"]:
+                error_message = error_details['message'] + " at " + error_details['location']
+                report[error_message].append(resource_id)
     print_progressbar(**kwargs)
 
 
