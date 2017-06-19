@@ -1,7 +1,7 @@
 import argparse
 import json
 from urllib.parse import quote
-from cedar.utils import downloader, validator, enumerator
+from cedar.utils import downloader, validator, finder
 from collections import defaultdict
 
 
@@ -72,17 +72,17 @@ def validate_instance(api_key, server_address, limit, report):
 
 def get_element_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=element"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_template_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=template"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_instance_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=instance"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_template(api_key, server_address, template_id):
