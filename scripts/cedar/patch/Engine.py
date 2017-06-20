@@ -1,4 +1,4 @@
-import utils
+from cedar.patch import utils
 
 
 class Engine(object):
@@ -9,42 +9,33 @@ class Engine(object):
     def add_patch(self, patch):
         self.patches.append(patch)
 
-    def execute(self, template_ids, debug=False):
-        patching_report = {
-            "success": [],
-            "failed": []
-        }
-        for template_id in template_ids:
+    def execute(self, template, debug=False):
+        if debug:
+            print("--------------------------------------------------------------------------------------")
+            print(template["@id"])
+            print("--------------------------------------------------------------------------------------")
+
+        patched_template = template
+
+        retry = False
+        while True:
             if debug:
-                print("--------------------------------------------------------------------------------------")
-                print(template_id)
-                print("--------------------------------------------------------------------------------------")
-
-            patched_template = utils.get_template(template_id)
-
-            retry = False
-            while True:
-                if debug:
-                    if retry:
-                        print("RE-VALIDATING...", end="")
-                    else:
-                        print("VALIDATING... ", end="")
-                is_valid, report = utils.validate_template(patched_template)
-                if not is_valid:
-                    if debug:
-                        print("NOT OK")
-                    patched_template = self.apply_patch(patched_template, report, debug)
-                    if patched_template is None:
-                        patching_report["failed"].append(template_id)
-                        break
+                if retry:
+                    print("RE-VALIDATING...", end="")
                 else:
-                    if debug:
-                        print("OK")
-                    patching_report["success"].append(template_id)
-                    break
-                retry = True
-
-        return patching_report
+                    print("VALIDATING... ", end="")
+            is_valid, report = utils.validate_template(patched_template)
+            if not is_valid:
+                if debug:
+                    print("NOT OK")
+                patched_template = self.apply_patch(patched_template, report, debug)
+                if patched_template is None:
+                    return False
+            else:
+                if debug:
+                    print("OK")
+                return True
+            retry = True
 
     def apply_patch(self, template, report, debug=False):
         for message in report:
