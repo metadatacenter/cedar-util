@@ -12,7 +12,7 @@ class RemoveEnumFromTypePatch(object):
 
     def is_applied(self, error_description):
         pattern = re.compile(
-            "object instance has properties which are not allowed by the schema: \['enum'\] at (/.+)?/properties/@type$")
+            "object instance has properties which are not allowed by the schema: \['enum'\] at (/properties/[^/]+)*/properties/@type$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
