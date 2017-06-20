@@ -17,6 +17,7 @@ def main():
                         help="The type of CEDAR resource")
     parser.add_argument("--limit",
                         required=False,
+                        type=int,
                         help="The maximum number of resources to validate")
     parser.add_argument("apikey", metavar="apiKey",
                         help="The API key used to query the CEDAR resource server")
