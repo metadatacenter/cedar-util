@@ -36,8 +36,8 @@ def main():
     patch_engine = build_patch_engine()
 
     report = {
-        "success": [],
-        "failed": []
+        "resolved": [],
+        "unresolved": []
     }
     if type == 'template':
         patch_template(patch_engine, api_key, server_address, limit, report, debug)
@@ -76,9 +76,9 @@ def patch_template(patch_engine, api_key, server_address, limit, report, debug=F
         template = get_template(api_key, server_address, template_id)
         is_success = patch_engine.execute(template, debug=debug)
         if is_success:
-            report["success"].append(template_id)
+            report["resolved"].append(template_id)
         else:
-            report["failed"].append(template_id)
+            report["unresolved"].append(template_id)
 
         if not debug:
             print_progressbar(iteration=index, total_count=total_templates)
@@ -120,10 +120,13 @@ def get_server_address(server):
 
 
 def show(report):
-    failed_size = len(report["failed"])
+    resolved_size = len(report["resolved"])
+    unresolved_size = len(report["unresolved"])
+    total_size = resolved_size + unresolved_size
     message = "All templates were successfully patched."
-    if failed_size > 0:
-        message = "Unable to patch " + str(failed_size) + " template(s)."
+    if unresolved_size > 0:
+        message = "Unable to patch %d out of %d templates. (Success rate: %.0f%%)" % \
+                  (unresolved_size, total_size, resolved_size*100/total_size)
         message += "\n"
         message += "Details: " + to_json_string(dict(report))
     print("\n" + message)
