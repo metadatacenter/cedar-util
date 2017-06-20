@@ -3,7 +3,7 @@ import re
 from cedar.patch import utils
 
 
-class RemoveEnumFromATypePatch(object):
+class RemoveEnumFromTypePatch(object):
 
     def __init__(self):
         self.description = "Fixes the schema definition of the @type object for a static template field"
