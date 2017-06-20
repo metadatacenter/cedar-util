@@ -56,13 +56,16 @@ def build_patch_engine():
     patch_engine.add_patch(AddIdToPropertiesPatch())
     patch_engine.add_patch(AddOrderToUiPatch())
     patch_engine.add_patch(AddPropertyLabelsToUiPatch())
+    patch_engine.add_patch(AddValueConstraintsToPropertiesPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
+    patch_engine.add_patch(MoveContentToUiPatch())
     patch_engine.add_patch(RecreateRequiredArrayPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(RemoveEnumFromOneOfPatch())
     patch_engine.add_patch(RemoveEnumFromTypePatch())
     patch_engine.add_patch(RemoveIdFromPropertiesPatch())
     patch_engine.add_patch(RemoveValueFromPropertiesPatch())
+    patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
     return patch_engine
 
 
