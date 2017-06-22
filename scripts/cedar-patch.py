@@ -61,6 +61,7 @@ def build_patch_engine():
     patch_engine.add_patch(AddIdToPropertiesPatch())
     patch_engine.add_patch(AddOrderToUiPatch())
     patch_engine.add_patch(AddPropertyLabelsToUiPatch())
+    patch_engine.add_patch(AddRequiredToPropertiesPatch())
     patch_engine.add_patch(AddValueConstraintsToPropertiesPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
     patch_engine.add_patch(MoveContentToUiPatch())

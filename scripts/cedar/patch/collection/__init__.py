@@ -1,6 +1,7 @@
 from cedar.patch.collection.AddIdToPropertiesPatch import AddIdToPropertiesPatch
 from cedar.patch.collection.AddOrderToUiPatch import AddOrderToUiPatch
 from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsToUiPatch
+from cedar.patch.collection.AddRequiredToPropertiesPatch import AddRequiredToPropertiesPatch
 from cedar.patch.collection.AddValueConstraintsToPropertiesPatch import AddValueConstraintsToPropertiesPatch
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
@@ -17,6 +18,7 @@ __all__ = [
     "AddIdToPropertiesPatch",
     "AddOrderToUiPatch",
     "AddPropertyLabelsToUiPatch",
+    "AddRequiredToPropertiesPatch",
     "AddValueConstraintsToPropertiesPatch",
     "FillEmptyValuePatch",
     "MoveContentToUiPatch",
