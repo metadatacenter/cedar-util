@@ -1,9 +1,12 @@
 import argparse
 import json
 from urllib.parse import quote
-from cedar.utils import downloader, finder
+from cedar.utils import downloader, validator, finder
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
+
+
+api_key = None
 
 
 def main():
@@ -31,6 +34,8 @@ def main():
     type = args.type
     limit = args.limit
     debug = args.debug
+
+    global api_key
     api_key = args.apikey
 
     patch_engine = build_patch_engine()
@@ -74,7 +79,7 @@ def patch_template(patch_engine, api_key, server_address, limit, report, debug=F
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         template = get_template(api_key, server_address, template_id)
-        is_success = patch_engine.execute(template, debug=debug)
+        is_success = patch_engine.execute(template, template_validator, debug=debug)
         if is_success:
             report["resolved"].append(template_id)
         else:
@@ -82,6 +87,13 @@ def patch_template(patch_engine, api_key, server_address, limit, report, debug=F
 
         if not debug:
             print_progressbar(iteration=index, total_count=total_templates)
+
+
+def template_validator(template):
+    url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template" # XXX: Should use the production server
+    status_code, report = validator.validate_template(api_key, template, request_url=url)
+    is_valid = json.loads(report["validates"])
+    return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
 
 
 def print_progressbar(**kwargs):

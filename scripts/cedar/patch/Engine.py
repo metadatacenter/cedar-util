@@ -1,6 +1,3 @@
-from cedar.patch import utils
-
-
 class Engine(object):
 
     def __init__(self):
@@ -9,7 +6,7 @@ class Engine(object):
     def add_patch(self, patch):
         self.patches.append(patch)
 
-    def execute(self, template, debug=False):
+    def execute(self, template, validator, debug=False):
         if debug:
             print("--------------------------------------------------------------------------------------")
             print(template["@id"])
@@ -24,7 +21,7 @@ class Engine(object):
                     print("RE-VALIDATING...", end="")
                 else:
                     print("VALIDATING... ", end="")
-            is_valid, report = utils.validate_template(patched_template)
+            is_valid, report = validator(patched_template)
             if not is_valid:
                 if debug:
                     print("NOT OK")

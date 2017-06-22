@@ -1,15 +1,6 @@
 import json
 import re
 from urllib.parse import quote
-from cedar.utils import downloader, validator, finder
-
-
-def validate_template(template):
-    api_key = "apiKey 8b9e3e4d8f0aa726e27aa314174b6d5491bbdf77f2bca6e796d6f0ef8ec6dee4"
-    url = "https://resource.metadatacenter.net/command/validate?resource_type=template"
-    status_code, message = validator.validate_template(api_key, template, request_url=url)
-    is_valid = json.loads(message["validates"])
-    return is_valid, [ error["message"] + " at " + error["location"] for error in message["errors"] if not is_valid ]
 
 
 def escape(s):
