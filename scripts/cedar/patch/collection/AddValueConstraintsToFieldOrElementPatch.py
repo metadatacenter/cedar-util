@@ -3,10 +3,10 @@ import re
 from cedar.patch import utils
 
 
-class AddValueConstraintsToPropertiesPatch(object):
+class AddValueConstraintsToFieldOrElementPatch(object):
 
     def __init__(self):
-        self.description = "Adds the missing _valueConstraints in the user's property object"
+        self.description = "Adds the missing _valueConstraints in a template element or field"
         self.since = "1.1.0"
         self.path = None
 

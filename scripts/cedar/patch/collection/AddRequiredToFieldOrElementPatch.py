@@ -4,7 +4,7 @@ import dpath
 from cedar.patch import utils
 
 
-class AddRequiredToPropertiesPatch(object):
+class AddRequiredToFieldOrElementPatch(object):
 
     def __init__(self):
         self.description = "Add the missing required field in a template element or field"

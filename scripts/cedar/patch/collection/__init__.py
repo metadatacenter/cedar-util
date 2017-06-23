@@ -2,8 +2,8 @@ from cedar.patch.collection.AddIdToPropertiesPatch import AddIdToPropertiesPatch
 from cedar.patch.collection.AddOrderToUiPatch import AddOrderToUiPatch
 from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsToUiPatch
 from cedar.patch.collection.AddProvenanceToFieldOrElementPatch import AddProvenanceToFieldOrElementPatch
-from cedar.patch.collection.AddRequiredToPropertiesPatch import AddRequiredToPropertiesPatch
-from cedar.patch.collection.AddValueConstraintsToPropertiesPatch import AddValueConstraintsToPropertiesPatch
+from cedar.patch.collection.AddRequiredToFieldOrElementPatch import AddRequiredToFieldOrElementPatch
+from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddValueConstraintsToFieldOrElementPatch
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoSchemaMatchPatch import NoSchemaMatchPatch
@@ -21,8 +21,8 @@ __all__ = [
     "AddOrderToUiPatch",
     "AddPropertyLabelsToUiPatch",
     "AddProvenanceToFieldOrElementPatch",
-    "AddRequiredToPropertiesPatch",
-    "AddValueConstraintsToPropertiesPatch",
+    "AddRequiredToFieldOrElementPatch",
+    "AddValueConstraintsToFieldOrElementPatch",
     "FillEmptyValuePatch",
     "MoveContentToUiPatch",
     "NoSchemaMatchPatch",
