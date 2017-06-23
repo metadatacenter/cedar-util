@@ -13,7 +13,7 @@ class RemovePageFromInnerUiPatch(object):
     def is_applied(self, error_description):
         pattern = re.compile("object instance has properties which are not allowed by the schema: \['pages'\] at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/_ui$")
         if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description) + "/page"
+            self.path = utils.get_error_location(error_description) + "/pages"
             return True
         else:
             return False
