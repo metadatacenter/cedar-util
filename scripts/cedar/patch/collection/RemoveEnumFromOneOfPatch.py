@@ -7,7 +7,8 @@ class RemoveEnumFromOneOfPatch(object):
 
     def __init__(self):
         self.description = "Fixes the schema definition of the @type object for the non-static template field"
-        self.since = "1.1.0"
+        self.from_version = None
+        self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):

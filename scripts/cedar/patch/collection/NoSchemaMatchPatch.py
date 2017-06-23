@@ -8,7 +8,8 @@ class NoSchemaMatchPatch(object):
 
     def __init__(self):
         self.description = "Fill the empty title or description that triggers the schema match error"
-        self.since = "1.1.0"
+        self.from_version = None
+        self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):

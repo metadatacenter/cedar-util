@@ -6,7 +6,8 @@ class RecreateAtContextPatch(object):
 
     def __init__(self):
         self.description = "Fixes the incomplete namespaces in the @context object"
-        self.since = "1.1.0"
+        self.from_version = None
+        self.to_version = "1.1.0"
         self.patbh = None
 
     def is_applied(self, error_description):

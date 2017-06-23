@@ -7,7 +7,8 @@ class FillEmptyValuePatch(object):
 
     def __init__(self):
         self.description = "Fills empty fields with a default 'blank' string value"
-        self.since = "1.1.0"
+        self.from_version = None
+        self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):

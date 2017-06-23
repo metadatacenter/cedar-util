@@ -7,7 +7,8 @@ class RemoveIdFromPropertiesPatch(object):
 
     def __init__(self):
         self.description = "Removes the @id property from a non-constrained field"
-        self.since = "1.1.0"
+        self.from_version = None
+        self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):
