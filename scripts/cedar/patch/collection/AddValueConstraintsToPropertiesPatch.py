@@ -11,7 +11,7 @@ class AddValueConstraintsToPropertiesPatch(object):
         self.path = None
 
     def is_applied(self, error_description):
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'_valueConstraints'(,'.+')*\]\) at (/properties/[^/]+)*/properties/[^/]+(/items)?$")
+        pattern = re.compile("object has missing required properties \(\[('.+',)*'_valueConstraints'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
