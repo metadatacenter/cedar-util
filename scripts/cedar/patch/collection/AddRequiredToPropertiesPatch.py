@@ -31,15 +31,15 @@ class AddRequiredToPropertiesPatch(object):
         if path is not None:
             self.path = path
 
-        user_property = self.get_all_properties(doc)
-
         patches = []
-        patch = {
-            "op": "add",
-            "value": user_property,
-            "path": self.path
-        }
-        patches.append(patch)
+        if not self.is_static_type(doc):
+            user_property = self.get_all_properties(doc)
+            patch = {
+                "op": "add",
+                "value": user_property,
+                "path": self.path
+            }
+            patches.append(patch)
 
         return patches
 
@@ -53,5 +53,8 @@ class AddRequiredToPropertiesPatch(object):
             "pav:createdBy",
             "pav:lastUpdatedOn",
             "oslc:modifiedBy"]
-
         return [prop for prop in properties if prop not in system_properties]
+
+    def is_static_type(self, doc):
+        type_value = dpath.util.get(doc, self.path + "/@type")
+        return "StaticTemplateField" in type_value
