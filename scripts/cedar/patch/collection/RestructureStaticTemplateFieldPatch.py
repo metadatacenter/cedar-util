@@ -1,5 +1,6 @@
 import jsonpatch
 import re
+import dpath
 from cedar.patch import utils
 
 
@@ -31,15 +32,21 @@ class RestructureStaticTemplateFieldPatch(object):
             self.path = path
 
         patches = []
+        if self.has_content(doc):
+            patch = {
+                "op": "move",
+                "from": self.path + "/properties/_content",
+                "path": self.path + "/_ui/_content"
+            }
+            patches.append(patch)
         patch = {
             "op": "remove",
-            "path": self.path + "/required",
+            "path": self.path + "/properties",
         }
         patches.append(patch)
         patch = {
-            "op": "replace",
-            "path": self.path + "/properties",
-            "value": {}
+            "op": "remove",
+            "path": self.path + "/required",
         }
         patches.append(patch)
         return patches
@@ -47,4 +54,9 @@ class RestructureStaticTemplateFieldPatch(object):
     def get_user_property_path(self, error_description):
         original_path = utils.get_error_location(error_description)
         user_property_path = original_path[:original_path.rfind('/@type')]
-        return  user_property_path
+        return user_property_path
+
+    def has_content(self, doc):
+        properties_path = self.path + "/properties"
+        properties = dpath.util.get(doc, properties_path)
+        return "_content" in properties
