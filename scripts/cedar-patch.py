@@ -65,6 +65,7 @@ def build_patch_engine():
     patch_engine.add_patch(AddValueConstraintsToPropertiesPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
     patch_engine.add_patch(MoveContentToUiPatch())
+    patch_engine.add_patch(NoSchemaMatchPatch())
     patch_engine.add_patch(RecreateRequiredArrayPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(RemoveEnumFromOneOfPatch())
