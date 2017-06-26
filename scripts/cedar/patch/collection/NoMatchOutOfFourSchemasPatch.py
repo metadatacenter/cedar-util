@@ -4,16 +4,17 @@ import dpath
 from cedar.patch import utils
 
 
-class NoSchemaMatchPatch(object):
+class NoMatchOutOfFourSchemasPatch(object):
 
     def __init__(self):
-        self.description = "Fill the empty title or description that triggers the schema match error"
+        self.description = "Fix the potential errors that trigger schema match error between 4 options:" \
+                           "template field, template element, static field, or an array of fields or elements"
         self.from_version = None
         self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):
-        pattern = re.compile("instance failed to match exactly one schema \(matched \d out of 4\) at ((/properties/[^/]+/items)?(/properties/[^/]+)?)*/properties/[^/]+$")
+        pattern = re.compile("instance failed to match exactly one schema \(matched 0 out of 4\) at ((/properties/[^/]+/items)?(/properties/[^/]+)?)*/properties/[^/]+$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
