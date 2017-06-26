@@ -6,13 +6,14 @@ from cedar.patch import utils
 class RemoveIdFromPropertiesPatch(object):
 
     def __init__(self):
-        self.description = "Removes the @id property from a non-constrained field"
+        self.description = "Remove the invalid @id property"
         self.from_version = None
         self.to_version = "1.1.0"
         self.path = None
 
     def is_applied(self, error_description):
-        pattern = re.compile("object has invalid properties \(\['@id'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
+        pattern = re.compile("object has invalid properties \(\['@id'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$|" +
+                             "object instance has properties which are not allowed by the schema: \['@id'\] at /properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description) + "/@id"
             return True
