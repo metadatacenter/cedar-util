@@ -34,9 +34,33 @@ class NoSchemaMatchPatch(object):
 
         patches = []
 
-        resource_object =  dpath.util.get(doc, self.path)
+        user_property_object = self.get_user_property_object(doc)
 
-        title = resource_object.get("title") or ""
+        patch = {
+            "op": "replace",
+            "value": {
+                "xsd": "http://www.w3.org/2001/XMLSchema#",
+                "pav": "http://purl.org/pav/",
+                "oslc": "http://open-services.net/ns/core#",
+                "schema": "http://schema.org/",
+                "pav:createdOn": {
+                    "@type": "xsd:dateTime"
+                },
+                "pav:createdBy": {
+                    "@type": "@id"
+                },
+                "pav:lastUpdatedOn": {
+                    "@type": "xsd:dateTime"
+                },
+                "oslc:modifiedBy": {
+                    "@type": "@id"
+                }
+            },
+            "path": self.path + "/@context"
+        }
+        patches.append(patch)
+
+        title = user_property_object.get("title") or ""
         if not title:  # if title is empty
             patch = {
                 "op": "add",
@@ -45,7 +69,7 @@ class NoSchemaMatchPatch(object):
             }
             patches.append(patch)
 
-        description = resource_object.get("description") or ""
+        description = user_property_object.get("description") or ""
         if not description:
             patch = {
                 "op": "add",
@@ -54,7 +78,7 @@ class NoSchemaMatchPatch(object):
             }
             patches.append(patch)
 
-        created_on = resource_object.get("pav:createdOn") or ""
+        created_on = user_property_object.get("pav:createdOn") or ""
         if not created_on:
             patch = {
                 "op": "add",
@@ -63,7 +87,7 @@ class NoSchemaMatchPatch(object):
             }
             patches.append(patch)
 
-        created_by = resource_object.get("pav:createdBy") or ""
+        created_by = user_property_object.get("pav:createdBy") or ""
         if not created_by:
             patch = {
                 "op": "add",
@@ -72,7 +96,7 @@ class NoSchemaMatchPatch(object):
             }
             patches.append(patch)
 
-        last_updated_on = resource_object.get("pav:lastUpdatedOn") or ""
+        last_updated_on = user_property_object.get("pav:lastUpdatedOn") or ""
         if not last_updated_on:
             patch = {
                 "op": "add",
@@ -81,7 +105,7 @@ class NoSchemaMatchPatch(object):
             }
             patches.append(patch)
 
-        modified_by = resource_object.get("oslc:modifiedBy") or ""
+        modified_by = user_property_object.get("oslc:modifiedBy") or ""
         if not modified_by:
             patch = {
                 "op": "add",
@@ -91,3 +115,11 @@ class NoSchemaMatchPatch(object):
             patches.append(patch)
 
         return patches
+
+    def get_user_property_object(self, doc):
+        user_property_object = dpath.util.get(doc, self.path)
+        items_object = user_property_object.get("items")
+        if items_object:
+            self.path = self.path + "/items"
+            user_property_object = items_object
+        return user_property_object
