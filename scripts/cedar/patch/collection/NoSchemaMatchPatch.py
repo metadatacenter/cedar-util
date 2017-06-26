@@ -13,7 +13,7 @@ class NoSchemaMatchPatch(object):
         self.path = None
 
     def is_applied(self, error_description):
-        pattern = re.compile("instance failed to match exactly one schema \(matched \d out of 4\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
+        pattern = re.compile("instance failed to match exactly one schema \(matched \d out of 4\) at ((/properties/[^/]+/items)?(/properties/[^/]+)?)*/properties/[^/]+$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
