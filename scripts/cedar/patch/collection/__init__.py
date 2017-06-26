@@ -7,6 +7,7 @@ from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddV
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoMatchOutOfFourSchemasPatch import NoMatchOutOfFourSchemasPatch
+from cedar.patch.collection.NoMatchOutOfTwoSchemasPatch import NoMatchOutOfTwoSchemasPatch
 from cedar.patch.collection.RecreateRequiredArrayPatch import RecreateRequiredArrayPatch
 from cedar.patch.collection.RemoveArrayDuplicatesPatch import RemoveArrayDuplicatesPatch
 from cedar.patch.collection.RemoveEnumFromOneOfPatch import RemoveEnumFromOneOfPatch
@@ -26,6 +27,7 @@ __all__ = [
     "FillEmptyValuePatch",
     "MoveContentToUiPatch",
     "NoMatchOutOfFourSchemasPatch",
+    "NoMatchOutOfTwoSchemasPatch",
     "RecreateRequiredArrayPatch",
     "RemoveArrayDuplicatesPatch",
     "RemoveEnumFromOneOfPatch",
