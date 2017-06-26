@@ -13,7 +13,7 @@ class RemoveIdFromPropertiesPatch(object):
 
     def is_applied(self, error_description):
         pattern = re.compile("object has invalid properties \(\['@id'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$|" +
-                             "object instance has properties which are not allowed by the schema: \['@id'\] at /properties$")
+                             "object instance has properties which are not allowed by the schema: \['@id'\] at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description) + "/@id"
             return True
