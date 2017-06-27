@@ -31,3 +31,11 @@ def get_error_location(text):
     except AttributeError:
         found = ''
     return found
+
+
+def check_argument_not_none(argument, user_message=None):
+    if argument is None:
+        message = "Missing input argument"
+        if user_message is not None:
+            message = user_message
+        raise Exception(message)

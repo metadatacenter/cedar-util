@@ -11,7 +11,7 @@ class RemoveEnumFromOneOfPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile(
             "array is too long: must have at most 2 elements but instance has 3 elements at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties/@type/oneOf$")
         if pattern.match(error_description):

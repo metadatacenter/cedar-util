@@ -12,7 +12,7 @@ class AddProvenanceToFieldOrElementPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile("object has missing required properties \(\[('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')" +
                              "[,('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')]*\]\) " +
                              "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")

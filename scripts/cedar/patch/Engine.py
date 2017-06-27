@@ -40,7 +40,7 @@ class Engine(object):
             if debug:
                 print("* Fixing " + message, end="")
             for patch in self.patches:
-                if patch.is_applied(message) and message not in handled_errors:
+                if patch.is_applied(message, template) and message not in handled_errors:
                     if debug:
                         print("... Patch applied!")
                     handled_errors.append(message)

@@ -10,7 +10,7 @@ class RecreateRequiredArrayPatch(object):
         self.to_version = "1.1.0"
         self.path = "/required"
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile(
             "array is too short: must have at least 9 elements but instance has \d elements at /required$|" +
             "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at /required/\d+$")

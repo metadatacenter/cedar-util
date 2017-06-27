@@ -11,7 +11,7 @@ class AddIdToPropertiesPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile("object has missing required properties \(\[('.+',)*'@id'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)

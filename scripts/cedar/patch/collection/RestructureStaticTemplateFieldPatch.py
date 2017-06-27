@@ -2,6 +2,7 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
+from cedar.patch.collection import utils as cedar_helper
 
 
 class RestructureStaticTemplateFieldPatch(object):
@@ -12,13 +13,17 @@ class RestructureStaticTemplateFieldPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
+        utils.check_argument_not_none(template, "The method required a template object")
+
+        is_applied = False
         pattern = re.compile("instance value \('https://schema.metadatacenter.org/core/StaticTemplateField'\) not found in enum \(possible values: \['https://schema.metadatacenter.org/core/TemplateElement'\]\) at (/properties/[^/]+)*/properties/[^/]+/@type$")
         if pattern.match(error_description):
             self.path = self.get_user_property_path(error_description)
-            return True
-        else:
-            return False
+            resource_obj = self.get_resource_object(template, self.path)
+            if cedar_helper.is_static_template_field(resource_obj):
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
@@ -61,3 +66,11 @@ class RestructureStaticTemplateFieldPatch(object):
         properties_path = self.path + "/properties"
         properties = dpath.util.get(doc, properties_path)
         return "_content" in properties
+
+    @staticmethod
+    def get_resource_object(template, path):
+        resource_object = template
+        parent_path = path[:path.rfind('/')]
+        if parent_path:
+            resource_object = dpath.util.get(template, parent_path)
+        return resource_object

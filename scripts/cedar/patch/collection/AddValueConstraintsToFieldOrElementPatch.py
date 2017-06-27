@@ -1,6 +1,8 @@
 import jsonpatch
 import re
+import dpath
 from cedar.patch import utils
+from cedar.patch.collection import utils as cedar_helper
 
 
 class AddValueConstraintsToFieldOrElementPatch(object):
@@ -11,13 +13,17 @@ class AddValueConstraintsToFieldOrElementPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
+        utils.check_argument_not_none(template, "The method required a template object")
+
+        is_applied = False
         pattern = re.compile("object has missing required properties \(\[('.+',)*'_valueConstraints'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+            resource_obj = self.get_resource_object(template, self.path)
+            if cedar_helper.is_template_field(resource_obj):
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
@@ -42,3 +48,7 @@ class AddValueConstraintsToFieldOrElementPatch(object):
         patches.append(patch)
 
         return patches
+
+    @staticmethod
+    def get_resource_object(template, path):
+        return dpath.util.get(template, path)

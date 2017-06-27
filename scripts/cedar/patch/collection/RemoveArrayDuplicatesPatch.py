@@ -13,7 +13,7 @@ class RemoveArrayDuplicatesPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile("array must not contain duplicate elements at /.+$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)

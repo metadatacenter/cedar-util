@@ -10,7 +10,7 @@ class RecreateAtContextPatch(object):
         self.to_version = "1.1.0"
         self.patbh = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         return True
 
     def apply(self, doc, path=None):

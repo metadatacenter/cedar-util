@@ -11,7 +11,7 @@ class RemoveValueFromPropertiesPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile("object has invalid properties \(\['@value'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$|" +
                              "object instance has properties which are not allowed by the schema: \['@value'\] at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
         if pattern.match(error_description):

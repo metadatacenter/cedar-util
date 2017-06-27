@@ -13,7 +13,7 @@ class NoMatchOutOfTwoSchemasPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
+    def is_applied(self, error_description, template=None):
         pattern = re.compile("instance failed to match exactly one schema \(matched 0 out of 2\) at ((/properties/[^/]+/items)?(/properties/[^/]+)?)*/properties/[^/]+/items$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)

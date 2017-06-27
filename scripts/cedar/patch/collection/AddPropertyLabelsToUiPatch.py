@@ -2,6 +2,7 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
+from cedar.patch.collection import utils as cedar_helper
 
 
 class AddPropertyLabelsToUiPatch(object):
@@ -12,14 +13,17 @@ class AddPropertyLabelsToUiPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description):
-        pattern = re.compile(
-            "object has missing required properties \(\[('.+',)*'propertyLabels'(,'.+')*\]\) at (/.+)?/_ui$")
+    def is_applied(self, error_description, template=None):
+        utils.check_argument_not_none(template, "The method required a template object")
+
+        is_applied = False
+        pattern = re.compile("object has missing required properties \(\[('.+',)*'propertyLabels'(,'.+')*\]\) at (/.+)?/_ui$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+            resource_obj = self.get_resource_object(template, self.path)
+            if cedar_helper.is_template(resource_obj) or cedar_helper.is_template_element(resource_obj):
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
@@ -68,6 +72,15 @@ class AddPropertyLabelsToUiPatch(object):
             "oslc:modifiedBy"]
         return [prop for prop in properties if prop not in system_properties]
 
-    def to_title_case(self, text):
+    @staticmethod
+    def to_title_case(text):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1 \2', text)
         return re.sub('([a-z0-9])([A-Z])', r'\1 \2', s1).title()
+
+    @staticmethod
+    def get_resource_object(template, path):
+        resource_object = template
+        parent_path = path[:path.rfind('/')]
+        if parent_path:
+            resource_object = dpath.util.get(template, parent_path)
+        return resource_object
