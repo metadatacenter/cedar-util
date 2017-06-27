@@ -59,7 +59,8 @@ def main():
 def build_patch_engine():
     patch_engine = Engine()
     patch_engine.add_patch(FillEmptyValuePatch())
-    patch_engine.add_patch(NoSchemaMatchPatch())
+    patch_engine.add_patch(NoMatchOutOfFourSchemasPatch())
+    patch_engine.add_patch(NoMatchOutOfTwoSchemasPatch())
     patch_engine.add_patch(MoveContentToUiPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(AddIdToPropertiesPatch())
