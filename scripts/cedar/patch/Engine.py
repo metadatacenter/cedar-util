@@ -13,6 +13,7 @@ class Engine(object):
             print("--------------------------------------------------------------------------------------")
 
         patched_template = template
+        handled_errors = []
 
         retry = False
         while True:
@@ -25,7 +26,7 @@ class Engine(object):
             if not is_valid:
                 if debug:
                     print("NOT OK")
-                patched_template = self.apply_patch(patched_template, report, debug)
+                patched_template = self.apply_patch(patched_template, report, handled_errors, debug)
                 if patched_template is None:
                     return False
             else:
@@ -34,14 +35,15 @@ class Engine(object):
                 return True
             retry = True
 
-    def apply_patch(self, template, report, debug=False):
+    def apply_patch(self, template, report, handled_errors, debug=False):
         for message in report:
             if debug:
                 print("* Fixing " + message, end="")
             for patch in self.patches:
-                if patch.is_applied(message):
+                if patch.is_applied(message) and message not in handled_errors:
                     if debug:
-                        print("... Success!")
+                        print("... Patch applied!")
+                    handled_errors.append(message)
                     patched_template = patch.apply(template)
                     return patched_template
             if debug:
