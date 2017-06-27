@@ -82,15 +82,14 @@ def patch_template(patch_engine, api_key, server_address, limit, report, debug=F
     template_ids = get_template_ids(api_key, server_address, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
+        if not debug:
+            print_progressbar(template_id, iteration=index, total_count=total_templates)
         template = get_template(api_key, server_address, template_id)
         is_success = patch_engine.execute(template, template_validator, debug=debug)
         if is_success:
             report["resolved"].append(template_id)
         else:
             report["unresolved"].append(template_id)
-
-        if not debug:
-            print_progressbar(iteration=index, total_count=total_templates)
 
 
 def template_validator(template):
@@ -100,14 +99,15 @@ def template_validator(template):
     return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
 
 
-def print_progressbar(**kwargs):
+def print_progressbar(template_id, **kwargs):
+    template_hash = template_id[template_id.rfind('/')+1:]
     if 'iteration' in kwargs and 'total_count' in kwargs:
         iteration = kwargs["iteration"]
         total_count = kwargs["total_count"]
         percent = 100 * (iteration / total_count)
         filled_length = int(percent)
         bar = "#" * filled_length + '-' * (100 - filled_length)
-        print("\rPatching (%d/%d): |%s| %d%% Complete" % (iteration, total_count, bar, percent), end='\r')
+        print("\rPatching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
 
 
 def get_template_ids(api_key, server_address, limit):
