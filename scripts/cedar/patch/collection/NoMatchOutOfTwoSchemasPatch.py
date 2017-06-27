@@ -114,9 +114,9 @@ class NoMatchOutOfTwoSchemasPatch(object):
             }
             patches.append(patch)
 
-        type = user_property_object.get("@type")
-        if type:
-            if type == "https://schema.metadatacenter.org/core/TemplateField":
+        resource_type = user_property_object.get("@type")
+        if resource_type:
+            if resource_type == "https://schema.metadatacenter.org/core/TemplateField":
                 ui_object = user_property_object.get("_ui")
                 ui_title = ui_object.get("title") or ""
                 if not ui_title:
@@ -142,7 +142,7 @@ class NoMatchOutOfTwoSchemasPatch(object):
                         "path": self.path + "/_ui/inputType"
                     }
                     patches.append(patch)
-            elif type == "https://schema.metadatacenter.org/core/TemplateElement":
+            elif resource_type == "https://schema.metadatacenter.org/core/TemplateElement":
                 ui_object = user_property_object.get("_ui")
                 ui_title = ui_object.get("title") or ""
                 if not ui_title:
