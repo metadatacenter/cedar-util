@@ -18,7 +18,7 @@ def all_templates(api_key, request_url=None, max_count=None, limit_per_page=500)
     offset = 0
     template_list = []
     for page in range(1, total_page):
-        template_details = get_details(api_key, request_url, offset, limit_per_page)
+        template_details = get_details(api_key, request_url, offset, total_count)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
     return template_list
@@ -37,7 +37,7 @@ def all_elements(api_key, request_url=None, max_count=None, limit_per_page=500):
     offset = 0
     template_list = []
     for page in range(1, total_page):
-        template_details = get_details(api_key, request_url, offset, limit_per_page)
+        template_details = get_details(api_key, request_url, offset, total_count)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
     return template_list
@@ -56,7 +56,7 @@ def all_instances(api_key, request_url=None, max_count=None, limit_per_page=500)
     offset = 0
     template_list = []
     for page in range(1, total_page):
-        template_details = get_details(api_key, request_url, offset, limit_per_page)
+        template_details = get_details(api_key, request_url, offset, total_count)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
     return template_list

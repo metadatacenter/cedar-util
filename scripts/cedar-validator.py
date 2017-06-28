@@ -1,7 +1,7 @@
 import argparse
 import json
 from urllib.parse import quote
-from cedar.utils import downloader, validator, enumerator
+from cedar.utils import downloader, validator, finder
 from collections import defaultdict
 
 
@@ -17,6 +17,7 @@ def main():
                         help="The type of CEDAR resource")
     parser.add_argument("--limit",
                         required=False,
+                        type=int,
                         help="The maximum number of resources to validate")
     parser.add_argument("apikey", metavar="apiKey",
                         help="The API key used to query the CEDAR resource server")
@@ -72,17 +73,17 @@ def validate_instance(api_key, server_address, limit, report):
 
 def get_element_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=element"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_template_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=template"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_instance_ids(api_key, server_address, limit):
     request_url = server_address + "/search?q=*&resource_types=instance"
-    return enumerator.all_templates(api_key, request_url, max_count=limit)
+    return finder.all_templates(api_key, request_url, max_count=limit)
 
 
 def get_template(api_key, server_address, template_id):
@@ -136,10 +137,9 @@ def consume(report, resource_id, status_code, server_message, **kwargs):
     else:
         is_valid = server_message["validates"]
         if is_valid == 'false':
-            error_messages = [error_details['message'] + " at " + error_details['location']
-                              for error_details in server_message["errors"]]
-            error_message = ', '.join(error_messages) # flatten list
-            report[error_message].append(resource_id)
+            for error_details in server_message["errors"]:
+                error_message = error_details['message'] + " at " + error_details['location']
+                report[error_message].append(resource_id)
     print_progressbar(**kwargs)
 
 

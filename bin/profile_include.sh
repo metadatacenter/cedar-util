@@ -12,7 +12,6 @@ export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 export CEDAR_UTIL_BIN=$CEDAR_HOME/cedar-util/bin
 
 #CEDAR location aliases
-alias gocedar='cd $CEDAR_HOME'
 alias goparent='cd $CEDAR_HOME/cedar-parent'
 alias goproject='cd $CEDAR_HOME/cedar-project'
 
@@ -22,7 +21,6 @@ alias godocs='cd $CEDAR_HOME/cedar-docs'
 alias goservercore='cd $CEDAR_HOME/cedar-server-core-library'
 alias gomodel='cd $CEDAR_HOME/cedar-model-validation-library'
 
-alias goprojectconfig='cd $CEDAR_HOME/cedar-project-config'
 alias goadmintool='cd $CEDAR_HOME/cedar-admin-tool'
 
 alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
@@ -47,7 +45,6 @@ alias gokk='cd $KEYCLOAK_HOME/bin'
 alias cedargstatus='$CEDAR_HOME/cedar-util/bin/gitstatus.sh'
 alias cedargbranches='$CEDAR_HOME/cedar-util/bin/gitbranches.sh'
 alias cedargpull='$CEDAR_HOME/cedar-util/bin/gitpull.sh'
-alias cedarss='$CEDAR_HOME/cedar-util/bin/cedarstatus.sh'
 alias cedarenv='set | grep -a CEDAR_'
 alias cedarat='$CEDAR_HOME/cedar-admin-tool/dist/cedar-admin-tool.sh'
 alias cedargcheckout='$CEDAR_HOME/cedar-util/bin/git-checkout-branch.sh'
