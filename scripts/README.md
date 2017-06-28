@@ -16,7 +16,7 @@ cedar
     +--- validator.py       : Validate a template/element/instance
 ```
 
-Example usage:
+**Example usage**:
 ```
 from cedar.utils import downloader
 from cedar.patch.collection import *
@@ -45,12 +45,11 @@ optional arguments:
 
 ```
 
-Example usage:
+**Example usage**:
 
 Validate all the templates in the staging server
 ```buildoutcfg
 $ python cedar-validator.py --server staging --type template "<CEDAR-API-KEY>"
-
 ```
 
 ### model-updater
@@ -74,11 +73,17 @@ optional arguments:
   --debug               Enter debug mode
 ```
 
-Example usage:
+**Example usage**:
 
 Patch all the templates in the production server
 ```buildoutcfg
 $ python cedar-patch.py --server production --type template "<CEDAR-API-KEY>"
 ```
+
+Patch the first 100 templates in the staging server
+```buildoutcfg
+$ python cedar-patch.py --server staging --type template "<CEDAR-API-KEY>" --limit 100
+```
+
 Note that the script will not make any data change to the server but it will run the updating workflow to apply the
 corresponding patches based on the error report returned by the model-validator
