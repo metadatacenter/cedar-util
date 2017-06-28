@@ -102,14 +102,30 @@ def patch_template(patch_engine, limit, report, debug=False):
 
 
 def template_validator(template):
-    url = server_address + "/command/validate?resource_type=template"
-    api_key = cedar_api_key
-    if staging_api_key is not None:
-        url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
-        api_key = staging_api_key
-    status_code, report = validator.validate_template(api_key, template, request_url=url)
+    status_code, report = run_validator(template)
     is_valid = json.loads(report["validates"])
     return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
+
+
+def run_validator(template):
+    return validator.validate_template(
+        get_api_key(),
+        template,
+        request_url=get_validator_endpoint())
+
+
+def get_validator_endpoint():
+    url = server_address + "/command/validate?resource_type=template"
+    if staging_api_key is not None:
+        url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
+    return url
+
+
+def get_api_key():
+    api_key = cedar_api_key
+    if staging_api_key is not None:
+        api_key = staging_api_key
+    return api_key
 
 
 def print_progressbar(template_id, **kwargs):
