@@ -7,7 +7,7 @@ from cedar.patch.Engine import Engine
 
 
 server_address = None
-api_key = None
+cedar_api_key = None
 staging_api_key = None
 
 
@@ -40,9 +40,9 @@ def main():
     limit = args.limit
     debug = args.debug
 
-    global server_address, api_key, staging_api_key
+    global server_address, cedar_api_key, staging_api_key
     server_address = get_server_address(args.server)
-    api_key = args.apikey
+    cedar_api_key = args.apikey
     staging_api_key = args.use_staging_validator
 
     patch_engine = build_patch_engine()
@@ -88,12 +88,12 @@ def build_patch_engine():
 
 
 def patch_template(patch_engine, limit, report, debug=False):
-    template_ids = get_template_ids(api_key, server_address, limit)
+    template_ids = get_template_ids(cedar_api_key, server_address, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, iteration=index, total_count=total_templates)
-        template = get_template(api_key, server_address, template_id)
+        template = get_template(cedar_api_key, server_address, template_id)
         is_success = patch_engine.execute(template, template_validator, debug=debug)
         if is_success:
             report["resolved"].append(template_id)
@@ -103,11 +103,11 @@ def patch_template(patch_engine, limit, report, debug=False):
 
 def template_validator(template):
     url = server_address + "/command/validate?resource_type=template"
-    cedar_api_key = api_key
+    api_key = cedar_api_key
     if staging_api_key is not None:
         url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
-        cedar_api_key = staging_api_key
-    status_code, report = validator.validate_template(cedar_api_key, template, request_url=url)
+        api_key = staging_api_key
+    status_code, report = validator.validate_template(api_key, template, request_url=url)
     is_valid = json.loads(report["validates"])
     return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
 
