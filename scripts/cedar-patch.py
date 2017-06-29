@@ -6,7 +6,9 @@ from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
 
-api_key = None
+server_address = None
+cedar_api_key = None
+staging_api_key = None
 
 
 def main():
@@ -23,20 +25,25 @@ def main():
                         required=False,
                         type=int,
                         help="The maximum number of resources to validate")
+    parser.add_argument("--use-staging-validator",
+                        required=False,
+                        metavar="CEDAR-STAGING-API-KEY",
+                        help="Use the validator from the staging server (nightly-build)")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
                         help="Enter debug mode")
-    parser.add_argument("apikey", metavar="apiKey",
+    parser.add_argument("apikey", metavar="CEDAR-API-KEY",
                         help="The API key used to query the CEDAR resource server")
     args = parser.parse_args()
-    server_address = get_server_address(args.server)
     type = args.type
     limit = args.limit
     debug = args.debug
 
-    global api_key
-    api_key = args.apikey
+    global server_address, cedar_api_key, staging_api_key
+    server_address = get_server_address(args.server)
+    cedar_api_key = args.apikey
+    staging_api_key = args.use_staging_validator
 
     patch_engine = build_patch_engine()
 
@@ -45,7 +52,7 @@ def main():
         "unresolved": []
     }
     if type == 'template':
-        patch_template(patch_engine, api_key, server_address, limit, report, debug)
+        patch_template(patch_engine, limit, report, debug)
     elif type == 'element':
         pass
     elif type == 'field':
@@ -59,6 +66,7 @@ def main():
 def build_patch_engine():
     patch_engine = Engine()
     patch_engine.add_patch(FillEmptyValuePatch())
+    patch_engine.add_patch(AddSchemaVersionPatch())
     patch_engine.add_patch(NoMatchOutOfFourSchemasPatch())
     patch_engine.add_patch(NoMatchOutOfTwoSchemasPatch())
     patch_engine.add_patch(MoveContentToUiPatch())
@@ -79,13 +87,13 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, api_key, server_address, limit, report, debug=False):
-    template_ids = get_template_ids(api_key, server_address, limit)
+def patch_template(patch_engine, limit, report, debug=False):
+    template_ids = get_template_ids(cedar_api_key, server_address, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, iteration=index, total_count=total_templates)
-        template = get_template(api_key, server_address, template_id)
+        template = get_template(cedar_api_key, server_address, template_id)
         is_success = patch_engine.execute(template, template_validator, debug=debug)
         if is_success:
             report["resolved"].append(template_id)
@@ -94,10 +102,30 @@ def patch_template(patch_engine, api_key, server_address, limit, report, debug=F
 
 
 def template_validator(template):
-    url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template" # XXX: Should use the production server
-    status_code, report = validator.validate_template(api_key, template, request_url=url)
+    status_code, report = run_validator(template)
     is_valid = json.loads(report["validates"])
     return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
+
+
+def run_validator(template):
+    return validator.validate_template(
+        get_api_key(),
+        template,
+        request_url=get_validator_endpoint())
+
+
+def get_validator_endpoint():
+    url = server_address + "/command/validate?resource_type=template"
+    if staging_api_key is not None:
+        url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
+    return url
+
+
+def get_api_key():
+    api_key = cedar_api_key
+    if staging_api_key is not None:
+        api_key = staging_api_key
+    return api_key
 
 
 def print_progressbar(template_id, **kwargs):
@@ -126,14 +154,14 @@ def escape(s):
 
 
 def get_server_address(server):
-    server_address = "http://localhost"
+    address = "http://localhost"
     if server == 'local':
-        server_address = "https://resource.metadatacenter.orgx"
+        address = "https://resource.metadatacenter.orgx"
     elif server == 'staging':
-        server_address = "https://resource.staging.metadatacenter.net"
+        address = "https://resource.staging.metadatacenter.net"
     elif server == 'production':
-        server_address = "https://resource.metadatacenter.net"
-    return server_address
+        address = "https://resource.metadatacenter.net"
+    return address
 
 
 def show(report):

@@ -3,6 +3,7 @@ from cedar.patch.collection.AddOrderToUiPatch import AddOrderToUiPatch
 from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsToUiPatch
 from cedar.patch.collection.AddProvenanceToFieldOrElementPatch import AddProvenanceToFieldOrElementPatch
 from cedar.patch.collection.AddRequiredToFieldOrElementPatch import AddRequiredToFieldOrElementPatch
+from cedar.patch.collection.AddSchemaVersionPatch import AddSchemaVersionPatch
 from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddValueConstraintsToFieldOrElementPatch
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
@@ -23,6 +24,7 @@ __all__ = [
     "AddPropertyLabelsToUiPatch",
     "AddProvenanceToFieldOrElementPatch",
     "AddRequiredToFieldOrElementPatch",
+    "AddSchemaVersionPatch",
     "AddValueConstraintsToFieldOrElementPatch",
     "FillEmptyValuePatch",
     "MoveContentToUiPatch",

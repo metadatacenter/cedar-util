@@ -57,11 +57,12 @@ $ python cedar-validator.py --server staging --type template "<CEDAR-API-KEY>"
 ```buildoutcfg
 usage: cedar-patch.py [-h] [-s {local,staging,production}]
                       [-t {template,element,field,instance}] [--limit LIMIT]
+                      [--use-staging-validator CEDAR-STAGING-API-KEY]
                       [--debug]
-                      apiKey
+                      CEDAR-API-KEY
 
 positional arguments:
-  apiKey                The API key used to query the CEDAR resource server
+  CEDAR-API-KEY         The API key used to query the CEDAR resource server
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -70,6 +71,9 @@ optional arguments:
   -t {template,element,field,instance}, --type {template,element,field,instance}
                         The type of CEDAR resource
   --limit LIMIT         The maximum number of resources to validate
+  --use-staging-validator CEDAR-STAGING-API-KEY
+                        Use the validator from the staging server (nightly-
+                        build)
   --debug               Enter debug mode
 ```
 
@@ -78,6 +82,11 @@ optional arguments:
 Patch all the templates in the production server
 ```buildoutcfg
 $ python cedar-patch.py --server production --type template "<CEDAR-API-KEY>"
+```
+
+Patch all the templates in the production server but use the most recent model-validator from the staging server.
+```buildoutcfg
+$ python cedar-patch.py --server production --type template "<CEDAR-API-KEY>" --use-staging-validator "<STAGING-API-KEY>"
 ```
 
 Patch the first 100 templates in the staging server
