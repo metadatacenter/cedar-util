@@ -7,8 +7,9 @@ echo - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 shopt -s expand_aliases
 source $CEDAR_HOME/cedar-util/bin/profile_include.sh
 
-startfolder
+startworkspace
 startgroup
+startmessaging
 startrepo
 startresource
 startschema
