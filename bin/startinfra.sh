@@ -6,6 +6,7 @@ echo ---------------------------------------------------------------------------
 echo
 
 $CEDAR_HOME/cedar-util/bin/startmongo.sh
+$CEDAR_HOME/cedar-util/bin/startmysql.sh
 $CEDAR_HOME/cedar-util/bin/startelastic.sh
 $CEDAR_HOME/cedar-util/bin/startkibana.sh
 $CEDAR_HOME/cedar-util/bin/startneo.sh
