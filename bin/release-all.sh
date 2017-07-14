@@ -101,7 +101,7 @@ release_artifact()
 {
     pushd $CEDAR_HOME/$1
     # Perform a release using the Maven Releases Plugin and tag it
-    mvn --batch-mode -Dtag=$CEDAR_RELEASE_TAG -DreleaseVersion=$CEDAR_RELEASE_VERSION -DscmCommentPrefix="[ci skip] " release:clean release:prepare
+    mvn -Darguments="-DskipTests" --batch-mode -Dtag=$CEDAR_RELEASE_TAG -DreleaseVersion=$CEDAR_RELEASE_VERSION -DscmCommentPrefix="[ci skip] " release:clean release:prepare
     exit_if_error
     mvn -Darguments="-DskipTests -Dmaven.javadoc.skip=true" release:perform
     exit_if_error
