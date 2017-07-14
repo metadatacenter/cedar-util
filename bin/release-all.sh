@@ -103,7 +103,7 @@ release_artifact()
     # Perform a release using the Maven Releases Plugin and tag it
     mvn --batch-mode -Dtag=$CEDAR_RELEASE_TAG -DreleaseVersion=$CEDAR_RELEASE_VERSION -DscmCommentPrefix="[ci skip] " release:clean release:prepare
     exit_if_error
-    mvn release:perform
+    mvn -Darguments="-DskipTests -Dmaven.javadoc.skip=true" release:perform
     exit_if_error
     git push 
     exit_if_error
@@ -471,3 +471,5 @@ release_all_documentation_repos
 release_all_client_repos
 release_all_docker_build_repos
 release_all_docker_deploy_repos
+
+#TODO check that master release version builds locally and that the next snapshot builds locally.
