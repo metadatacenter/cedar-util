@@ -17,7 +17,7 @@ def all_templates(api_key, request_url=None, max_count=None, limit_per_page=500)
 
     offset = 0
     template_list = []
-    for page in range(1, total_page):
+    for page in range(1, total_page + 1):
         template_details = get_details(api_key, request_url, offset, limit_per_page)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
@@ -36,7 +36,7 @@ def all_elements(api_key, request_url=None, max_count=None, limit_per_page=500):
 
     offset = 0
     template_list = []
-    for page in range(1, total_page):
+    for page in range(1, total_page + 1):
         template_details = get_details(api_key, request_url, offset, limit_per_page)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
@@ -55,7 +55,7 @@ def all_instances(api_key, request_url=None, max_count=None, limit_per_page=500)
 
     offset = 0
     template_list = []
-    for page in range(1, total_page):
+    for page in range(1, total_page + 1):
         template_details = get_details(api_key, request_url, offset, limit_per_page)
         template_list.extend(get_identifier_list(template_details))
         offset = limit_per_page * page
@@ -63,7 +63,7 @@ def all_instances(api_key, request_url=None, max_count=None, limit_per_page=500)
 
 
 def get_total_paging(total_count, limit_per_page):
-    return math.ceil(total_count/limit_per_page) + 1
+    return math.ceil(total_count/limit_per_page)
 
 
 def get_total_count(api_key, request_url):
