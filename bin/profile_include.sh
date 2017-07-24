@@ -87,6 +87,9 @@ alias stopneo='$CEDAR_HOME/cedar-util/bin/stopneo.sh'
 alias startredis='$CEDAR_HOME/cedar-util/bin/startredis.sh'
 alias stopredis='$CEDAR_HOME/cedar-util/bin/stopredis.sh'
 
+alias startrc='$CEDAR_HOME/cedar-util/bin/startrediscommander.sh'
+alias killrc='$CEDAR_HOME/cedar-util/bin/killrediscommander.sh'
+
 #CEDAR server aliases
 alias starteditor='goeditor && gulp &'
 alias stopeditor='kill `pgrep gulp`'
@@ -123,3 +126,5 @@ alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
 alias stopinfra='$CEDAR_HOME/cedar-util/bin/stopinfra.sh'
 
 alias ij="'/Applications/IntelliJ IDEA.app/Contents/MacOS/idea'"
+
+alias rmmvn='rm -rf ~/.m2/repository/'
