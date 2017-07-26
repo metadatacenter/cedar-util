@@ -42,7 +42,7 @@ CEDAR_FRONTEND_REPOS=( "cedar-template-editor" )
 
 CEDAR_DOCUMENTATION_REPOS=("cedar-docs" "cedar-swagger-ui" )
 
-CEDAR_CLIENT_REPOS=()
+CEDAR_CLIENT_REPOS=( "biosample-exporter" ))
 
 CEDAR_PROJECT_REPOS=( "cedar-project" )
 
