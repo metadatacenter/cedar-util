@@ -23,8 +23,9 @@ alias gomodel='cd $CEDAR_HOME/cedar-model-validation-library'
 
 alias goadmintool='cd $CEDAR_HOME/cedar-admin-tool'
 
-alias gofolder='cd $CEDAR_HOME/cedar-folder-server'
+alias goworkspace='cd $CEDAR_HOME/cedar-workspace-server'
 alias gogroup='cd $CEDAR_HOME/cedar-group-server'
+alias gomessaging='cd $CEDAR_HOME/cedar-messaging-server'
 alias gorepo='cd $CEDAR_HOME/cedar-repo-server'
 alias goresource='cd $CEDAR_HOME/cedar-resource-server'
 alias goschema='cd $CEDAR_HOME/cedar-schema-server'
@@ -71,6 +72,9 @@ alias killkk='$CEDAR_HOME/cedar-util/bin/killkeycloak.sh'
 alias startmongo='$CEDAR_HOME/cedar-util/bin/startmongo.sh'
 alias stopmongo='$CEDAR_HOME/cedar-util/bin/stopmongo.sh'
 
+alias startmysql='$CEDAR_HOME/cedar-util/bin/startmysql.sh'
+alias stopmysql='$CEDAR_HOME/cedar-util/bin/stopmysql.sh'
+
 alias startkibana='$CEDAR_HOME/cedar-util/bin/startkibana.sh'
 alias stopkibana='$CEDAR_HOME/cedar-util/bin/stopkibana.sh'
 
@@ -83,12 +87,17 @@ alias stopneo='$CEDAR_HOME/cedar-util/bin/stopneo.sh'
 alias startredis='$CEDAR_HOME/cedar-util/bin/startredis.sh'
 alias stopredis='$CEDAR_HOME/cedar-util/bin/stopredis.sh'
 
+alias startrc='$CEDAR_HOME/cedar-util/bin/startrediscommander.sh'
+alias killrc='$CEDAR_HOME/cedar-util/bin/killrediscommander.sh'
+
 #CEDAR server aliases
 alias starteditor='goeditor && gulp &'
 alias stopeditor='kill `pgrep gulp`'
 
-alias startfolder='$CEDAR_UTIL_BIN/start-dw-server.sh folder &'
-alias stopfolder='$CEDAR_UTIL_BIN/stop-dw-server.sh folder 9208'
+alias startworkspace='$CEDAR_UTIL_BIN/start-dw-server.sh workspace &'
+alias stopworkspace='$CEDAR_UTIL_BIN/stop-dw-server.sh workspace 9208'
+alias startmessaging='$CEDAR_UTIL_BIN/start-dw-server.sh messaging &'
+alias stopmessaging='$CEDAR_UTIL_BIN/stop-dw-server.sh messaging 9212'
 alias startgroup='$CEDAR_UTIL_BIN/start-dw-server.sh group &'
 alias stopgroup='$CEDAR_UTIL_BIN/stop-dw-server.sh group 9209'
 alias startrepo='$CEDAR_UTIL_BIN/start-dw-server.sh repo &'
@@ -117,3 +126,5 @@ alias startinfra='$CEDAR_HOME/cedar-util/bin/startinfra.sh'
 alias stopinfra='$CEDAR_HOME/cedar-util/bin/stopinfra.sh'
 
 alias ij="'/Applications/IntelliJ IDEA.app/Contents/MacOS/idea'"
+
+alias rmmvn='rm -rf ~/.m2/repository/'
