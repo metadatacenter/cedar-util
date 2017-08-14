@@ -1,0 +1,66 @@
+{
+  "@context": {
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "pav": "http://purl.org/pav/",
+    "schema": "http://schema.org/",
+    "oslc": "http://open-services.net/ns/core#",
+    "schema:isBasedOn": {
+      "@type": "@id"
+    },
+    "schema:name": {
+      "@type": "xsd:string"
+    },
+    "schema:description": {
+      "@type": "xsd:string"
+    },
+    "pav:createdOn": {
+      "@type": "xsd:dateTime"
+    },
+    "pav:createdBy": {
+      "@type": "@id"
+    },
+    "pav:lastUpdatedOn": {
+      "@type": "xsd:dateTime"
+    },
+    "oslc:modifiedBy": {
+      "@type": "@id"
+    },
+    "sampleName": "https://schema.metadatacenter.orgx/properties/sampleName",
+    "tissue": "https://schema.metadatacenter.orgx/properties/tissue",
+    "sex": "https://schema.metadatacenter.orgx/properties/sex",
+    "isolate": "https://schema.metadatacenter.orgx/properties/isolate",
+    "age": "https://schema.metadatacenter.orgx/properties/age",
+    "biomaterialProvider": "https://schema.metadatacenter.orgx/properties/biomaterialProvider",
+    "optionalAttribute": "https://schema.metadatacenter.orgx/properties/optionalAttribute",
+    "organism": "https://schema.metadatacenter.orgx/properties/organism"
+  },
+  "sampleName": {
+    "@value": null
+  },
+  "tissue": {
+    "@type": "http://data.bioontology.org/ontologies/NCIT/classes/http%3A%2F%2Fncicb.nci.nih.gov%2Fxml%2Fowl%2FEVS%2FThesaurus.owl%23C12801"
+  },
+  "sex": {
+    "@type": "http://data.bioontology.org/ontologies/NCIT/classes/http%3A%2F%2Fncicb.nci.nih.gov%2Fxml%2Fowl%2FEVS%2FThesaurus.owl%23C28421"
+  },
+  "isolate": {
+    "@value": null
+  },
+  "age": {
+    "@value": null
+  },
+  "biomaterialProvider": {
+    "@value": null
+  },
+  "optionalAttribute": [],
+  "organism": {
+    "@type": "http://data.bioontology.org/ontologies/NCBITAXON/classes/http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FSTY%2FT001"
+  },
+  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/f1d0c702-70df-4b49-ba24-e0f9ce4ae3a6",
+  "schema:name": "BioSample Human metadata",
+  "schema:description": "BioSample Human",
+  "pav:createdOn": "2017-08-10T15:17:04-0700",
+  "pav:createdBy": "https://metadatacenter.org/users/8d787b98-33dd-4aff-a88c-440caf452c61",
+  "pav:lastUpdatedOn": "2017-08-10T15:17:04-0700",
+  "oslc:modifiedBy": "https://metadatacenter.org/users/8d787b98-33dd-4aff-a88c-440caf452c61"
+}
