@@ -25,6 +25,10 @@ def main():
                         choices=['template', 'element', 'field', 'instance'],
                         default="template",
                         help="The type of CEDAR resource")
+    parser.add_argument("--lookup",
+                        required=False,
+                        metavar="FILENAME",
+                        help="An input file containing a list of resource identifiers to patch")
     parser.add_argument("--limit",
                         required=False,
                         type=int,
@@ -46,6 +50,7 @@ def main():
                         help="The API key used to query the CEDAR resource server")
     args = parser.parse_args()
     type = args.type
+    lookup_file = args.lookup
     limit = args.limit
     output_dir = args.outputDir
     debug = args.debug
@@ -57,7 +62,7 @@ def main():
 
     patch_engine = build_patch_engine()
     if type == 'template':
-        patch_template(patch_engine, limit, output_dir, debug)
+        patch_template(patch_engine, lookup_file, limit, output_dir, debug)
     elif type == 'element':
         pass
     elif type == 'field':
@@ -92,8 +97,8 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, limit, output_dir, debug=False):
-    template_ids = get_template_ids(cedar_api_key, server_address, limit)
+def patch_template(patch_engine, lookup_file, limit, output_dir, debug=False):
+    template_ids = get_template_ids(lookup_file, server_address, cedar_api_key, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -166,7 +171,21 @@ def print_progressbar(template_id, **kwargs):
         print("\rPatching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
 
 
-def get_template_ids(api_key, server_address, limit):
+def get_template_ids(lookup_file, server_address, cedar_api_key, limit):
+    template_ids = []
+    if lookup_file is not None:
+        template_ids.extend(get_template_ids_from_file(lookup_file))
+    else:
+        template_ids.extend(get_template_ids_from_server(server_address, cedar_api_key, limit))
+    return template_ids
+
+def get_template_ids_from_file(filename):
+    with open(filename) as infile:
+        template_ids = infile.readlines()
+        return [x.strip() for x in template_ids]
+
+
+def get_template_ids_from_server(server_address, api_key, limit):
     request_url = server_address + "/search?q=*&resource_types=template"
     return finder.all_templates(api_key, request_url, max_count=limit)
 
