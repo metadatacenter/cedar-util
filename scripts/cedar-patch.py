@@ -33,6 +33,10 @@ def main():
                         required=False,
                         metavar="CEDAR-STAGING-API-KEY",
                         help="Use the validator from the staging server (nightly-build)")
+    parser.add_argument("--outputDir",
+                        required=False,
+                        default="/tmp",
+                        help="Set the output directory to store the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -42,6 +46,7 @@ def main():
     args = parser.parse_args()
     type = args.type
     limit = args.limit
+    output_dir = args.targetDir
     debug = args.debug
 
     global server_address, cedar_api_key, staging_api_key
@@ -51,7 +56,7 @@ def main():
 
     patch_engine = build_patch_engine()
     if type == 'template':
-        patch_template(patch_engine, limit, debug)
+        patch_template(patch_engine, limit, output_dir, debug)
     elif type == 'element':
         pass
     elif type == 'field':
@@ -86,7 +91,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, limit, debug=False):
+def patch_template(patch_engine, limit, output_dir, debug=False):
     template_ids = get_template_ids(cedar_api_key, server_address, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
@@ -97,7 +102,7 @@ def patch_template(patch_engine, limit, debug=False):
         if is_success:
             if patched_template is not None:
                 create_report("resolved", patched_template)
-                write_to_file(patched_template)
+                write_to_file(patched_template, output_dir)
         else:
             create_report("unresolved", patched_template)
 
@@ -119,12 +124,12 @@ def create_report(report_entry, patched_template):
     report[report_entry].append(patched_template["@id"])
 
 
-def write_to_file(patched_template, target_dir=None):
+def write_to_file(patched_template, output_dir):
     if patched_template is not None:
         filename = create_filename_from_id(patched_template["@id"])
-        if target_dir is None:
-            target_dir = "/tmp"
-        output_path = target_dir + "/" + filename
+        if output_dir is None:
+            output_dir = "/tmp"
+        output_path = output_dir + "/" + filename
         with open(output_path, "w") as outfile:
             json.dump(patched_template, outfile)
 
