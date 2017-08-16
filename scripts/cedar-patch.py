@@ -94,7 +94,7 @@ def patch_template(patch_engine, limit, report, debug=False):
         if not debug:
             print_progressbar(template_id, iteration=index, total_count=total_templates)
         template = get_template(cedar_api_key, server_address, template_id)
-        is_success = patch_engine.execute(template, template_validator, debug=debug)
+        is_success, patched_template = patch_engine.execute(template, template_validator, debug=debug)
         if is_success:
             report["resolved"].append(template_id)
         else:
