@@ -13,7 +13,7 @@ class AddSchemaVersionPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:schemaVersion'(,'.+')*\]\) at /.+$")
+        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:schemaVersion'(,'.+')*\]\) at /.*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
@@ -21,8 +21,11 @@ class AddSchemaVersionPatch(object):
             return False
 
     def apply(self, doc, path=None):
+        print(doc)
         patch = self.get_json_patch(doc, path)
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+        print("HERE!!!")
+        print(patched_doc)
         return patched_doc
 
     def get_json_patch(self, doc, path=None):

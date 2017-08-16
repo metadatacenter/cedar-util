@@ -12,7 +12,7 @@ class FillEmptyValuePatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("string '' is too short \(length: 0, required minimum: 1\) at /.+$")
+        pattern = re.compile("string '' is too short \(length: 0, required minimum: 1\) at /.*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
