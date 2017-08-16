@@ -46,7 +46,7 @@ def main():
     args = parser.parse_args()
     type = args.type
     limit = args.limit
-    output_dir = args.targetDir
+    output_dir = args.outputDir
     debug = args.debug
 
     global server_address, cedar_api_key, staging_api_key
