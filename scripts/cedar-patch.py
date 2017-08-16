@@ -200,8 +200,8 @@ def show(report):
     total_size = resolved_size + unresolved_size
     message = "All templates were successfully patched."
     if unresolved_size > 0:
-        message = "Unable to patch %d out of %d invalid templates. (Success rate: %.0f%%)" % \
-                  (unresolved_size, total_size, resolved_size*100/total_size)
+        message = "Successfully patch %d out of %d invalid templates. (Success rate: %.0f%%)" % \
+                  (resolved_size, total_size, resolved_size*100/total_size)
         message += "\n"
         message += "Details: " + to_json_string(dict(report))
     print("\n" + message)
