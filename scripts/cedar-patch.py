@@ -35,6 +35,7 @@ def main():
                         help="Use the validator from the staging server (nightly-build)")
     parser.add_argument("--outputDir",
                         required=False,
+                        metavar="DIRNAME",
                         default="/tmp",
                         help="Set the output directory to store the patched resources")
     parser.add_argument("--debug",
