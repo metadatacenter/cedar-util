@@ -105,6 +105,7 @@ def patch_template(patch_engine, limit, output_dir, debug=False):
                 write_to_file(patched_template, output_dir)
         else:
             create_report("unresolved", patched_template)
+            write_to_file(patched_template, output_dir)
 
 
 def validate_template(template):
