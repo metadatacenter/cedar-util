@@ -9,6 +9,10 @@ from cedar.patch.Engine import Engine
 server_address = None
 cedar_api_key = None
 staging_api_key = None
+report = {
+    "resolved": [],
+    "unresolved": []
+}
 
 
 def main():
@@ -46,13 +50,8 @@ def main():
     staging_api_key = args.use_staging_validator
 
     patch_engine = build_patch_engine()
-
-    report = {
-        "resolved": [],
-        "unresolved": []
-    }
     if type == 'template':
-        patch_template(patch_engine, limit, report, debug)
+        patch_template(patch_engine, limit, debug)
     elif type == 'element':
         pass
     elif type == 'field':
@@ -87,7 +86,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, limit, report, debug=False):
+def patch_template(patch_engine, limit, debug=False):
     template_ids = get_template_ids(cedar_api_key, server_address, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
@@ -96,9 +95,11 @@ def patch_template(patch_engine, limit, report, debug=False):
         template = get_template(cedar_api_key, server_address, template_id)
         is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
         if is_success:
-            report["resolved"].append(template_id)
+            if patched_template is not None:
+                create_report("resolved", patched_template)
+                write_to_file(patched_template)
         else:
-            report["unresolved"].append(template_id)
+            create_report("unresolved", patched_template)
 
 
 def validate_template(template):
@@ -112,6 +113,25 @@ def run_validator(template):
         get_api_key(),
         template,
         request_url=get_validator_endpoint())
+
+
+def create_report(report_entry, patched_template):
+    report[report_entry].append(patched_template["@id"])
+
+
+def write_to_file(patched_template, target_dir=None):
+    if patched_template is not None:
+        filename = create_filename_from_id(patched_template["@id"])
+        if target_dir is None:
+            target_dir = "/tmp"
+        output_path = target_dir + "/" + filename
+        with open(output_path, "w") as outfile:
+            json.dump(patched_template, outfile)
+
+
+def create_filename_from_id(resource_id):
+    resource_hash = extract_resource_hash(resource_id)
+    return resource_hash + ".patched.json"
 
 
 def get_validator_endpoint():
@@ -129,7 +149,7 @@ def get_api_key():
 
 
 def print_progressbar(template_id, **kwargs):
-    template_hash = template_id[template_id.rfind('/')+1:]
+    template_hash = extract_resource_hash(template_id)
     if 'iteration' in kwargs and 'total_count' in kwargs:
         iteration = kwargs["iteration"]
         total_count = kwargs["total_count"]
@@ -153,6 +173,10 @@ def escape(s):
     return quote(str(s), safe='')
 
 
+def extract_resource_hash(resource_id):
+    return resource_id[resource_id.rfind('/')+1:]
+
+
 def get_server_address(server):
     address = "http://localhost"
     if server == 'local':
@@ -170,7 +194,7 @@ def show(report):
     total_size = resolved_size + unresolved_size
     message = "All templates were successfully patched."
     if unresolved_size > 0:
-        message = "Unable to patch %d out of %d templates. (Success rate: %.0f%%)" % \
+        message = "Unable to patch %d out of %d invalid templates. (Success rate: %.0f%%)" % \
                   (unresolved_size, total_size, resolved_size*100/total_size)
         message += "\n"
         message += "Details: " + to_json_string(dict(report))
