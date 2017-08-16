@@ -21,11 +21,8 @@ class AddSchemaVersionPatch(object):
             return False
 
     def apply(self, doc, path=None):
-        print(doc)
         patch = self.get_json_patch(doc, path)
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
-        print("HERE!!!")
-        print(patched_doc)
         return patched_doc
 
     def get_json_patch(self, doc, path=None):
@@ -39,7 +36,7 @@ class AddSchemaVersionPatch(object):
         patch = {
             "op": "add",
             "value": "1.1.0",
-            "path": self.path
+            "path": self.path + "/schema:schemaVersion"
         }
         patches.append(patch)
 
