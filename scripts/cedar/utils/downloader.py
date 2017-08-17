@@ -6,7 +6,12 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_resource(api_key, request_url):
-    return send_get_request(api_key, request_url)
+    response = send_get_request(api_key, request_url)
+    if response.status_code == requests.codes.ok:
+        document = json.loads(response.text)
+        return document
+    else:
+        response.raise_for_status()
 
 
 def get_template(api_key, url_template=None, **kwargs):
@@ -36,5 +41,4 @@ def send_get_request(api_key, request_url):
         'Authorization': api_key
     }
     response = requests.request("GET", request_url, headers=headers, verify=False)
-    document = json.loads(response.text)
-    return document
+    return response
