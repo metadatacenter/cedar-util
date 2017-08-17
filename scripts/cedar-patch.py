@@ -1,5 +1,6 @@
 import argparse
 import json
+import requests.exceptions
 from urllib.parse import quote
 from cedar.utils import downloader, validator, finder
 from cedar.patch.collection import *
@@ -70,7 +71,8 @@ def main():
     elif type == 'instance':
         pass
 
-    show(report)
+    if not debug:
+        show(report)
 
 
 def build_patch_engine():
@@ -103,15 +105,18 @@ def patch_template(patch_engine, lookup_file, limit, output_dir, debug=False):
     for index, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, iteration=index, total_count=total_templates)
-        template = get_template(cedar_api_key, server_address, template_id)
-        is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
-        if is_success:
-            if patched_template is not None:
-                create_report("resolved", patched_template)
+        try:
+            template = get_template(cedar_api_key, server_address, template_id)
+            is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
+            if is_success:
+                if patched_template is not None:
+                    create_report("resolved", template_id)
+                    write_to_file(patched_template, output_dir)
+            else:
+                create_report("unresolved", template_id)
                 write_to_file(patched_template, output_dir)
-        else:
-            create_report("unresolved", patched_template)
-            write_to_file(patched_template, output_dir)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
 
 
 def validate_template(template):
@@ -127,8 +132,8 @@ def run_validator(template):
         request_url=get_validator_endpoint())
 
 
-def create_report(report_entry, patched_template):
-    report[report_entry].append(patched_template["@id"])
+def create_report(report_entry, template_id):
+    report[report_entry].append(template_id)
 
 
 def write_to_file(patched_template, output_dir):
@@ -168,7 +173,7 @@ def print_progressbar(template_id, **kwargs):
         percent = 100 * (iteration / total_count)
         filled_length = int(percent)
         bar = "#" * filled_length + '-' * (100 - filled_length)
-        print("\rPatching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
+        print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
 
 
 def get_template_ids(lookup_file, server_address, cedar_api_key, limit):
@@ -178,6 +183,7 @@ def get_template_ids(lookup_file, server_address, cedar_api_key, limit):
     else:
         template_ids.extend(get_template_ids_from_server(server_address, cedar_api_key, limit))
     return template_ids
+
 
 def get_template_ids_from_file(filename):
     with open(filename) as infile:
@@ -217,15 +223,25 @@ def get_server_address(server):
 def show(report):
     resolved_size = len(report["resolved"])
     unresolved_size = len(report["unresolved"])
-    total_size = resolved_size + unresolved_size
-    message = "All templates were successfully patched."
-    if unresolved_size > 0:
-        message = "Successfully patch %d out of %d invalid templates. (Success rate: %.0f%%)" % \
-                  (resolved_size, total_size, resolved_size*100/total_size)
-        message += "\n"
-        message += "Details: " + to_json_string(dict(report))
-    print("\n" + message)
     print()
+    print(create_report_message(resolved_size, unresolved_size))
+    print()
+
+
+def create_report_message(solved_size, unsolved_size):
+    report_message = ""
+    if unsolved_size == 0:
+        report_message = "All templates were successfully patched."
+    else:
+        if solved_size == 0:
+            report_message = "Unable to completely fix the invalid templates"
+        else:
+            total_size = solved_size + unsolved_size
+            report_message += "Successfully fix %d out of %d invalid templates. (Success rate: %.0f%%)" % \
+                              (solved_size, total_size, solved_size * 100 / total_size)
+        report_message += "\n"
+        report_message += "Details: " + to_json_string(dict(report))
+    return report_message
 
 
 def to_json_string(obj, pretty=True):
