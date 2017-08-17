@@ -115,6 +115,15 @@ class NoMatchOutOfFourSchemasPatch(object):
             }
             patches.append(patch)
 
+        schema_version = user_property_object.get("schema:schemaVersion") or ""
+        if not schema_version:
+            patch = {
+                "op": "add",
+                "value": "1.1.0",
+                "path": self.path + "/schema:schemaVersion"
+            }
+            patches.append(patch)
+
         return patches
 
     def get_user_property_object(self, doc):
