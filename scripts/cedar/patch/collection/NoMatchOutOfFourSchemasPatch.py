@@ -61,6 +61,14 @@ class NoMatchOutOfFourSchemasPatch(object):
         }
         patches.append(patch)
 
+        if user_property_object["@type"] == "https://schema.metadatacenter.org/core/StaticTemplateField" \
+                and user_property_object.get("properties") is not None:
+            patch = {
+                "op": "remove",
+                "path": self.path + "/properties"
+            }
+            patches.append(patch)
+
         title = user_property_object.get("title") or ""
         if not title:  # if title is empty
             patch = {
