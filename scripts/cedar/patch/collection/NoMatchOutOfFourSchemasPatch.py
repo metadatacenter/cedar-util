@@ -61,13 +61,42 @@ class NoMatchOutOfFourSchemasPatch(object):
         }
         patches.append(patch)
 
-        if user_property_object["@type"] == "https://schema.metadatacenter.org/core/StaticTemplateField" \
-                and user_property_object.get("properties") is not None:
-            patch = {
-                "op": "remove",
-                "path": self.path + "/properties"
-            }
-            patches.append(patch)
+        property_object = user_property_object.get("properties")
+        if property_object is not None:
+            if user_property_object["@type"] == "https://schema.metadatacenter.org/core/StaticTemplateField":
+                patch = {
+                    "op": "remove",
+                    "path": self.path + "/properties"
+                }
+                patches.append(patch)
+
+        if property_object is not None:
+            at_type = property_object.get("@type")
+            if at_type is not None:
+                one_of = at_type.get("oneOf")
+                if one_of is None:
+                    patch = {
+                        "op": "replace",
+                        "value": {
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "format": "uri"
+                                },
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    },
+                                    "uniqueItems": True
+                                }
+                            ]
+                        },
+                        "path": self.path + "/properties/@type"
+                    }
+                    patches.append(patch)
 
         title = user_property_object.get("title") or ""
         if not title:  # if title is empty
