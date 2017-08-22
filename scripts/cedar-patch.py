@@ -1,7 +1,7 @@
 import argparse
 import json
 import requests.exceptions
-from cedar.utils import getter, searcher, validator, get_server_address, to_boolean, to_json_string
+from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -120,9 +120,10 @@ def patch_template(patch_engine, lookup_file, limit, output_dir, debug=False):
 
 
 def validate_template(template):
-    status_code, report = run_validator(template)
-    is_valid = to_boolean(report["validates"])
-    return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
+    is_valid, message = run_validator(template)
+    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
+                      for error_detail in message["errors"]
+                      if not is_valid]
 
 
 def run_validator(template):

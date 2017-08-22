@@ -1,5 +1,6 @@
 import argparse
-from cedar.utils import getter, searcher, validator, get_server_address, to_boolean, to_json_string
+import requests
+from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
 from collections import defaultdict
 
 
@@ -27,14 +28,17 @@ def main():
 
     report = create_empty_report()
 
-    if type == 'template':
-        validate_template(api_key, server_address, limit, report)
-    elif type == 'element':
-        validate_element(api_key, server_address, limit, report)
-    elif type == 'field':
-        pass
-    elif type == 'instance':
-        validate_instance(api_key, server_address, limit, report)
+    try:
+        if type == 'template':
+            validate_template(api_key, server_address, limit, report)
+        elif type == 'element':
+            validate_element(api_key, server_address, limit, report)
+        elif type == 'field':
+            pass
+        elif type == 'instance':
+            validate_instance(api_key, server_address, limit, report)
+    except requests.exceptions.HTTPError as error:
+        exit(error)
 
     show(report)
 
@@ -44,8 +48,8 @@ def validate_template(api_key, server_address, limit, report):
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         template = get_template(api_key, server_address, template_id)
-        status_code, server_message = validator.validate_template(server_address, api_key, template)
-        consume(report, template_id, status_code, server_message, iteration=index, total_count=total_templates)
+        is_valid, validation_message = validator.validate_template(server_address, api_key, template)
+        consume(report, template_id, is_valid, validation_message, iteration=index, total_count=total_templates)
 
 
 def validate_element(api_key, server_address, limit, report):
@@ -53,8 +57,8 @@ def validate_element(api_key, server_address, limit, report):
     total_elements = len(element_ids)
     for index, element_id in enumerate(element_ids, start=1):
         element = get_element(api_key, server_address, element_id)
-        status_code, server_message = validator.validate_element(server_address, api_key, element)
-        consume(report, element_id, status_code, server_message, iteration=index, total_count=total_elements)
+        is_valid, validation_message = validator.validate_element(server_address, api_key, element)
+        consume(report, element_id, is_valid, validation_message, iteration=index, total_count=total_elements)
 
 
 def validate_instance(api_key, server_address, limit, report):
@@ -62,8 +66,8 @@ def validate_instance(api_key, server_address, limit, report):
     total_instances = len(instance_ids)
     for index, instance_id in enumerate(instance_ids, start=1):
         instance = get_instance(api_key, server_address, instance_id)
-        status_code, server_message = validator.validate_instance(server_address, api_key, instance)
-        consume(report, instance_id, status_code, server_message, iteration=index, total_count=total_instances)
+        is_valid, validation_message = validator.validate_instance(server_address, api_key, instance)
+        consume(report, instance_id, is_valid, validation_message, iteration=index, total_count=total_instances)
 
 
 def get_element_ids(api_key, server_address, limit):
@@ -94,18 +98,11 @@ def create_empty_report():
     return defaultdict(list)
 
 
-def consume(report, resource_id, status_code, server_message, **kwargs):
-    if status_code > 200:
-        error_message = str(status_code) + " " + server_message["status"]
-        if detail_message(server_message):
-            error_message += " - " + detail_message(server_message)[:80] + "..."  # get a snippet
-        report[error_message].append(resource_id)
-    else:
-        is_valid = to_boolean(server_message["validates"])
-        if not is_valid:
-            for error_details in server_message["errors"]:
-                error_message = error_details['message'] + " at " + error_details['location']
-                report[error_message].append(resource_id)
+def consume(report, resource_id, is_valid, validation_message, **kwargs):
+    if not is_valid:
+        for error_details in validation_message["errors"]:
+            error_message = error_details['message'] + " at " + error_details['location']
+            report[error_message].append(resource_id)
     print_progressbar(**kwargs)
 
 

@@ -4,12 +4,13 @@
 utils.validator
 ~~~~~~~~~~~~~~
 This module provides utility functions that are used to validate a CEDAR
-resource (template/element/instance). The function will return a request
-status code followed by the validation message
+resource (template/element/instance). The function will return the validation
+status followed by the validation message
 """
 
 import requests
 import json
+from . import to_boolean
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -18,7 +19,7 @@ def validate_resource(api_key, request_url, resource):
     response = send_post_request(api_key, request_url, resource)
     if response.status_code == requests.codes.ok:
         message = json.loads(response.text)
-        return response.status_code, message
+        return to_boolean(message["validates"]), message
     else:
         response.raise_for_status()
 
