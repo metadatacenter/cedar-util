@@ -95,6 +95,7 @@ def build_patch_engine():
     patch_engine.add_patch(RemoveValueFromPropertiesPatch())
     patch_engine.add_patch(RemovePageFromInnerUiPatch())
     patch_engine.add_patch(RecreateRequiredArrayPatch())
+    patch_engine.add_patch(RemovePatternPropertiesPatch())
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
     return patch_engine
 

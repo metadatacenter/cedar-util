@@ -16,6 +16,7 @@ from cedar.patch.collection.RemoveEnumFromTypePatch import RemoveEnumFromTypePat
 from cedar.patch.collection.RemoveIdFromPropertiesPatch import RemoveIdFromPropertiesPatch
 from cedar.patch.collection.RemoveValueFromPropertiesPatch import RemoveValueFromPropertiesPatch
 from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInnerUiPatch
+from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
 
 __all__ = [
@@ -37,4 +38,5 @@ __all__ = [
     "RemoveIdFromPropertiesPatch",
     "RemoveValueFromPropertiesPatch",
     "RemovePageFromInnerUiPatch",
+    "RemovePatternPropertiesPatch",
     "RestructureStaticTemplateFieldPatch"]
