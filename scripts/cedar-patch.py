@@ -1,4 +1,5 @@
 import argparse
+import os
 import json
 import requests.exceptions
 from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
@@ -40,7 +41,6 @@ def main():
     parser.add_argument("--outputDir",
                         required=False,
                         metavar="DIRNAME",
-                        default="/tmp",
                         help="Set the output directory to store the patched resources")
     parser.add_argument("--debug",
                         required=False,
@@ -141,7 +141,7 @@ def write_to_file(patched_template, output_dir):
     if patched_template is not None:
         filename = create_filename_from_id(patched_template["@id"])
         if output_dir is None:
-            output_dir = "/tmp"
+            output_dir = os.getcwd()
         output_path = output_dir + "/" + filename
         with open(output_path, "w") as outfile:
             json.dump(patched_template, outfile)
