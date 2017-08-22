@@ -1,7 +1,11 @@
 import argparse
 import requests
 from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
-from collections import defaultdict
+
+
+server_address = None
+cedar_api_key = None
+report = {}
 
 
 def main():
@@ -14,118 +18,141 @@ def main():
                         choices=['template', 'element', 'field', 'instance'],
                         default="template",
                         help="The type of CEDAR resource")
+    parser.add_argument("--lookup",
+                        required=False,
+                        metavar="FILENAME",
+                        help="An input file containing a list of resource identifiers to patch")
     parser.add_argument("--limit",
                         required=False,
                         type=int,
                         help="The maximum number of resources to validate")
-    parser.add_argument("apikey", metavar="apiKey",
+    parser.add_argument("apikey", metavar="CEDAR-API-KEY",
                         help="The API key used to query the CEDAR resource server")
     args = parser.parse_args()
-    server_address = get_server_address(args.server)
-    type = args.type
+    resource_type = args.type
+    lookup_file = args.lookup
     limit = args.limit
-    api_key = args.apikey
 
-    report = create_empty_report()
+    global server_address, cedar_api_key
+    server_address = get_server_address(args.server)
+    cedar_api_key = args.apikey
 
-    try:
-        if type == 'template':
-            validate_template(api_key, server_address, limit, report)
-        elif type == 'element':
-            validate_element(api_key, server_address, limit, report)
-        elif type == 'field':
-            pass
-        elif type == 'instance':
-            validate_instance(api_key, server_address, limit, report)
-    except requests.exceptions.HTTPError as error:
-        exit(error)
+    if resource_type == 'template':
+        template_ids = get_template_ids(lookup_file, limit)
+        validate_template(template_ids)
+    elif resource_type == 'element':
+        element_ids = get_element_ids(lookup_file, limit)
+        validate_element(element_ids)
+    elif resource_type == 'field':
+        pass
+    elif resource_type == 'instance':
+        instance_ids = get_instance_ids(lookup_file, limit)
+        validate_instance(lookup_file, limit)
 
-    show(report)
+    show_report()
 
 
-def validate_template(api_key, server_address, limit, report):
-    template_ids = get_template_ids(api_key, server_address, limit)
+def validate_template(template_ids):
     total_templates = len(template_ids)
-    for index, template_id in enumerate(template_ids, start=1):
-        template = get_template(api_key, server_address, template_id)
-        is_valid, validation_message = validator.validate_template(server_address, api_key, template)
-        consume(report, template_id, is_valid, validation_message, iteration=index, total_count=total_templates)
+    for counter, template_id in enumerate(template_ids, start=1):
+        print_progressbar(template_id, counter, total_templates)
+        try:
+            template = get_template(template_id)
+            is_valid, validation_message = validator.validate_template(server_address, cedar_api_key, template)
+            reporting(template_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
 
 
-def validate_element(api_key, server_address, limit, report):
-    element_ids = get_element_ids(api_key, server_address, limit)
+def validate_element(element_ids):
     total_elements = len(element_ids)
-    for index, element_id in enumerate(element_ids, start=1):
-        element = get_element(api_key, server_address, element_id)
-        is_valid, validation_message = validator.validate_element(server_address, api_key, element)
-        consume(report, element_id, is_valid, validation_message, iteration=index, total_count=total_elements)
+    for counter, element_id in enumerate(element_ids, start=1):
+        print_progressbar(element_id, counter, total_elements)
+        try:
+            element = get_element(element_id)
+            is_valid, validation_message = validator.validate_element(server_address, cedar_api_key, element)
+            reporting(element_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
 
 
-def validate_instance(api_key, server_address, limit, report):
-    instance_ids = get_instance_ids(api_key, server_address, limit)
+def validate_instance(instance_ids):
     total_instances = len(instance_ids)
-    for index, instance_id in enumerate(instance_ids, start=1):
-        instance = get_instance(api_key, server_address, instance_id)
-        is_valid, validation_message = validator.validate_instance(server_address, api_key, instance)
-        consume(report, instance_id, is_valid, validation_message, iteration=index, total_count=total_instances)
+    for counter, instance_id in enumerate(instance_ids, start=1):
+        print_progressbar(instance_id, counter, total_instances)
+        try:
+            instance = get_instance(instance_id)
+            is_valid, validation_message = validator.validate_instance(server_address, cedar_api_key, instance)
+            reporting(instance_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
 
 
-def get_element_ids(api_key, server_address, limit):
-    return searcher.search_elements(server_address, api_key, max_count=limit)
+def get_template_ids(lookup_file, limit):
+    template_ids = []
+    if lookup_file is not None:
+        template_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        template_ids = searcher.search_templates(server_address, cedar_api_key, max_count=limit)
+    return template_ids
 
 
-def get_template_ids(api_key, server_address, limit):
-    return searcher.get_templates(server_address, api_key, max_count=limit)
+def get_element_ids(lookup_file, limit):
+    element_ids = []
+    if lookup_file is not None:
+        element_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        element_ids = searcher.search_elements(server_address, cedar_api_key, max_count=limit)
+    return element_ids
 
 
-def get_instance_ids(api_key, server_address, limit):
-    return searcher.search_instances(server_address, api_key, max_count=limit)
+def get_instance_ids(lookup_file, limit):
+    instance_ids = []
+    if lookup_file is not None:
+        instance_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        instance_ids = searcher.search_instances(server_address, cedar_api_key, max_count=limit)
+    return instance_ids
 
 
-def get_template(api_key, server_address, template_id):
-    return getter.get_template(server_address, api_key, template_id)
+def get_ids_from_file(filename):
+    with open(filename) as infile:
+        resource_ids = infile.readlines()
+        return [id.strip() for id in resource_ids]
 
 
-def get_element(api_key, server_address, element_id):
-    return getter.get_element(server_address, api_key, element_id)
+def get_template(template_id):
+    return getter.get_template(server_address, cedar_api_key, template_id)
 
 
-def get_instance(api_key, server_address, instance_id):
-    return getter.get_instance(server_address, api_key, instance_id)
+def get_element(element_id):
+    return getter.get_element(server_address, cedar_api_key, element_id)
 
 
-def create_empty_report():
-    return defaultdict(list)
+def get_instance(instance_id):
+    return getter.get_instance(server_address, cedar_api_key, instance_id)
 
 
-def consume(report, resource_id, is_valid, validation_message, **kwargs):
+def reporting(resource_id, is_valid, validation_message):
     if not is_valid:
         for error_details in validation_message["errors"]:
             error_message = error_details['message'] + " at " + error_details['location']
-            report[error_message].append(resource_id)
-    print_progressbar(**kwargs)
+            report.setdefault(error_message,[]).append(resource_id)
 
 
-def print_progressbar(**kwargs):
-    if 'iteration' in kwargs and 'total_count' in kwargs:
-        iteration = kwargs["iteration"]
-        total_count = kwargs["total_count"]
-        percent = 100 * (iteration / total_count)
-        filled_length = int(percent)
-        bar = "#" * filled_length + '-' * (100 - filled_length)
-        print("\rProcessing (%d/%d): |%s| %d%% Complete" % (iteration, total_count, bar, percent), end='\r')
+def print_progressbar(resource_id, counter, total_count):
+    resource_hash = extract_resource_hash(resource_id)
+    percent = 100 * (counter / total_count)
+    filled_length = int(percent)
+    bar = "#" * filled_length + '-' * (100 - filled_length)
+    print("\rValidating (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
-def detail_message(server_message):
-    detail_message = None
-    if "message" in server_message:
-        detail_message = server_message["message"]
-    elif "errorMessage" in server_message:
-        detail_message = server_message["errorMessage"]
-    return detail_message
+def extract_resource_hash(resource_id):
+    return resource_id[resource_id.rfind('/')+1:]
 
 
-def show(report):
+def show_report():
     report_size = len(report)
     message = "No error was found."
     if report_size > 0:
