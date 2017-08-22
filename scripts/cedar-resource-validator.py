@@ -1,5 +1,5 @@
 import argparse
-from cedar.utils import getter, validator, get_server_address, to_json_string
+from cedar.utils import getter, validator, get_server_address, to_boolean, to_json_string
 from collections import defaultdict
 
 
@@ -77,8 +77,8 @@ def consume(report, resource_id, status_code, server_message, **kwargs):
             error_message += " - " + detail_message(server_message)[:80] + "..."  # get a snippet
         report[error_message].append(resource_id)
     else:
-        is_valid = server_message["validates"]
-        if is_valid == 'false':
+        is_valid = to_boolean(server_message["validates"])
+        if not is_valid:
             for error_details in server_message["errors"]:
                 error_message = error_details['message'] + " at " + error_details['location']
                 report[error_message].append(resource_id)
