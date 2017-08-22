@@ -4,22 +4,28 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def validate_template(api_key, document, request_url=None):
-    if request_url is None:
-        request_url = "https://resource.metadatacenter.orgx/command/validate?resource_type=template"
-    return send_post_request(api_key, request_url, document)
+def validate_resource(api_key, request_url, resource):
+    response = send_post_request(api_key, request_url, resource)
+    if response.status_code == requests.codes.ok:
+        message = json.loads(response.text)
+        return response.status_code, message
+    else:
+        response.raise_for_status()
 
 
-def validate_instance(api_key, document, request_url=None):
-    if request_url is None:
-        request_url = "https://resource.metadatacenter.orgx/command/validate?resource_type=instance"
-    return send_post_request(api_key, request_url, document)
+def validate_template(server_address, api_key, template):
+    request_url = server_address + "/command/validate?resource_type=template"
+    return validate_resource(api_key, request_url, template)
 
 
-def validate_element(api_key, document, request_url=None):
-    if request_url is None:
-        request_url = "https://resource.metadatacenter.orgx/command/validate?resource_type=element"
-    return send_post_request(api_key, request_url, document)
+def validate_element(server_address, api_key, element):
+    request_url = server_address + "/command/validate?resource_type=element"
+    return validate_resource(api_key, request_url, element)
+
+
+def validate_instance(server_address, api_key, instance,):
+    request_url = server_address + "/command/validate?resource_type=instance"
+    return validate_resource(api_key, request_url, instance)
 
 
 def send_post_request(api_key, request_url, data):
@@ -28,5 +34,4 @@ def send_post_request(api_key, request_url, data):
         "Authorization": api_key
     }
     response = requests.request("POST", request_url, headers=headers, data=json.dumps(data), verify=False)
-    message = json.loads(response.text)
-    return response.status_code, message
+    return response

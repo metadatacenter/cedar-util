@@ -126,10 +126,10 @@ def validate_template(template):
 
 
 def run_validator(template):
-    return validator.validate_template(
-        get_api_key(),
-        template,
-        request_url=get_validator_endpoint())
+    if staging_api_key is not None:
+        return validator.validate_template(get_server_address("staging"), staging_api_key, template)
+    else:
+        return validator.validate_template(server_address, cedar_api_key, template)
 
 
 def create_report(report_entry, template_id):
@@ -149,20 +149,6 @@ def write_to_file(patched_template, output_dir):
 def create_filename_from_id(resource_id):
     resource_hash = extract_resource_hash(resource_id)
     return resource_hash + ".patched.json"
-
-
-def get_validator_endpoint():
-    url = server_address + "/command/validate?resource_type=template"
-    if staging_api_key is not None:
-        url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
-    return url
-
-
-def get_api_key():
-    api_key = cedar_api_key
-    if staging_api_key is not None:
-        api_key = staging_api_key
-    return api_key
 
 
 def print_progressbar(template_id, **kwargs):
