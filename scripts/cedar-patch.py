@@ -63,7 +63,7 @@ def main():
         pass
 
     if not debug:
-        show(report)
+        show_report()
 
 
 def build_patch_engine():
@@ -168,7 +168,7 @@ def extract_resource_hash(resource_id):
     return resource_id[resource_id.rfind('/')+1:]
 
 
-def show(report):
+def show_report():
     resolved_size = len(report["resolved"])
     unresolved_size = len(report["unresolved"])
     print()
