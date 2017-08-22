@@ -1,7 +1,7 @@
 import argparse
 import json
 import requests.exceptions
-from cedar.utils import getter, searcher, validator, get_server_address
+from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -211,13 +211,6 @@ def create_report_message(solved_size, unsolved_size):
         report_message += "\n"
         report_message += "Details: " + to_json_string(dict(report))
     return report_message
-
-
-def to_json_string(obj, pretty=True):
-    if pretty:
-        return json.dumps(obj, indent=2, sort_keys=True)
-    else:
-        return json.dumps(obj)
 
 
 if __name__ == "__main__":

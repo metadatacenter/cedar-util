@@ -1,6 +1,5 @@
 import argparse
-import json
-from cedar.utils import getter, validator, get_server_address
+from cedar.utils import getter, validator, get_server_address, to_json_string
 from collections import defaultdict
 
 
@@ -69,13 +68,6 @@ def get_instance(api_key, server_address, instance_id):
 
 def create_empty_report():
     return defaultdict(list)
-
-
-def to_json_string(obj, pretty=True):
-    if pretty:
-        return json.dumps(obj, indent=2, sort_keys=True)
-    else:
-        return json.dumps(obj)
 
 
 def consume(report, resource_id, status_code, server_message, **kwargs):
