@@ -1,10 +1,12 @@
 import json
+import os
 
 
 __all__ = [
     'get_server_address',
     'to_boolean',
-    'to_json_string'
+    'to_json_string',
+    'write_to_file'
 ]
 
 
@@ -32,3 +34,11 @@ def to_json_string(obj, pretty=True):
         return json.dumps(obj, indent=2, sort_keys=True)
     else:
         return json.dumps(obj)
+
+
+def write_to_file(patched_template, filename, output_dir=None):
+    if output_dir is None:
+        output_dir = os.getcwd()
+    output_path = output_dir + "/" + filename
+    with open(output_path, "w") as outfile:
+        json.dump(patched_template, outfile)

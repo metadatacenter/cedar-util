@@ -1,8 +1,6 @@
 import argparse
-import os
-import json
 import requests.exceptions
-from cedar.utils import getter, searcher, validator, get_server_address, to_json_string
+from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -111,10 +109,12 @@ def patch_template(patch_engine, lookup_file, limit, output_dir, debug=False):
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
-                    write_to_file(patched_template, output_dir)
+                    filename = create_filename_from_id(template_id)
+                    write_to_file(patched_template, filename, output_dir)
             else:
                 create_report("unresolved", template_id)
-                write_to_file(patched_template, output_dir)
+                filename = create_filename_from_id(template_id)
+                write_to_file(patched_template, filename, output_dir)
         except requests.exceptions.HTTPError as error:
             exit(error)
 
@@ -137,19 +137,9 @@ def create_report(report_entry, template_id):
     report[report_entry].append(template_id)
 
 
-def write_to_file(patched_template, output_dir):
-    if patched_template is not None:
-        filename = create_filename_from_id(patched_template["@id"])
-        if output_dir is None:
-            output_dir = os.getcwd()
-        output_path = output_dir + "/" + filename
-        with open(output_path, "w") as outfile:
-            json.dump(patched_template, outfile)
-
-
 def create_filename_from_id(resource_id):
     resource_hash = extract_resource_hash(resource_id)
-    return resource_hash + ".patched.json"
+    return "template-" + resource_hash + ".patched.json"
 
 
 def print_progressbar(template_id, **kwargs):
