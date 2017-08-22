@@ -7,7 +7,6 @@ from cedar.patch.Engine import Engine
 
 server_address = None
 cedar_api_key = None
-staging_api_key = None
 report = {
     "resolved": [],
     "unresolved": []
@@ -32,10 +31,6 @@ def main():
                         required=False,
                         type=int,
                         help="The maximum number of resources to validate")
-    parser.add_argument("--use-staging-validator",
-                        required=False,
-                        metavar="CEDAR-STAGING-API-KEY",
-                        help="Use the validator from the staging server (nightly-build)")
     parser.add_argument("--output-dir",
                         required=False,
                         metavar="DIRNAME",
@@ -53,10 +48,9 @@ def main():
     output_dir = args.output_dir
     debug = args.debug
 
-    global server_address, cedar_api_key, staging_api_key
+    global server_address, cedar_api_key
     server_address = get_server_address(args.server)
     cedar_api_key = args.apikey
-    staging_api_key = args.use_staging_validator
 
     patch_engine = build_patch_engine()
     if type == 'template':
@@ -97,14 +91,14 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, lookup_file, limit, output_dir, debug=False):
-    template_ids = get_template_ids(lookup_file, server_address, cedar_api_key, limit)
+def patch_template(patch_engine, lookup_file, limit, output_dir, debug):
+    template_ids = get_template_ids(lookup_file, limit)
     total_templates = len(template_ids)
     for index, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, iteration=index, total_count=total_templates)
         try:
-            template = get_template(cedar_api_key, server_address, template_id)
+            template = get_template(template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -127,10 +121,7 @@ def validate_template(template):
 
 
 def run_validator(template):
-    if staging_api_key is not None:
-        return validator.validate_template(get_server_address("staging"), staging_api_key, template)
-    else:
-        return validator.validate_template(server_address, cedar_api_key, template)
+    return validator.validate_template(server_address, cedar_api_key, template)
 
 
 def create_report(report_entry, template_id):
@@ -153,12 +144,12 @@ def print_progressbar(template_id, **kwargs):
         print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
 
 
-def get_template_ids(lookup_file, server_address, cedar_api_key, limit):
+def get_template_ids(lookup_file, limit):
     template_ids = []
     if lookup_file is not None:
         template_ids.extend(get_template_ids_from_file(lookup_file))
     else:
-        template_ids.extend(get_template_ids_from_server(server_address, cedar_api_key, limit))
+        template_ids.extend(get_template_ids_from_server(limit))
     return template_ids
 
 
@@ -168,12 +159,12 @@ def get_template_ids_from_file(filename):
         return [x.strip() for x in template_ids]
 
 
-def get_template_ids_from_server(server_address, api_key, limit):
-    return searcher.search_templates(server_address, api_key, max_count=limit)
+def get_template_ids_from_server(limit):
+    return searcher.search_templates(server_address, cedar_api_key, max_count=limit)
 
 
-def get_template(api_key, server_address, template_id):
-    return getter.get_template(server_address, api_key, template_id)
+def get_template(template_id):
+    return getter.get_template(server_address, cedar_api_key, template_id)
 
 
 def extract_resource_hash(resource_id):
