@@ -54,7 +54,8 @@ def main():
 
     patch_engine = build_patch_engine()
     if resource_type == 'template':
-        patch_template(patch_engine, lookup_file, limit, output_dir, debug)
+        template_ids = get_template_ids(lookup_file, limit)
+        patch_template(patch_engine, template_ids, output_dir, debug)
     elif resource_type == 'element':
         pass
     elif resource_type == 'field':
@@ -91,8 +92,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, lookup_file, limit, output_dir, debug):
-    template_ids = get_template_ids(lookup_file, limit)
+def patch_template(patch_engine, template_ids, output_dir, debug):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -114,14 +114,10 @@ def patch_template(patch_engine, lookup_file, limit, output_dir, debug):
 
 
 def validate_template(template):
-    is_valid, message = run_validator(template)
+    is_valid, message = validator.validate_template(server_address, cedar_api_key, template)
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
-
-
-def run_validator(template):
-    return validator.validate_template(server_address, cedar_api_key, template)
 
 
 def create_report(report_entry, template_id):
@@ -133,31 +129,27 @@ def create_filename_from_id(resource_id):
     return "template-" + resource_hash + ".patched.json"
 
 
-def print_progressbar(template_id, counter, total_count):
-    template_hash = extract_resource_hash(template_id)
+def print_progressbar(resource_id, counter, total_count):
+    resource_hash = extract_resource_hash(resource_id)
     percent = 100 * (counter / total_count)
     filled_length = int(percent)
     bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, template_hash), end='\r')
+    print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
 def get_template_ids(lookup_file, limit):
     template_ids = []
     if lookup_file is not None:
-        template_ids.extend(get_template_ids_from_file(lookup_file))
+        template_ids.extend(get_ids_from_file(lookup_file))
     else:
-        template_ids.extend(get_template_ids_from_server(limit))
+        template_ids = searcher.search_templates(server_address, cedar_api_key, max_count=limit)
     return template_ids
 
 
-def get_template_ids_from_file(filename):
+def get_ids_from_file(filename):
     with open(filename) as infile:
-        template_ids = infile.readlines()
-        return [x.strip() for x in template_ids]
-
-
-def get_template_ids_from_server(limit):
-    return searcher.search_templates(server_address, cedar_api_key, max_count=limit)
+        resource_ids = infile.readlines()
+        return [id.strip() for id in resource_ids]
 
 
 def get_template(template_id):
