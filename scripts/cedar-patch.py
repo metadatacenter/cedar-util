@@ -1,7 +1,7 @@
 import argparse
 import json
 import requests.exceptions
-from cedar.utils import getter, searcher, validator
+from cedar.utils import getter, searcher, validator, get_server_address
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -187,17 +187,6 @@ def get_template(api_key, server_address, template_id):
 
 def extract_resource_hash(resource_id):
     return resource_id[resource_id.rfind('/')+1:]
-
-
-def get_server_address(server):
-    address = "http://localhost"
-    if server == 'local':
-        address = "https://resource.metadatacenter.orgx"
-    elif server == 'staging':
-        address = "https://resource.staging.metadatacenter.net"
-    elif server == 'production':
-        address = "https://resource.metadatacenter.net"
-    return address
 
 
 def show(report):

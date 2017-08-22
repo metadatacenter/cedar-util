@@ -1,6 +1,6 @@
 import argparse
 import json
-from cedar.utils import getter, searcher, validator
+from cedar.utils import getter, searcher, validator, get_server_address
 from collections import defaultdict
 
 
@@ -89,17 +89,6 @@ def get_element(api_key, server_address, element_id):
 
 def get_instance(api_key, server_address, instance_id):
     return getter.get_instance(server_address, api_key, instance_id)
-
-
-def get_server_address(server):
-    server_address = "http://localhost"
-    if server == 'local':
-        server_address = "https://resource.metadatacenter.orgx"
-    elif server == 'staging':
-        server_address = "https://resource.staging.metadatacenter.net"
-    elif server == 'production':
-        server_address = "https://resource.metadatacenter.net"
-    return server_address
 
 
 def create_empty_report():
