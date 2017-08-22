@@ -1,7 +1,6 @@
 import argparse
 import json
-from urllib.parse import quote
-from cedar.utils import downloader, validator
+from cedar.utils import getter, validator
 from collections import defaultdict
 
 
@@ -60,18 +59,15 @@ def validate_instance(api_key, server_address, instance_id, report, **kwargs):
 
 
 def get_template(api_key, server_address, template_id):
-    request_url = server_address + "/templates/" + escape(template_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_template(server_address, api_key, template_id)
 
 
 def get_element(api_key, server_address, element_id):
-    request_url = server_address + "/template-elements/" + escape(element_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_element(server_address, api_key, element_id)
 
 
 def get_instance(api_key, server_address, instance_id):
-    request_url = server_address + "/template-instances/" + escape(instance_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_instance(server_address, api_key, instance_id)
 
 
 def get_server_address(server):
@@ -82,16 +78,11 @@ def get_server_address(server):
         server_address = "https://resource.staging.metadatacenter.net"
     elif server == 'production':
         server_address = "https://resource.metadatacenter.net"
-
     return server_address
 
 
 def create_empty_report():
     return defaultdict(list)
-
-
-def escape(s):
-    return quote(str(s), safe='')
 
 
 def to_json_string(obj, pretty=True):

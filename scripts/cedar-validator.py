@@ -1,7 +1,6 @@
 import argparse
 import json
-from urllib.parse import quote
-from cedar.utils import downloader, validator, finder
+from cedar.utils import getter, searcher, validator
 from collections import defaultdict
 
 
@@ -72,33 +71,27 @@ def validate_instance(api_key, server_address, limit, report):
 
 
 def get_element_ids(api_key, server_address, limit):
-    request_url = server_address + "/search?q=*&resource_types=element"
-    return finder.all_templates(api_key, request_url, max_count=limit)
+    return searcher.search_elements(server_address, api_key, max_count=limit)
 
 
 def get_template_ids(api_key, server_address, limit):
-    request_url = server_address + "/search?q=*&resource_types=template"
-    return finder.all_templates(api_key, request_url, max_count=limit)
+    return searcher.get_templates(server_address, api_key, max_count=limit)
 
 
 def get_instance_ids(api_key, server_address, limit):
-    request_url = server_address + "/search?q=*&resource_types=instance"
-    return finder.all_templates(api_key, request_url, max_count=limit)
+    return searcher.search_instances(server_address, api_key, max_count=limit)
 
 
 def get_template(api_key, server_address, template_id):
-    request_url = server_address + "/templates/" + escape(template_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_template(server_address, api_key, template_id)
 
 
 def get_element(api_key, server_address, element_id):
-    request_url = server_address + "/template-elements/" + escape(element_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_element(server_address, api_key, element_id)
 
 
 def get_instance(api_key, server_address, instance_id):
-    request_url = server_address + "/template-instances/" + escape(instance_id)
-    return downloader.get_resource(api_key, request_url)
+    return getter.get_instance(server_address, api_key, instance_id)
 
 
 def get_server_address(server):
@@ -109,16 +102,11 @@ def get_server_address(server):
         server_address = "https://resource.staging.metadatacenter.net"
     elif server == 'production':
         server_address = "https://resource.metadatacenter.net"
-
     return server_address
 
 
 def create_empty_report():
     return defaultdict(list)
-
-
-def escape(s):
-    return quote(str(s), safe='')
 
 
 def to_json_string(obj, pretty=True):

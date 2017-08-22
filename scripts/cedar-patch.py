@@ -1,8 +1,7 @@
 import argparse
 import json
 import requests.exceptions
-from urllib.parse import quote
-from cedar.utils import downloader, validator, finder
+from cedar.utils import getter, searcher, validator
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -193,17 +192,11 @@ def get_template_ids_from_file(filename):
 
 
 def get_template_ids_from_server(server_address, api_key, limit):
-    request_url = server_address + "/search?q=*&resource_types=template"
-    return finder.all_templates(api_key, request_url, max_count=limit)
+    return searcher.search_templates(server_address, api_key, max_count=limit)
 
 
 def get_template(api_key, server_address, template_id):
-    request_url = server_address + "/templates/" + escape(template_id)
-    return downloader.get_resource(api_key, request_url)
-
-
-def escape(s):
-    return quote(str(s), safe='')
+    return getter.get_template(server_address, api_key, template_id)
 
 
 def extract_resource_hash(resource_id):
