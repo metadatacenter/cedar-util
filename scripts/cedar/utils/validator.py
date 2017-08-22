@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.validator
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to validate a CEDAR
+resource (template/element/instance). The function will return a request
+status code followed by the validation message
+"""
+
 import requests
 import json
 from requests.packages.urllib3.exceptions import InsecureRequestWarning

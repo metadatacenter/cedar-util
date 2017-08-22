@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.storer
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to create a CEDAR
+resource (template/element/instance) via a POST request.
+"""
+
 import requests
 import json
 from requests.packages.urllib3.exceptions import InsecureRequestWarning

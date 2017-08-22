@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.updater
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to modify a CEDAR
+resource (template/element/instance) via a PUT request.
+"""
+
 import requests
 import json
 from urllib.parse import quote

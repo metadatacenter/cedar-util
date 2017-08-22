@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.remover
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to remove a CEDAR
+resource (template/element/instance) via a DELETE request.
+"""
+
 import requests
 import json
 from urllib.parse import quote

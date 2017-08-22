@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.searcher
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to search a CEDAR
+resource (template/element/instance) by specifying the keyword query and
+some other search parameters (e.g., max_count and limit).
+
+If the user doesn't specify the keyword query then the function will
+return all the items (perform a "search all" call)
+"""
+
 import math
 import requests
 import json

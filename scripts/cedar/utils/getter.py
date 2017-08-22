@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+utils.getter
+~~~~~~~~~~~~~~
+This module provides utility functions that are used to get a CEDAR
+resource (template/element/instance) via a GET request.
+"""
+
 import requests
 import json
 from urllib.parse import quote
