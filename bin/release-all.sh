@@ -197,6 +197,9 @@ release_project_repo()
 
 release_frontend_repo()
 {
+    # See https://github.com/metadatacenter/cedar-docs/wiki/Configuring-NPM-to-use-the-CEDAR-Nexus-Server
+    npm login --registry=https://nexus.bmir.stanford.edu/repository/npm-cedar/
+    
     pushd $CEDAR_HOME/$1
 
     git checkout develop
@@ -281,6 +284,17 @@ release_standalone_repo()
     tag_repo_with_release_version $1
     copy_release_to_master $1
     update_repo_to_next_development_version $1
+
+    popd
+}
+
+release_client_repo()
+{
+    pushd $CEDAR_HOME/$1
+
+    tag_repo_with_release_version $1
+    copy_release_to_master $1
+    git checkout develop
 
     popd
 }
@@ -385,7 +399,7 @@ release_all_client_repos()
     echo "Releasing client repos..."
     for r in "${CEDAR_CLIENT_REPOS[@]}"
     do
-        release_standalone_repo $r
+        release_client_repo $r
     done
 }
 
