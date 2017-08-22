@@ -42,7 +42,7 @@ def main():
     parser.add_argument("apikey", metavar="CEDAR-API-KEY",
                         help="The API key used to query the CEDAR resource server")
     args = parser.parse_args()
-    type = args.type
+    resource_type = args.type
     lookup_file = args.lookup
     limit = args.limit
     output_dir = args.output_dir
@@ -53,13 +53,13 @@ def main():
     cedar_api_key = args.apikey
 
     patch_engine = build_patch_engine()
-    if type == 'template':
+    if resource_type == 'template':
         patch_template(patch_engine, lookup_file, limit, output_dir, debug)
-    elif type == 'element':
+    elif resource_type == 'element':
         pass
-    elif type == 'field':
+    elif resource_type == 'field':
         pass
-    elif type == 'instance':
+    elif resource_type == 'instance':
         pass
 
     if not debug:
