@@ -30,7 +30,7 @@ CEDAR_SERVER_REPOS=(
     "cedar-repo-server"
     "cedar-schema-server"
     "cedar-resource-server"
-    "cedar-terminology-server  "
+    "cedar-terminology-server"
     "cedar-valuerecommender-server"
     "cedar-group-server"
     "cedar-submission-server"
@@ -40,9 +40,9 @@ CEDAR_SERVER_REPOS=(
 
 CEDAR_FRONTEND_REPOS=( "cedar-template-editor" )
 
-CEDAR_DOCUMENTATION_REPOS=("cedar-docs" "cedar-swagger-ui" )
+CEDAR_DOCUMENTATION_REPOS=( "cedar-docs" "cedar-swagger-ui" )
 
-CEDAR_CLIENT_REPOS=( "biosample-exporter" ))
+CEDAR_CLIENT_REPOS=( "biosample-exporter" )
 
 CEDAR_PROJECT_REPOS=( "cedar-project" )
 
@@ -82,47 +82,30 @@ exit_if_error()
 
 update_repo_parent_to_release()
 {
-    pushd $CEDAR_HOME/$1
     # Update versions of parent and dependencies to release version
     git checkout develop
     git pull 
-    exit_if_error
     mvn versions:update-parent versions:update-child-modules # Update parent POM to release version (recursively)
-    exit_if_error
     mvn -DallowSnapshots=false versions:update-properties # Update version properties to point to latest release versions
-    exit_if_error
     git commit -a -m "Updated parent POM and dependency versions to release version"
     git push
-    exit_if_error
-    popd
 }
 
 release_artifact()
 {
-    pushd $CEDAR_HOME/$1
     # Perform a release using the Maven Releases Plugin and tag it
     mvn -Darguments="-DskipTests" --batch-mode -Dtag=$CEDAR_RELEASE_TAG -DreleaseVersion=$CEDAR_RELEASE_VERSION -DscmCommentPrefix="[ci skip] " release:clean release:prepare
-    exit_if_error
     mvn -Darguments="-DskipTests -Dmaven.javadoc.skip=true" release:perform
-    exit_if_error
     git push 
-    exit_if_error
-    popd
 }
 
 copy_release_to_master()
 {
-    pushd $CEDAR_HOME/$1
     # Make the master branch reflect the released version
     git checkout master
     git pull
-    exit_if_error
     git merge -X theirs --no-ff -m "$CEDAR_RELEASE_VERSION" $CEDAR_RELEASE_TAG
-    exit_if_error
     git push
-    exit_if_error
-
-    popd
 }
 
 install_artifact()
@@ -132,33 +115,23 @@ install_artifact()
 
 update_repo_to_next_development_version()
 {
-    pushd $CEDAR_HOME/$1
-
     # Return to develop branch and update to next development version
     git checkout develop
     git pull
-    exit_if_error
     mvn -DallowSnapshots=true versions:update-parent # Update parent POM to current development version
-    exit_if_error
     mvn -DallowSnapshots=true versions:update-properties # Update version properties to point to latest development versions
-    exit_if_error
     git commit -a -m "Updated CEDAR component dependencies to point to current development snapshots"
     git push 
-    exit_if_error
     mvn -DskipTests=true deploy # deploy new development artifact
-
-    popd
 }
 
 tag_repo_with_release_version()
 {
-    pushd $1
     # Tag the latest development version
     git checkout develop
     git pull 
     git tag $CEDAR_RELEASE_TAG
     git push origin $CEDAR_RELEASE_TAG
-    popd
 }
 
 release_parent_repo()
@@ -168,7 +141,6 @@ release_parent_repo()
     sed -i '' 's/<cedar.version>.*<\/cedar.version>/<cedar.version>'${CEDAR_RELEASE_VERSION}'<\/cedar.version>/g' pom.xml 
     git commit -a -m "Updated cedar.version to release version"
     git push 
-    exit_if_error
 
     release_artifact $1
     copy_release_to_master $1
@@ -179,7 +151,6 @@ release_parent_repo()
     sed -i '' 's/<cedar.version>.*<\/cedar.version>/<cedar.version>'${CEDAR_NEXT_DEVELOPMENT_VERSION}'<\/cedar.version>/g' pom.xml 
     git commit -a -m "Updated cedar.version to next development version"
     git push 
-    exit_if_error
     mvn clean deploy # deploy development artifact
     popd
 }
@@ -230,16 +201,14 @@ release_frontend_repo()
 
     git checkout develop
     git pull
-    exit_if_error
     sed -i '' 's/- CEDAR_VERSION\s*=.*\".*\"/- CEDAR_VERSION=\"'${CEDAR_RELEASE_VERSION}'\"/g' .travis.yml
     jq '.version="'${CEDAR_RELEASE_VERSION}'"' package.json > json.package && mv json.package package.json
     git commit -a -m "Set release version for .travis.yml and package.json"
     git push
-    exit_if_error
     
     tag_repo_with_release_version $1
     copy_release_to_master $1
-    npm publish # Publish released version to Nexus server
+    npm publish 
     
     # Return to develop branch 
     git checkout develop
@@ -247,10 +216,8 @@ release_frontend_repo()
     jq '.version="'${CEDAR_NEXT_DEVELOPMENT_VERSION}'"' package.json > json.package && mv json.package package.json
     git commit -a -m "Updated to next development version"
     git push
-    exit_if_error
 
-    npm publish # Publish the new development version to Nexus server
-    exit_if_error
+    npm publish 
 
     popd
 }
@@ -262,6 +229,7 @@ release_docker_build_repo()
     # Tag the latest development version
     git checkout develop
     git pull origin develop
+    find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-microservice:.*$/FROM metadatacenter\/cedar-microservice:'${CEDAR_RELEASE_VERSION}'/' {} \; -print
     find . -name Dockerfile -exec sed -i '' 's/^ENV CEDAR_VERSION=.*$/ENV CEDAR_VERSION='${CEDAR_RELEASE_VERSION}'/' {} \; -print
     git commit -a -m "Set the release version in the Dockerfiles"
     git push origin develop
@@ -272,6 +240,7 @@ release_docker_build_repo()
     
     # Return to develop branch 
     git checkout develop
+    find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-microservice:.*$/FROM metadatacenter\/cedar-microservice:'${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
     find . -name Dockerfile -exec sed -i '' 's/^ENV CEDAR_VERSION=.*$/ENV CEDAR_VERSION='${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
     git commit -a -m "Updated to next development version"
     git push origin develop
@@ -288,6 +257,7 @@ release_docker_deploy_repo()
     git checkout develop
     git pull origin develop
     sed -i '' 's/^export CEDAR_VERSION=.*$/export CEDAR_VERSION='${CEDAR_RELEASE_VERSION}'/' ./cedar-assets/bin/set-env-base.sh
+    find . -name .env -exec sed -i '' 's/^CEDAR_DOCKER_VERSION=.*$/CEDAR_DOCKER_VERSION='${CEDAR_RELEASE_VERSION}'/' {} \; -print
     git commit -a -m "Set the release version in the Dockerfiles"
     git push origin develop
 
@@ -297,6 +267,7 @@ release_docker_deploy_repo()
     # Return to develop branch 
     git checkout develop
     sed -i '' 's/^export CEDAR_VERSION=.*$/export CEDAR_VERSION='${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' ./cedar-assets/bin/set-env-base.sh
+    find . -name .env -exec sed -i '' 's/CEDAR_DOCKER_VERSION=.*$/CEDAR_DOCKER_VERSION='${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
     git commit -a -m "Updated to next development version"
     git push origin develop
     
@@ -338,9 +309,7 @@ git_pull_branch()
 {
     printf "$format" $1 $CEDAR_HOME/$1
     git -C "$CEDAR_HOME/$1" checkout $2
-    exit_if_error
     git -C "$CEDAR_HOME/$1" pull
-    exit_if_error
 }
 
 git_pull_all_repos()
@@ -349,7 +318,6 @@ git_pull_all_repos()
     for r in "${CEDAR_ALL_REPOS[@]}"
     do
         git_pull_branch $r develop
-        exit_if_error
     done
 }
 
@@ -363,7 +331,6 @@ build_repo()
 {
     pushd $CEDAR_HOME/$1
     mvn -DskipTests clean install
-    exit_if_error
     popd
 }
 
@@ -416,7 +383,7 @@ release_all_documentation_repos()
 release_all_client_repos()
 {
     echo "Releasing client repos..."
-    for r in "${CEDAR_DOCUMENTATION_REPOS[@]}"
+    for r in "${CEDAR_CLIENT_REPOS[@]}"
     do
         release_standalone_repo $r
     done
@@ -468,7 +435,9 @@ release_all_server_repos
 release_all_project_repos
 release_all_frontend_repos
 release_all_documentation_repos
+
 release_all_client_repos
+
 release_all_docker_build_repos
 release_all_docker_deploy_repos
 
