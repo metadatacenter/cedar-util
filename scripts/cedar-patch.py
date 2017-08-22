@@ -94,9 +94,9 @@ def build_patch_engine():
 def patch_template(patch_engine, lookup_file, limit, output_dir, debug):
     template_ids = get_template_ids(lookup_file, limit)
     total_templates = len(template_ids)
-    for index, template_id in enumerate(template_ids, start=1):
+    for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
-            print_progressbar(template_id, iteration=index, total_count=total_templates)
+            print_progressbar(template_id, counter, total_templates)
         try:
             template = get_template(template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
@@ -133,15 +133,12 @@ def create_filename_from_id(resource_id):
     return "template-" + resource_hash + ".patched.json"
 
 
-def print_progressbar(template_id, **kwargs):
+def print_progressbar(template_id, counter, total_count):
     template_hash = extract_resource_hash(template_id)
-    if 'iteration' in kwargs and 'total_count' in kwargs:
-        iteration = kwargs["iteration"]
-        total_count = kwargs["total_count"]
-        percent = 100 * (iteration / total_count)
-        filled_length = int(percent)
-        bar = "#" * filled_length + '-' * (100 - filled_length)
-        print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
+    percent = 100 * (counter / total_count)
+    filled_length = int(percent)
+    bar = "#" * filled_length + '-' * (100 - filled_length)
+    print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, template_hash), end='\r')
 
 
 def get_template_ids(lookup_file, limit):
