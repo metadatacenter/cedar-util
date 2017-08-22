@@ -38,7 +38,7 @@ def main():
                         required=False,
                         metavar="CEDAR-STAGING-API-KEY",
                         help="Use the validator from the staging server (nightly-build)")
-    parser.add_argument("--outputDir",
+    parser.add_argument("--output-dir",
                         required=False,
                         metavar="DIRNAME",
                         help="Set the output directory to store the patched resources")
@@ -52,7 +52,7 @@ def main():
     type = args.type
     lookup_file = args.lookup
     limit = args.limit
-    output_dir = args.outputDir
+    output_dir = args.output_dir
     debug = args.debug
 
     global server_address, cedar_api_key, staging_api_key
