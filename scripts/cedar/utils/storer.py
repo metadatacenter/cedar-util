@@ -22,18 +22,18 @@ def store_resource(api_key, request_url, resource):
         response.raise_for_status()
 
 
-def store_template(server_address, api_key, template, override=False):
-    request_url = server_address + "/templates?import_mode=" + str(override)
+def store_template(server_address, api_key, template, import_mode=False):
+    request_url = server_address + "/templates?import_mode=" + str(import_mode)
     return store_resource(api_key, request_url, template)
 
 
-def store_element(server_address, api_key, element, override=False):
-    request_url = server_address + "/template-elements?import_mode=" + str(override)
+def store_element(server_address, api_key, element, import_mode=False):
+    request_url = server_address + "/template-elements?import_mode=" + str(import_mode)
     return store_resource(api_key, request_url, element)
 
 
-def store_instance(server_address, api_key, instance, override=False):
-    request_url = server_address + "/template-instances?import_mode=" + str(override)
+def store_instance(server_address, api_key, instance, import_mode=False):
+    request_url = server_address + "/template-instances?import_mode=" + str(import_mode)
     return store_resource(api_key, request_url, instance)
 
 
