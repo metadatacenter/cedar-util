@@ -53,6 +53,11 @@ def search_instances(server_address, api_key, query='*', max_count=None, limit_p
     return search_resources(api_key, request_url, max_count, limit_per_page)
 
 
+def search_instances_of(server_address, api_key, template_id, max_count=None, limit_per_page=500):
+    request_url = server_address + "/search-deep?derived_from_id=" + template_id + "&q=*&resource_types=instance"
+    return search_resources(api_key, request_url, max_count, limit_per_page)
+
+
 def get_total_paging(total_count, limit_per_page):
     return math.ceil(total_count/limit_per_page)
 
