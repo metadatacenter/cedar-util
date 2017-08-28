@@ -25,6 +25,8 @@ __all__ = [
     "AddPropertyLabelsToUiPatch",
     "AddProvenanceToFieldOrElementPatch",
     "AddRequiredToFieldOrElementPatch",
+    "AddRdfsLabelToContextPropertiesPatch",
+    "AddRdfsToContextPropertiesPatch",
     "AddSchemaVersionPatch",
     "AddValueConstraintsToFieldOrElementPatch",
     "FillEmptyValuePatch",
