@@ -69,6 +69,8 @@ def main():
 
 def build_patch_engine():
     patch_engine = Engine()
+    patch_engine.add_patch(AddSchemaDescriptionToContextPatch())
+    patch_engine.add_patch(AddSchemaNameToContextPatch())
     patch_engine.add_patch(AddRdfsLabelToContextPropertiesPatch())
     patch_engine.add_patch(AddRdfsToContextPropertiesPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
