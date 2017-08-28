@@ -43,4 +43,5 @@ __all__ = [
     "RemoveValueFromPropertiesPatch",
     "RemovePageFromInnerUiPatch",
     "RemovePatternPropertiesPatch",
+    "RenameValueLabelToRdfsLabelPatch",
     "RestructureStaticTemplateFieldPatch"]
