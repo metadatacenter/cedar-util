@@ -35,11 +35,9 @@ class AddSchemaDescriptionToContextPatch(object):
         patch = {
             "op": "add",
             "value": {
-                "schema:description": {
-                    "@type": "xsd:string"
-                }
+                "@type": "xsd:string"
             },
-            "path": self.path
+            "path": self.path + "/schema:description"
         }
         patches.append(patch)
         return patches

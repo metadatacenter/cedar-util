@@ -35,19 +35,17 @@ class AddRdfsLabelToContextPropertiesPatch(object):
         patch = {
             "op": "add",
             "value": {
-                "rdfs:label": {
-                    "type": "object",
-                    "properties": {
-                        "@type": {
-                            "type": "string",
-                            "enum": [
-                                "xsd:string"
-                            ]
-                        }
+                "type": "object",
+                "properties": {
+                    "@type": {
+                        "type": "string",
+                        "enum": [
+                            "xsd:string"
+                        ]
                     }
                 }
             },
-            "path": self.path
+            "path": self.path + "/rdfs:label"
         }
         patches.append(patch)
         return patches

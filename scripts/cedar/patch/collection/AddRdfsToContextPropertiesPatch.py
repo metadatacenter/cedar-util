@@ -35,15 +35,13 @@ class AddRdfsToContextPropertiesPatch(object):
         patch = {
             "op": "add",
             "value": {
-                "rdfs": {
-                    "type": "string",
-                    "format": "uri",
-                    "enum": [
-                        "http://www.w3.org/2000/01/rdf-schema#"
-                    ]
-                }
+                "type": "string",
+                "format": "uri",
+                "enum": [
+                    "http://www.w3.org/2000/01/rdf-schema#"
+                ]
             },
-            "path": self.path
+            "path": self.path + "/rdfs"
         }
         patches.append(patch)
         return patches
