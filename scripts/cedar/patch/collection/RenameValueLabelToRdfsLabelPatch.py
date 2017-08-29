@@ -6,7 +6,7 @@ from cedar.patch import utils
 class RenameValueLabelToRdfsLabelPatch(object):
 
     def __init__(self):
-        self.description = "Move _content object to the _ui field"
+        self.description = "Rename all _valueLabel fields to rdfs:label"
         self.from_version = "1.1.0"
         self.to_version = "1.2.0"
         self.path = None
