@@ -1,6 +1,17 @@
 #!/bin/bash
 
 # Script to release all CEDAR artifacts.
+#
+# CEDAR_HOME and CEDAR_RELEASE_VERSION varables must be set.
+#
+# Maven ~/.m2/settings.xml file must be configured to use CEDAR Nexus server:
+#
+# https://github.com/metadatacenter/cedar-docs/wiki/Configuring-Maven-to-use-the-CEDAR-Nexus-Server
+#
+# NPM ~/.npmrc file must also be configured to use CEDAR Nexus server:
+#
+# https://github.com/metadatacenter/cedar-docs/wiki/Configuring-NPM-to-use-the-CEDAR-Nexus-Server
+#
 # Works but needs hardening
 
 if [ -z "$CEDAR_HOME" ]; then
