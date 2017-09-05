@@ -74,7 +74,6 @@ def build_patch_engine():
     patch_engine.add_patch(AddSchemaNameToContextPatch())
     patch_engine.add_patch(AddRdfsLabelToContextPropertiesPatch())
     patch_engine.add_patch(AddRdfsToContextPropertiesPatch())
-    patch_engine.add_patch(RestructureMultiValuedFieldPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
     patch_engine.add_patch(AddSchemaVersionPatch())
     patch_engine.add_patch(NoMatchOutOfFourSchemasPatch())
@@ -95,6 +94,7 @@ def build_patch_engine():
     patch_engine.add_patch(RecreateRequiredArrayPatch())
     patch_engine.add_patch(RemovePatternPropertiesPatch())
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
+    patch_engine.add_patch(RestructureMultiValuedFieldPatch())
     return patch_engine
 
 
