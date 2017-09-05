@@ -14,7 +14,7 @@ class RestructureMultiValuedFieldPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at (/properties/[^/]+)+")
+        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at [/properties/[^/]+]+")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
