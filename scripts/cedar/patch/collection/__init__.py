@@ -10,6 +10,7 @@ from cedar.patch.collection.AddRdfsToContextPropertiesPatch import AddRdfsToCont
 from cedar.patch.collection.AddRequiredToFieldOrElementPatch import AddRequiredToFieldOrElementPatch
 from cedar.patch.collection.AddSchemaDescriptionToContextPatch import AddSchemaDescriptionToContextPatch
 from cedar.patch.collection.AddSchemaDescriptionToContextPropertiesPatch import AddSchemaDescriptionToContextPropertiesPatch
+from cedar.patch.collection.AddSchemaIsBasedOnToContextPropertiesPatch import AddSchemaIsBasedOnToContextPropertiesPatch
 from cedar.patch.collection.AddSchemaNameToContextPatch import AddSchemaNameToContextPatch
 from cedar.patch.collection.AddSchemaNameToContextPropertiesPatch import AddSchemaNameToContextPropertiesPatch
 from cedar.patch.collection.AddSchemaVersionPatch import AddSchemaVersionPatch
@@ -41,6 +42,7 @@ __all__ = [
     "AddRequiredToFieldOrElementPatch",
     "AddSchemaDescriptionToContextPatch",
     "AddSchemaDescriptionToContextPropertiesPatch",
+    "AddSchemaIsBasedOnToContextPropertiesPatch",
     "AddSchemaNameToContextPatch",
     "AddSchemaNameToContextPropertiesPatch",
     "AddRdfsLabelToContextPropertiesPatch",
