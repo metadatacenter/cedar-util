@@ -72,6 +72,7 @@ def build_patch_engine():
     patch_engine.add_patch(RenameValueLabelToRdfsLabelPatch())
     patch_engine.add_patch(AddSchemaDescriptionToContextPatch())
     patch_engine.add_patch(AddSchemaNameToContextPatch())
+    patch_engine.add_patch(AddSchemaNameToContextPropertiesPatch())
     patch_engine.add_patch(AddXsdToContextPatch())
     patch_engine.add_patch(AddRdfsLabelToContextPropertiesPatch())
     patch_engine.add_patch(AddRdfsLabelToPropertiesPatch())
