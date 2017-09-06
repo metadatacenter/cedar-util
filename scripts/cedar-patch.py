@@ -87,6 +87,7 @@ def build_patch_engine():
     patch_engine.add_patch(MoveContentToUiPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(AddIdToPropertiesPatch())
+    patch_engine.add_patch(AddContentToUiPatch())
     patch_engine.add_patch(AddOrderToUiPatch())
     patch_engine.add_patch(AddPropertyLabelsToUiPatch())
     patch_engine.add_patch(AddProvenanceToContextPatch())

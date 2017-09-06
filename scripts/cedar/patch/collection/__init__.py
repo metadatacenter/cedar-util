@@ -1,3 +1,4 @@
+from cedar.patch.collection.AddContentToUiPatch import AddContentToUiPatch
 from cedar.patch.collection.AddIdToPropertiesPatch import AddIdToPropertiesPatch
 from cedar.patch.collection.AddOrderToUiPatch import AddOrderToUiPatch
 from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsToUiPatch
@@ -36,6 +37,7 @@ from cedar.patch.collection.RestructureStaticTemplateFieldPatch import Restructu
 from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureMultiValuedFieldPatch
 
 __all__ = [
+    "AddContentToUiPatch",
     "AddIdToPropertiesPatch",
     "AddOrderToUiPatch",
     "AddPropertyLabelsToUiPatch",
