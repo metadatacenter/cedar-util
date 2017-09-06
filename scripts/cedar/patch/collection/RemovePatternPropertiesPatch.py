@@ -7,13 +7,13 @@ class RemovePatternPropertiesPatch(object):
 
     def __init__(self):
         self.description = "Removes the requirement to have 'patternProperties' field in @context"
-        self.from_version = None
+        self.from_version = "1.1.0"
         self.to_version = "1.2.0"
         self.path = None
 
     def is_applied(self, error_description, template=None):
         pattern = re.compile(
-            "object instance has properties which are not allowed by the schema: ['patternProperties'] at /.*$")
+            "object instance has properties which are not allowed by the schema: \['patternProperties'\] at /.*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
@@ -35,7 +35,7 @@ class RemovePatternPropertiesPatch(object):
         patches = []
         patch = {
             "op": "remove",
-            "path": self.path
+            "path": self.path + "/patternProperties"
         }
         patches.append(patch)
 
