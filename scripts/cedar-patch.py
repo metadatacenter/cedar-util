@@ -83,6 +83,7 @@ def build_patch_engine():
     patch_engine.add_patch(AddIdToPropertiesPatch())
     patch_engine.add_patch(AddOrderToUiPatch())
     patch_engine.add_patch(AddPropertyLabelsToUiPatch())
+    patch_engine.add_patch(AddProvenanceToContextPatch())
     patch_engine.add_patch(AddProvenanceToFieldOrElementPatch())
     patch_engine.add_patch(AddRequiredToFieldOrElementPatch())
     patch_engine.add_patch(AddValueConstraintsToFieldOrElementPatch())
