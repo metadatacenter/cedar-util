@@ -14,12 +14,16 @@ class RestructureMultiValuedFieldPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at [/properties/[^/]+]+")
+        utils.check_argument_not_none(template, "The method required a template object")
+
+        is_applied = False
+        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at (/properties/[^/]+)+")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+            resource_obj = dpath.util.get(template, self.path)
+            if cedar_helper.is_multivalued_field(resource_obj):
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
@@ -33,12 +37,19 @@ class RestructureMultiValuedFieldPatch(object):
         if path is not None:
             self.path = path
 
+        element_or_field = dpath.util.get(doc, self.path)
+
         patches = []
+        patch = {
+            "op": "remove",
+            "path": self.path
+        }
+        patches.append(patch)
 
         patch = {
-            "op": "move",
-            "from": self.path,
-            "to": self.path + "/items"
+            "op": "add",
+            "value": {},
+            "path": self.path
         }
         patches.append(patch)
 
@@ -53,6 +64,13 @@ class RestructureMultiValuedFieldPatch(object):
             "op": "add",
             "value": 1,
             "path": self.path + "/minItems"
+        }
+        patches.append(patch)
+
+        patch = {
+            "op": "add",
+            "value": element_or_field,
+            "path": self.path + "/items"
         }
         patches.append(patch)
 
