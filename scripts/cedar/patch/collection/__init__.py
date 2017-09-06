@@ -4,6 +4,7 @@ from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsT
 from cedar.patch.collection.AddProvenanceToContextPatch import AddProvenanceToContextPatch
 from cedar.patch.collection.AddProvenanceToFieldOrElementPatch import AddProvenanceToFieldOrElementPatch
 from cedar.patch.collection.AddRdfsLabelToContextPropertiesPatch import AddRdfsLabelToContextPropertiesPatch
+from cedar.patch.collection.AddRdfsLabelToPropertiesPatch import AddRdfsLabelToPropertiesPatch
 from cedar.patch.collection.AddRdfsToContextPropertiesPatch import AddRdfsToContextPropertiesPatch
 from cedar.patch.collection.AddRequiredToFieldOrElementPatch import AddRequiredToFieldOrElementPatch
 from cedar.patch.collection.AddSchemaDescriptionToContextPatch import AddSchemaDescriptionToContextPatch
@@ -37,6 +38,7 @@ __all__ = [
     "AddSchemaDescriptionToContextPatch",
     "AddSchemaNameToContextPatch",
     "AddRdfsLabelToContextPropertiesPatch",
+    "AddRdfsLabelToPropertiesPatch",
     "AddRdfsToContextPropertiesPatch",
     "AddSchemaVersionPatch",
     "AddValueConstraintsToFieldOrElementPatch",
