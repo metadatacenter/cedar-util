@@ -16,25 +16,32 @@ def main():
                         nargs=2,
                         metavar=("SERVER-ADDRESS", "CEDAR-API-KEY"),
                         help="The destination server into which all the resources are copied")
+    parser.add_argument("--include-instances",
+                        dest="include_instances",
+                        default=False,
+                        action="store_true",
+                        help="Import all the template instances as well")
     args = parser.parse_args()
     source_server_address, source_api_key = args.from_server
     target_server_address, target_api_key = args.to_server
+    include_instances = args.include_instances
 
-    migrate(source_server_address, target_server_address, source_api_key, target_api_key)
+    migrate(source_server_address, target_server_address, source_api_key, target_api_key, include_instances)
 
 
-def migrate(source_server_address, target_server_address, source_api_key, target_api_key):
+def migrate(source_server_address, target_server_address, source_api_key, target_api_key, include_instances):
     template_ids = get_template_ids(source_server_address, source_api_key)
     for template_id in template_ids:
         print("Copying template: " + template_id)
         template = get_template(source_server_address, source_api_key, template_id)
         store_template(target_server_address, target_api_key, template)
 
-        instance_ids = get_instance_ids(source_server_address, source_api_key, template_id)
-        for counter, instance_id in enumerate(instance_ids, start=1):
-            print_progressbar(instance_id, "instance", counter, len(instance_ids))
-            instance = get_instance(source_server_address, source_api_key, instance_id)
-            store_instance(target_server_address, target_api_key, instance)
+        if include_instances:
+            instance_ids = get_instance_ids(source_server_address, source_api_key, template_id)
+            for counter, instance_id in enumerate(instance_ids, start=1):
+                print_progressbar(instance_id, "instance", counter, len(instance_ids))
+                instance = get_instance(source_server_address, source_api_key, instance_id)
+                store_instance(target_server_address, target_api_key, instance)
 
     element_ids = get_element_ids(source_server_address, source_api_key)
     for counter, element_id in enumerate(element_ids, start=1):
