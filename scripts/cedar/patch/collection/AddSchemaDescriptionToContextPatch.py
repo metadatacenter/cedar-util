@@ -12,7 +12,7 @@ class AddSchemaDescriptionToContextPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:description'(,'.+')*\]\) at /@context$")
+        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:description'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/@context$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
