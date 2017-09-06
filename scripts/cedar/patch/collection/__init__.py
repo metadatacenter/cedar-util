@@ -26,6 +26,7 @@ from cedar.patch.collection.RemoveArrayDuplicatesPatch import RemoveArrayDuplica
 from cedar.patch.collection.RemoveEnumFromOneOfPatch import RemoveEnumFromOneOfPatch
 from cedar.patch.collection.RemoveEnumFromTypePatch import RemoveEnumFromTypePatch
 from cedar.patch.collection.RemoveIdFromPropertiesPatch import RemoveIdFromPropertiesPatch
+from cedar.patch.collection.RemoveInstanceOfPatch import RemoveInstanceOfPatch
 from cedar.patch.collection.RemoveValueFromPropertiesPatch import RemoveValueFromPropertiesPatch
 from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInnerUiPatch
 from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
@@ -63,6 +64,7 @@ __all__ = [
     "RemoveEnumFromOneOfPatch",
     "RemoveEnumFromTypePatch",
     "RemoveIdFromPropertiesPatch",
+    "RemoveInstanceOfPatch",
     "RemoveValueFromPropertiesPatch",
     "RemovePageFromInnerUiPatch",
     "RemovePatternPropertiesPatch",

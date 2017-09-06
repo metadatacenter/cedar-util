@@ -97,6 +97,7 @@ def build_patch_engine():
     patch_engine.add_patch(RemoveEnumFromOneOfPatch())
     patch_engine.add_patch(RemoveEnumFromTypePatch())
     patch_engine.add_patch(RemoveIdFromPropertiesPatch())
+    patch_engine.add_patch(RemoveInstanceOfPatch())
     patch_engine.add_patch(RemoveValueFromPropertiesPatch())
     patch_engine.add_patch(RemovePageFromInnerUiPatch())
     patch_engine.add_patch(RecreateRequiredArrayPatch())
