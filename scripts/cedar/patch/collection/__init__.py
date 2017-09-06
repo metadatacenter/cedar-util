@@ -16,6 +16,7 @@ from cedar.patch.collection.AddSchemaNameToContextPropertiesPatch import AddSche
 from cedar.patch.collection.AddSchemaVersionPatch import AddSchemaVersionPatch
 from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddValueConstraintsToFieldOrElementPatch
 from cedar.patch.collection.AddXsdToContextPatch import AddXsdToContextPatch
+from cedar.patch.collection.AddXsdToContextPropertiesPatch import AddXsdToContextPropertiesPatch
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoMatchOutOfFourSchemasPatch import NoMatchOutOfFourSchemasPatch
@@ -51,6 +52,7 @@ __all__ = [
     "AddSchemaVersionPatch",
     "AddValueConstraintsToFieldOrElementPatch",
     "AddXsdToContextPatch",
+    "AddXsdToContextPropertiesPatch",
     "FillEmptyValuePatch",
     "MoveContentToUiPatch",
     "NoMatchOutOfFourSchemasPatch",
