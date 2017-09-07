@@ -13,6 +13,9 @@ class AddProvenanceToFieldOrElementPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
+        if template is None:
+            pass # Just ignore
+
         pattern = re.compile("object has missing required properties \(\[('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')" +
                              "[,('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')]*\]\) " +
                              "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
@@ -27,9 +30,11 @@ class AddProvenanceToFieldOrElementPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
+    def get_json_patch(self, doc=None, path=None):
+        utils.check_argument_not_none(doc, "The method requires the 'doc' argument")
+
         if self.path is None and path is None:
-            raise Exception("The method required a 'path' location")
+            raise Exception("The method requires the 'path' argument")
 
         if path is not None:
             self.path = path

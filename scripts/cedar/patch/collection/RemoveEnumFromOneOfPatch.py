@@ -12,6 +12,9 @@ class RemoveEnumFromOneOfPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
+        if template is None:
+            pass # Just ignore
+
         pattern = re.compile(
             "array is too long: must have at most 2 elements but instance has 3 elements at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties/@type/oneOf$")
         if pattern.match(error_description):
@@ -25,9 +28,12 @@ class RemoveEnumFromOneOfPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
+    def get_json_patch(self, doc=None, path=None):
+        if doc is None:
+            pass # Just ignore
+
         if self.path is None and path is None:
-            raise Exception("The method required a 'path' location")
+            raise Exception("The method requires the 'path' argument")
 
         if path is not None:
             self.path = path

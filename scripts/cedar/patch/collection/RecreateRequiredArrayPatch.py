@@ -1,5 +1,6 @@
 import jsonpatch
 import re
+from cedar.patch import utils
 
 
 class RecreateRequiredArrayPatch(object):
@@ -11,6 +12,9 @@ class RecreateRequiredArrayPatch(object):
         self.path = "/required"
 
     def is_applied(self, error_description, template=None):
+        if template is None:
+            pass # Just ignore
+
         pattern = re.compile(
             "array is too short: must have at least 9 elements but instance has \d elements at /required$|" +
             "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at /required/\d+$")
@@ -24,7 +28,9 @@ class RecreateRequiredArrayPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
+    def get_json_patch(self, doc=None, path=None):
+        utils.check_argument_not_none(doc, "The method requires the 'doc' argument")
+
         properties_list = self.get_all_properties(doc)
 
         patches = []

@@ -12,6 +12,9 @@ class RemoveSchemaVersionPatch(object):
         self.path = None
 
     def is_applied(self, error_description, template=None):
+        if template is None:
+            pass # Just ignore
+
         pattern = re.compile(
             "object instance has properties which are not allowed by the schema: \['schemaVersion'\] at /.*$")
         if pattern.match(error_description):
@@ -25,9 +28,12 @@ class RemoveSchemaVersionPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
+    def get_json_patch(self, doc=None, path=None):
+        if doc is None:
+            pass  # Just ignore
+
         if self.path is None and path is None:
-            raise Exception("The method required a 'path' location")
+            raise Exception("The method requires the 'path' argument")
 
         if path is not None:
             self.path = path
