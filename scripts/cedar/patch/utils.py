@@ -39,9 +39,6 @@ def check_argument(argname, argobj, isreq=True):
             raise Exception("The method requires the '" + argname + "' argument")
 
 
-def check_argument_not_none(argument, user_message=None):
-    if argument is None:
-        message = "Missing input argument"
-        if user_message is not None:
-            message = user_message
-        raise Exception(message)
+def check_argument_not_none(argname, arg):
+    if arg is None:
+        raise Exception("The method requires the '" + argname + "' argument")
