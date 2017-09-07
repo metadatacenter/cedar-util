@@ -13,14 +13,16 @@ class RestructureStaticTemplateFieldPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description, template=None):
-        utils.check_argument_not_none(template, "The method required a template object")
+    def is_applied(self, error, doc=None):
+        utils.check_argument('error', error, isreq=True)
+        utils.check_argument('doc', doc, isreq=True)
 
+        error_description = error
         is_applied = False
         pattern = re.compile("instance value \('https://schema.metadatacenter.org/core/StaticTemplateField'\) not found in enum \(possible values: \['https://schema.metadatacenter.org/core/TemplateElement'\]\) at (/properties/[^/]+)*/properties/[^/]+/@type$")
         if pattern.match(error_description):
             self.path = self.get_user_property_path(error_description)
-            resource_obj = self.get_resource_object(template, self.path)
+            resource_obj = self.get_resource_object(doc, self.path)
             if cedar_helper.is_static_template_field(resource_obj):
                 is_applied = True
         return is_applied
@@ -31,13 +33,8 @@ class RestructureStaticTemplateFieldPatch(object):
         return patched_doc
 
     def get_json_patch(self, doc=None, path=None):
-        utils.check_argument_not_none(doc, "The method requires the 'doc' argument")
-
-        if self.path is None and path is None:
-            raise Exception("The method requires the 'path' argument")
-
-        if path is not None:
-            self.path = path
+        utils.check_argument('doc', doc, isreq=True)
+        utils.check_argument('path', path, isreq=False)
 
         patches = []
         if self.has_content(doc):

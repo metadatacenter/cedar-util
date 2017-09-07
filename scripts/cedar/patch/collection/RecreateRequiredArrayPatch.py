@@ -11,10 +11,11 @@ class RecreateRequiredArrayPatch(object):
         self.to_version = "1.1.0"
         self.path = "/required"
 
-    def is_applied(self, error_description, template=None):
-        if template is None:
-            pass # Just ignore
+    def is_applied(self, error, doc=None):
+        utils.check_argument('error', error, isreq=True)
+        utils.check_argument('doc', doc, isreq=False)
 
+        error_description = error
         pattern = re.compile(
             "array is too short: must have at least 9 elements but instance has \d elements at /required$|" +
             "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at /required/\d+$")
@@ -29,7 +30,8 @@ class RecreateRequiredArrayPatch(object):
         return patched_doc
 
     def get_json_patch(self, doc=None, path=None):
-        utils.check_argument_not_none(doc, "The method requires the 'doc' argument")
+        utils.check_argument('doc', doc, isreq=True)
+        utils.check_argument('path', path, isreq=False)
 
         properties_list = self.get_all_properties(doc)
 

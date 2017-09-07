@@ -33,6 +33,12 @@ def get_error_location(text):
     return found
 
 
+def check_argument(argname, argobj, isreq=True):
+    if isreq:
+        if argobj is None:
+            raise Exception("The method requires the '" + argname + "' argument")
+
+
 def check_argument_not_none(argument, user_message=None):
     if argument is None:
         message = "Missing input argument"

@@ -12,10 +12,11 @@ class AddProvenanceToContextPropertiesPatch(object):
         self.to_version = "1.1.0"
         self.path = None
 
-    def is_applied(self, error_description, template=None):
-        if template is None:
-            pass # Just ignore
+    def is_applied(self, error, doc=None):
+        utils.check_argument('error', error, isreq=True)
+        utils.check_argument('doc', doc, isreq=False)
 
+        error_description = error
         pattern = re.compile("object has missing required properties \(\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\]\) at /properties/@context/properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
@@ -29,14 +30,8 @@ class AddProvenanceToContextPropertiesPatch(object):
         return patched_doc
 
     def get_json_patch(self, doc=None, path=None):
-        if doc is None:
-            pass # Just ignore
-
-        if self.path is None and path is None:
-            raise Exception("The method requires the 'path' argument")
-
-        if path is not None:
-            self.path = path
+        utils.check_argument('doc', doc, isreq=False)
+        utils.check_argument('path', path, isreq=False)
 
         patches = []
         patch = {
