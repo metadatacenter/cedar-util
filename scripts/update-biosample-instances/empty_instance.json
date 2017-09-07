@@ -4,6 +4,9 @@
     "pav": "http://purl.org/pav/",
     "schema": "http://schema.org/",
     "oslc": "http://open-services.net/ns/core#",
+    "rdfs:label": {
+      "@type": "xsd:string"
+    },
     "schema:isBasedOn": {
       "@type": "@id"
     },
@@ -56,11 +59,11 @@
   "organism": {
     "@type": "http://data.bioontology.org/ontologies/NCBITAXON/classes/http%3A%2F%2Fpurl.bioontology.org%2Fontology%2FSTY%2FT001"
   },
-  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/f1d0c702-70df-4b49-ba24-e0f9ce4ae3a6",
-  "schema:name": "BioSample Human metadata",
+  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/ae1d8f8f-fa1f-41e3-89cb-87a69b22add7",
+  "schema:name": "BioSample Human",
   "schema:description": "BioSample Human",
-  "pav:createdOn": "2017-08-10T15:17:04-0700",
+  "pav:createdOn": "2017-08-31T15:56:05-0700",
   "pav:createdBy": "https://metadatacenter.org/users/8d787b98-33dd-4aff-a88c-440caf452c61",
-  "pav:lastUpdatedOn": "2017-08-10T15:17:04-0700",
+  "pav:lastUpdatedOn": "2017-08-31T15:56:05-0700",
   "oslc:modifiedBy": "https://metadatacenter.org/users/8d787b98-33dd-4aff-a88c-440caf452c61"
 }
