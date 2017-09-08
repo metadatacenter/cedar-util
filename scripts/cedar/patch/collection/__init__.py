@@ -23,6 +23,7 @@ from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoMatchOutOfFourSchemasPatch import NoMatchOutOfFourSchemasPatch
 from cedar.patch.collection.NoMatchOutOfTwoSchemasPatch import NoMatchOutOfTwoSchemasPatch
+from cedar.patch.collection.RecreateElementRequiredPatch import RecreateElementRequiredPatch
 from cedar.patch.collection.RecreateTemplateRequiredPatch import RecreateTemplateRequiredPatch
 from cedar.patch.collection.RemoveArrayDuplicatesPatch import RemoveArrayDuplicatesPatch
 from cedar.patch.collection.RemoveEnumFromOneOfPatch import RemoveEnumFromOneOfPatch
@@ -63,6 +64,7 @@ __all__ = [
     "MoveContentToUiPatch",
     "NoMatchOutOfFourSchemasPatch",
     "NoMatchOutOfTwoSchemasPatch",
+    "RecreateElementRequiredPatch",
     "RecreateTemplateRequiredPatch",
     "RemoveArrayDuplicatesPatch",
     "RemoveEnumFromOneOfPatch",
