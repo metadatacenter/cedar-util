@@ -3,7 +3,7 @@ import re
 from cedar.patch import utils
 
 
-class RecreateRequiredArrayPatch(object):
+class RecreateTemplateRequiredPatch(object):
 
     def __init__(self):
         self.description = "Fixes the property list of a template's required array"
