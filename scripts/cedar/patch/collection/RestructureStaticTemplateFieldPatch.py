@@ -2,7 +2,6 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
-from cedar.patch.collection import utils as cedar_helper
 
 
 class RestructureStaticTemplateFieldPatch(object):
@@ -22,8 +21,7 @@ class RestructureStaticTemplateFieldPatch(object):
         pattern = re.compile("instance value \('https://schema.metadatacenter.org/core/StaticTemplateField'\) not found in enum \(possible values: \['https://schema.metadatacenter.org/core/TemplateElement'\]\) at (/properties/[^/]+)*/properties/[^/]+/@type$")
         if pattern.match(error_description):
             self.path = self.get_user_property_path(error_description)
-            resource_obj = self.get_resource_object(doc, self.path)
-            if cedar_helper.is_static_template_field(resource_obj):
+            if utils.is_static_template_field(doc, at=self.path):
                 is_applied = True
         return is_applied
 
@@ -32,44 +30,40 @@ class RestructureStaticTemplateFieldPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    def get_patch(self, doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_description = error
+        path = self.get_user_property_path(error_description)
 
         patches = []
-        if self.has_content(doc):
+        if self.has_content(doc, path):
             patch = {
                 "op": "move",
-                "from": self.path + "/properties/_content",
-                "path": self.path + "/_ui/_content"
+                "from": path + "/properties/_content",
+                "path": path + "/_ui/_content"
             }
             patches.append(patch)
-        patch = {
-            "op": "remove",
-            "path": self.path + "/properties",
-        }
-        patches.append(patch)
-        patch = {
-            "op": "remove",
-            "path": self.path + "/required",
-        }
-        patches.append(patch)
-        return patches
 
-    def get_user_property_path(self, error_description):
+        patch = {
+            "op": "remove",
+            "path": path + "/properties",
+        }
+        patches.append(patch)
+        patch = {
+            "op": "remove",
+            "path": path + "/required",
+        }
+        patches.append(patch)
+        return jsonpatch.JsonPatch(patches)
+
+    @staticmethod
+    def get_user_property_path(error_description):
         original_path = utils.get_error_location(error_description)
         user_property_path = original_path[:original_path.rfind('/@type')]
         return user_property_path
 
-    def has_content(self, doc):
-        properties_path = self.path + "/properties"
+    @staticmethod
+    def has_content(doc, path):
+        properties_path = path + "/properties"
         properties = dpath.util.get(doc, properties_path)
         return "_content" in properties
-
-    @staticmethod
-    def get_resource_object(template, path):
-        resource_object = template
-        parent_path = path[:path.rfind('/')]
-        if parent_path:
-            resource_object = dpath.util.get(template, parent_path)
-        return resource_object

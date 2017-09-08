@@ -20,7 +20,10 @@ class AddRequiredToFieldOrElementPatch(object):
         pattern = re.compile("object has missing required properties \(\['required'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            return True
+            if not utils.is_static_template_field(doc):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -29,24 +32,20 @@ class AddRequiredToFieldOrElementPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    def get_patch(self, doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description)
+        user_property = self.get_all_properties(doc, path)
+        patches = [{
+            "op": "add",
+            "value": user_property,
+            "path": path + "/required"
+        }]
+        return jsonpatch.JsonPatch(patches)
 
-        patches = []
-        if not self.is_static_type(doc):
-            user_property = self.get_all_properties(doc)
-            patch = {
-                "op": "add",
-                "value": user_property,
-                "path": self.path + "/required"
-            }
-            patches.append(patch)
-
-        return patches
-
-    def get_all_properties(self, doc):
-        properties = list(dpath.util.get(doc, self.path + "/properties").keys())
+    @staticmethod
+    def get_all_properties(doc, path):
+        properties = list(dpath.util.get(doc, path + "/properties").keys())
         system_properties = [
             "@id",
             "@type",
@@ -56,7 +55,3 @@ class AddRequiredToFieldOrElementPatch(object):
             "pav:lastUpdatedOn",
             "oslc:modifiedBy"]
         return [prop for prop in properties if prop not in system_properties]
-
-    def is_static_type(self, doc):
-        type_value = dpath.util.get(doc, self.path + "/@type")
-        return "StaticTemplateField" in type_value

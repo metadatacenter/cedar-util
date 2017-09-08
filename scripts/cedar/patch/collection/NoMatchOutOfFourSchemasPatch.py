@@ -30,14 +30,16 @@ class NoMatchOutOfFourSchemasPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    def get_patch(self, doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_description = error
+        path = utils.get_error_location(error_description)
+
+        user_property = self.get_user_property_object(doc, path)
+        path = user_property["path"]
+        user_property_object = user_property["object"]
 
         patches = []
-
-        user_property_object = self.get_user_property_object(doc)
-
         patch = {
             "op": "replace",
             "value": {
@@ -58,16 +60,16 @@ class NoMatchOutOfFourSchemasPatch(object):
                     "@type": "@id"
                 }
             },
-            "path": self.path + "/@context"
+            "path": path + "/@context"
         }
         patches.append(patch)
 
         property_object = user_property_object.get("properties")
         if property_object is not None:
-            if user_property_object["@type"] == "https://schema.metadatacenter.org/core/StaticTemplateField":
+            if utils.is_static_template_field(user_property_object):
                 patch = {
                     "op": "remove",
-                    "path": self.path + "/properties"
+                    "path": path + "/properties"
                 }
                 patches.append(patch)
 
@@ -95,7 +97,7 @@ class NoMatchOutOfFourSchemasPatch(object):
                                 }
                             ]
                         },
-                        "path": self.path + "/properties/@type"
+                        "path": path + "/properties/@type"
                     }
                     patches.append(patch)
 
@@ -104,7 +106,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": "blank",
-                "path": self.path + "/title"
+                "path": path + "/title"
             }
             patches.append(patch)
 
@@ -113,7 +115,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": "blank",
-                "path": self.path + "/description"
+                "path": path + "/description"
             }
             patches.append(patch)
 
@@ -122,7 +124,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:createdOn"
+                "path": path + "/pav:createdOn"
             }
             patches.append(patch)
 
@@ -131,7 +133,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:createdBy"
+                "path": path + "/pav:createdBy"
             }
             patches.append(patch)
 
@@ -140,7 +142,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:lastUpdatedOn"
+                "path": path + "/pav:lastUpdatedOn"
             }
             patches.append(patch)
 
@@ -149,7 +151,7 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/oslc:modifiedBy"
+                "path": path + "/oslc:modifiedBy"
             }
             patches.append(patch)
 
@@ -158,16 +160,20 @@ class NoMatchOutOfFourSchemasPatch(object):
             patch = {
                 "op": "add",
                 "value": "1.1.0",
-                "path": self.path + "/schema:schemaVersion"
+                "path": path + "/schema:schemaVersion"
             }
             patches.append(patch)
 
-        return patches
+        return jsonpatch.JsonPatch(patches)
 
-    def get_user_property_object(self, doc):
-        user_property_object = dpath.util.get(doc, self.path)
+    @staticmethod
+    def get_user_property_object(doc, path):
+        user_property_object = dpath.util.get(doc, path)
         items_object = user_property_object.get("items")
         if items_object:
-            self.path = self.path + "/items"
+            path = path + "/items"
             user_property_object = items_object
-        return user_property_object
+        return {
+            "path": path,
+            "object": user_property_object
+        }

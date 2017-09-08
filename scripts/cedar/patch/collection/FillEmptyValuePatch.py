@@ -28,18 +28,13 @@ class FillEmptyValuePatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=False)
-        utils.check_argument('path', path, isreq=False)
-
-        default_value = "blank"
-
-        patches = []
-        patch = {
+    @staticmethod
+    def get_patch(doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description)
+        patches = [{
             "op": "add",
-            "value": default_value,
-            "path": self.path
-        }
-        patches.append(patch)
-
-        return patches
+            "value": "blank",
+            "path": path
+        }]
+        return jsonpatch.JsonPatch(patches)

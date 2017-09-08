@@ -29,45 +29,36 @@ class AddProvenanceToContextPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=False)
-        utils.check_argument('path', path, isreq=False)
-
-        patches = []
-        patch = {
+    @staticmethod
+    def get_patch(doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description)
+        patches = [{
             "op": "add",
             "value": {
                 "@type": "@id"
             },
-            "path": self.path + "/oslc:modifiedBy"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/oslc:modifiedBy"
+        },
+        {
             "op": "add",
             "value": {
                 "@type": "@id"
             },
-            "path": self.path + "/pav:createdBy"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/pav:createdBy"
+        },
+        {
             "op": "add",
             "value": {
                 "@type": "xsd:dateTime"
             },
-            "path": self.path + "/pav:createdOn"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/pav:createdOn"
+        },
+        {
             "op": "add",
             "value": {
                 "@type": "xsd:dateTime"
             },
-            "path": self.path + "/pav:lastUpdatedOn"
-        }
-        patches.append(patch)
-
-        return patches
+            "path": path + "/pav:lastUpdatedOn"
+        }]
+        return jsonpatch.JsonPatch(patches)

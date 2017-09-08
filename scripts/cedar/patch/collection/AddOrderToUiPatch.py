@@ -2,7 +2,6 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
-from cedar.patch.collection import utils as cedar_helper
 
 
 class AddOrderToUiPatch(object):
@@ -22,8 +21,8 @@ class AddOrderToUiPatch(object):
         pattern = re.compile("object has missing required properties \(\[('.+',)*'order'(,'.+')*\]\) at (/.+)?/_ui$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            resource_obj = self.get_resource_object(doc, self.path)
-            if cedar_helper.is_template(resource_obj) or cedar_helper.is_template_element(resource_obj):
+            parent_path = utils.get_parent_path(self.path)
+            if utils.is_template(doc, at=parent_path) or utils.is_template_element(doc, at=parent_path):
                 is_applied = True
         return is_applied
 
@@ -32,24 +31,21 @@ class AddOrderToUiPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
-
-        user_properties = self.get_user_properties(doc)
-
-        patches = []
-        patch = {
+    def get_patch(self, doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_description = error
+        path = utils.get_error_location(error_description)
+        user_properties = self.get_user_properties(doc, path)
+        patches = [{
             "op": "add",
             "value": user_properties,
-            "path": self.path + "/order"
-        }
-        patches.append(patch)
+            "path": path + "/order"
+        }]
+        return jsonpatch.JsonPatch(patches)
 
-        return patches
-
-    def get_user_properties(self, doc):
-        parent_path = self.path[:self.path.rfind('/')]
+    @staticmethod
+    def get_user_properties(doc, path):
+        parent_path = utils.get_parent_path(path)
         properties = list(dpath.util.get(doc, parent_path + "/properties").keys())
         system_properties = [
             "@context",
@@ -63,11 +59,3 @@ class AddOrderToUiPatch(object):
             "pav:lastUpdatedOn",
             "oslc:modifiedBy"]
         return [prop for prop in properties if prop not in system_properties]
-
-    @staticmethod
-    def get_resource_object(template, path):
-        resource_object = template
-        parent_path = path[:path.rfind('/')]
-        if parent_path:
-            resource_object = dpath.util.get(template, parent_path)
-        return resource_object

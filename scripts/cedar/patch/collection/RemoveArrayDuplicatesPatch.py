@@ -30,24 +30,21 @@ class RemoveArrayDuplicatesPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    def get_patch(self, doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_description = error
+        path = utils.get_error_location(error_description)
 
-        array_items = dpath.util.get(doc, self.path)
+        array_items = dpath.util.get(doc, path)
         non_duplicate_list = list(OrderedDict.fromkeys(array_items))
 
-        patches = []
-        patch = {
+        patches = [{
             "op": "remove",
-            "path": self.path
-        }
-        patches.append(patch)
-        patch = {
+            "path": path
+        },
+        {
             "op": "add",
             "value": non_duplicate_list,
-            "path": self.path
-        }
-        patches.append(patch)
-
-        return patches
+            "path": path
+        }]
+        return jsonpatch.JsonPatch(patches)

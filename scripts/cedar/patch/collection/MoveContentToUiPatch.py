@@ -28,19 +28,14 @@ class MoveContentToUiPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=False)
-        utils.check_argument('path', path, isreq=False)
-
-        parent_path = self.path[:self.path.rfind('/properties')]
-        ui_path = parent_path + "/_ui/_content"
-
-        patches = []
-        patch = {
+    @staticmethod
+    def get_patch(doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description) + "/_content"
+        ui_content_path = path[:path.rfind('/properties')] + "/_ui/_content"
+        patches = [{
             "op": "move",
-            "from": self.path,
-            "path": ui_path
-        }
-        patches.append(patch)
-
-        return patches
+            "from": path,
+            "path": ui_content_path
+        }]
+        return jsonpatch.JsonPatch(patches)

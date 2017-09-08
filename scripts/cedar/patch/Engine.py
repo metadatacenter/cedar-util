@@ -1,4 +1,5 @@
 import copy
+import jsonpatch
 
 
 class Engine(object):
@@ -56,7 +57,7 @@ class Engine(object):
             for patch in self.patches:
                 if patch.is_applied(error_message, template) and error_message not in self.__solved_errors:
                     found_patch = True
-                    patched_template = patch.apply(template)
+                    patched_template = patch.get_patch(template, error_message).apply(template)
                     break
 
             if found_patch:

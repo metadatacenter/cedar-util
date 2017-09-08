@@ -28,12 +28,11 @@ class AddRdfsToContextPropertiesPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=False)
-        utils.check_argument('path', path, isreq=False)
-
-        patches = []
-        patch = {
+    @staticmethod
+    def get_patch(doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description)
+        patches = [{
             "op": "add",
             "value": {
                 "type": "string",
@@ -42,7 +41,6 @@ class AddRdfsToContextPropertiesPatch(object):
                     "http://www.w3.org/2000/01/rdf-schema#"
                 ]
             },
-            "path": self.path + "/rdfs"
-        }
-        patches.append(patch)
-        return patches
+            "path": path + "/rdfs"
+        }]
+        return jsonpatch.JsonPatch(patches)

@@ -31,20 +31,21 @@ class AddProvenanceToFieldOrElementPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    @staticmethod
+    def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_description = error
+        path = utils.get_error_location(error_description)
 
         patches = []
 
-        resource_object =  dpath.util.get(doc, self.path)
-
+        resource_object = dpath.util.get(doc, path)
         title = resource_object.get("title") or ""
         if not title:  # if title is empty
             patch = {
                 "op": "add",
                 "value": "blank",
-                "path": self.path + "/title"
+                "path": path + "/title"
             }
             patches.append(patch)
 
@@ -53,7 +54,7 @@ class AddProvenanceToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": "blank",
-                "path": self.path + "/description"
+                "path": path + "/description"
             }
             patches.append(patch)
 
@@ -62,7 +63,7 @@ class AddProvenanceToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:createdOn"
+                "path": path + "/pav:createdOn"
             }
             patches.append(patch)
 
@@ -71,7 +72,7 @@ class AddProvenanceToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:createdBy"
+                "path": path + "/pav:createdBy"
             }
             patches.append(patch)
 
@@ -80,7 +81,7 @@ class AddProvenanceToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/pav:lastUpdatedOn"
+                "path": path + "/pav:lastUpdatedOn"
             }
             patches.append(patch)
 
@@ -89,8 +90,8 @@ class AddProvenanceToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": None,
-                "path": self.path + "/oslc:modifiedBy"
+                "path": path + "/oslc:modifiedBy"
             }
             patches.append(patch)
 
-        return patches
+        return jsonpatch.JsonPatch(patches)

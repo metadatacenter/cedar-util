@@ -2,7 +2,6 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
-from cedar.patch.collection import utils as cedar_helper
 
 
 class RestructureMultiValuedFieldPatch(object):
@@ -22,8 +21,7 @@ class RestructureMultiValuedFieldPatch(object):
         pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at (/properties/[^/]+)+")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            resource_obj = dpath.util.get(doc, self.path)
-            if cedar_helper.is_multivalued_field(resource_obj):
+            if utils.is_multivalued_field(doc, at=self.path):
                 is_applied = True
         return is_applied
 
@@ -32,45 +30,36 @@ class RestructureMultiValuedFieldPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
+    @staticmethod
+    def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+        error_message = error
+        path = utils.get_error_location(error_message)
 
-        element_or_field = dpath.util.get(doc, self.path)
+        element_or_field = dpath.util.get(doc, path)
 
-        patches = []
-        patch = {
+        patches = [{
             "op": "remove",
-            "path": self.path
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path
+        },
+        {
             "op": "add",
             "value": {},
-            "path": self.path
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path
+        },
+        {
             "op": "add",
             "value": "array",
-            "path": self.path + "/type"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/type"
+        },
+        {
             "op": "add",
             "value": 1,
-            "path": self.path + "/minItems"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/minItems"
+        },
+        {
             "op": "add",
             "value": element_or_field,
-            "path": self.path + "/items"
-        }
-        patches.append(patch)
-
-        return patches
+            "path": path + "/items"
+        }]
+        return jsonpatch.JsonPatch(patches)

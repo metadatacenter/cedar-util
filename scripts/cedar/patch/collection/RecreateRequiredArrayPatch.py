@@ -29,28 +29,22 @@ class RecreateRequiredArrayPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=True)
-        utils.check_argument('path', path, isreq=False)
-
+    def get_patch(self, doc, error):
+        utils.check_argument_not_none("doc", doc)
         properties_list = self.get_all_properties(doc)
-
-        patches = []
-        patch = {
+        patches = [{
             "op": "remove",
             "path": "/required"
-        }
-        patches.append(patch)
-        patch = {
+        },
+        {
             "op": "add",
             "value": properties_list,
             "path": "/required"
-        }
-        patches.append(patch)
+        }]
+        return jsonpatch.JsonPatch(patches)
 
-        return patches
-
-    def get_all_properties(self, doc):
+    @staticmethod
+    def get_all_properties(doc):
         default_properties = [
             "@context",
             "@id",
@@ -61,10 +55,8 @@ class RecreateRequiredArrayPatch(object):
             "pav:createdBy",
             "pav:lastUpdatedOn",
             "oslc:modifiedBy"]
-
         properties = list(doc["properties"].keys())
         for prop in properties:
             if prop not in default_properties:
                 default_properties.append(prop)
-
         return default_properties

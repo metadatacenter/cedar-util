@@ -1,8 +1,6 @@
 import jsonpatch
 import re
-import dpath
 from cedar.patch import utils
-from cedar.patch.collection import utils as cedar_helper
 
 
 class AddValueConstraintsToFieldOrElementPatch(object):
@@ -22,8 +20,7 @@ class AddValueConstraintsToFieldOrElementPatch(object):
         pattern = re.compile("object has missing required properties \(\[('.+',)*'_valueConstraints'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
-            resource_obj = self.get_resource_object(doc, self.path)
-            if cedar_helper.is_template_field(resource_obj):
+            if utils.is_template_field(doc, at=self.path):
                 is_applied = True
         return is_applied
 
@@ -32,22 +29,15 @@ class AddValueConstraintsToFieldOrElementPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc=None, path=None):
-        utils.check_argument('doc', doc, isreq=False)
-        utils.check_argument('path', path, isreq=False)
-
-        patches = []
-        patch = {
+    @staticmethod
+    def get_patch(doc, error):
+        error_description = error
+        path = utils.get_error_location(error_description)
+        patches = [{
             "op": "add",
             "value": {
                 "requiredValue": False
             },
-            "path": self.path + "/_valueConstraints"
-        }
-        patches.append(patch)
-
-        return patches
-
-    @staticmethod
-    def get_resource_object(template, path):
-        return dpath.util.get(template, path)
+            "path": path + "/_valueConstraints"
+        }]
+        return jsonpatch.JsonPatch(patches)
