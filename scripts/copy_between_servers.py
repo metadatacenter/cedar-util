@@ -21,10 +21,10 @@ import urllib
 
 # Server uris
 source_server = "https://resource.staging.metadatacenter.net/"
-target_server = "https://resource.metadatacenter.net/"
+target_server = "https://resource.metadatacenter.orgx/"
 # Api keys
-source_api_key = "<apiKey1>"
-target_api_key = "<apiKey2>"
+source_api_key = "<apiKey>"
+target_api_key = "<apiKey>"
 
 # Folder ids
 target_folder_id_templates = "https://repo.metadatacenter.net/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
@@ -46,37 +46,37 @@ limit_per_call = 500
 max_count = 40000
 
 
-def main():
-    # Disable InsecureRequestWarning
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
-    # Move templates and instances
-    for source_template_id in source_templates_ids:
-        template_text = get_template(source_server, source_template_id, source_api_key)
-        template_text = template_text.replace(old, new)
-        template_json = json.loads(template_text)
-        target_template_json = post_template(target_server, template_json, target_folder_id_templates, target_api_key)
-        target_template_id = target_template_json['@id']
-        post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id_instances,
-                       max_count, limit_per_call, source_api_key, target_api_key)
-
-    # Move elements
-    for source_element_id in source_elements_ids:
-        element_text = get_element(source_server, source_element_id, source_api_key)
-        element_text = element_text.replace(old, new)
-        element_json = json.loads(element_text)
-        post_element(target_server, element_json, target_folder_id_elements, target_api_key)
-
-    print("**** Done ****")
+# def main():
+#     # Disable InsecureRequestWarning
+#     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+#
+#     # Move templates and instances
+#     for source_template_id in source_templates_ids:
+#         template_text = get_template(source_server, source_template_id, source_api_key)
+#         template_text = template_text.replace(old, new)
+#         template_json = json.loads(template_text)
+#         target_template_json = post_template(target_server, template_json, target_folder_id_templates, target_api_key)
+#         target_template_id = target_template_json['@id']
+#         post_instances(source_server, target_server, source_template_id, target_template_id, target_folder_id_instances,
+#                        max_count, limit_per_call, source_api_key, target_api_key)
+#
+#     # Move elements
+#     for source_element_id in source_elements_ids:
+#         element_text = get_element(source_server, source_element_id, source_api_key)
+#         element_text = element_text.replace(old, new)
+#         element_json = json.loads(element_text)
+#         post_element(target_server, element_json, target_folder_id_elements, target_api_key)
+#
+#     print("**** Done ****")
 
 
 # Used to delete the template and instances created
-# def main():  
-#     # Disable InsecureRequestWarning
-#     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  
-#     templ_id = "https://repo.metadatacenter.orgx/templates/cd292507-4a49-4326-8196-d262255c3507"
-#     delete_instances(target_server, templ_id, max_count, limit_per_call, target_api_key)
-#     print("**** Done ****")
+def main():
+    # Disable InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    templ_id = "https://repo.metadatacenter.orgx/templates/f1d0c702-70df-4b49-ba24-e0f9ce4ae3a6"
+    delete_instances(target_server, templ_id, max_count, limit_per_call, target_api_key)
+    print("**** Done ****")
 
 def get_template(server, template_id, api_key):
     url = server + "templates/" + urllib.parse.quote(template_id, safe='')
