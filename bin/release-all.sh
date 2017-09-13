@@ -293,13 +293,13 @@ release_docker_deploy_repo()
     popd
 }
 
-release_standalone_repo()
+release_mavenless_repo()
 {
     pushd $CEDAR_HOME/$1
 
     tag_repo_with_release_version $1
     copy_release_to_master $1
-    update_repo_to_next_development_version $1
+    git checkout develop
 
     popd
 }
@@ -310,7 +310,7 @@ release_client_repo()
 
     tag_repo_with_release_version $1
     copy_release_to_master $1
-    git checkout develop
+    update_repo_to_next_development_version $1
 
     popd
 }
