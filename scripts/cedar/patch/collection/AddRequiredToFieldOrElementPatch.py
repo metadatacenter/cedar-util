@@ -38,7 +38,7 @@ class AddRequiredToFieldOrElementPatch(object):
             patch = {
                 "op": "add",
                 "value": user_property,
-                "path": self.path
+                "path": self.path + "/required"
             }
             patches.append(patch)
 

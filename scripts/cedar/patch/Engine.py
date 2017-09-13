@@ -1,51 +1,70 @@
+import copy
+
+
 class Engine(object):
 
     def __init__(self):
         self.patches = []
+        self.__solved_errors = []
+        self.__unsolved_errors = []
 
     def add_patch(self, patch):
         self.patches.append(patch)
 
-    def execute(self, template, validator, debug=False):
+    def execute(self, template, validate_template, debug=False):
+        self.__solved_errors[:] = []
+        copy_template = copy.deepcopy(template)
+
         if debug:
-            print("--------------------------------------------------------------------------------------")
-            print(template["@id"])
-            print("--------------------------------------------------------------------------------------")
+            print("[INFO] Patching the template <" + template["@id"] + ">")
 
-        patched_template = template
-        handled_errors = []
+        patched_template = None
 
-        retry = False
-        while True:
-            if debug:
-                if retry:
-                    print("RE-VALIDATING...", end="")
-                else:
-                    print("VALIDATING... ", end="")
-            is_valid, report = validator(patched_template)
-            if not is_valid:
-                if debug:
-                    print("NOT OK")
-                patched_template = self.apply_patch(patched_template, report, handled_errors, debug)
-                if patched_template is None:
-                    return False
+        stop_trying = False
+        resolvable = True
+        while not stop_trying:
+            is_valid, report = validate_template(copy_template)
+            if is_valid:
+                stop_trying = True
+                resolvable = True
             else:
-                if debug:
-                    print("OK")
-                return True
-            retry = True
+                output = self.__apply_patch(copy_template, report, debug)
+                if output is not None:
+                    copy_template = copy.deepcopy(output)
+                    patched_template = output
+                else:
+                    stop_trying = True
+                    resolvable = False
+        if debug:
+            if resolvable:
+                if patched_template is None:
+                    print("[INFO] Template is already valid!\n")
+                else:
+                    print("[SUCCESS] Template is successfully patched!\n")
+            else:
+                for unsolved_error in self.__unsolved_errors:
+                    print("[ERROR] Unable to fix " + unsolved_error);
+                print("[FATAL] Unable to fix the template!\n")
 
-    def apply_patch(self, template, report, handled_errors, debug=False):
-        for message in report:
-            if debug:
-                print("* Fixing " + message, end="")
+        return resolvable, patched_template
+
+    def __apply_patch(self, template, report, debug=False):
+        self.__unsolved_errors[:] = []
+        patched_template = None
+        for error_message in report:
+            found_patch = False
             for patch in self.patches:
-                if patch.is_applied(message, template) and message not in handled_errors:
-                    if debug:
-                        print("... Patch applied!")
-                    handled_errors.append(message)
+                if patch.is_applied(error_message, template) and error_message not in self.__solved_errors:
+                    found_patch = True
                     patched_template = patch.apply(template)
-                    return patched_template
-            if debug:
-                print("... Failed: Patch is not available!")
-        return None
+                    break
+
+            if found_patch:
+                if debug:
+                    print("[FIXED] " + error_message)
+                self.__solved_errors.append(error_message)
+                break
+            else:
+                self.__unsolved_errors.append(error_message)
+
+        return patched_template

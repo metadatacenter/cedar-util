@@ -1,6 +1,17 @@
 #!/bin/bash
 
 # Script to release all CEDAR artifacts.
+#
+# CEDAR_HOME and CEDAR_RELEASE_VERSION varables must be set.
+#
+# Maven ~/.m2/settings.xml file must be configured to use CEDAR Nexus server:
+#
+# https://github.com/metadatacenter/cedar-docs/wiki/Configuring-Maven-to-use-the-CEDAR-Nexus-Server
+#
+# NPM ~/.npmrc file must also be configured to use CEDAR Nexus server:
+#
+# https://github.com/metadatacenter/cedar-docs/wiki/Configuring-NPM-to-use-the-CEDAR-Nexus-Server
+#
 # Works but needs hardening
 
 if [ -z "$CEDAR_HOME" ]; then
@@ -42,7 +53,12 @@ CEDAR_FRONTEND_REPOS=( "cedar-template-editor" )
 
 CEDAR_DOCUMENTATION_REPOS=( "cedar-docs" "cedar-swagger-ui" )
 
-CEDAR_CLIENT_REPOS=( "biosample-exporter" )
+CEDAR_CLIENT_REPOS=(
+    "biosample-exporter" 
+    "cedar-archetype-instance-reader",
+    "cedar-archetype-instance-writer" 
+    "cedar-archetype-exporter" 
+)
 
 CEDAR_PROJECT_REPOS=( "cedar-project" )
 
@@ -197,6 +213,9 @@ release_project_repo()
 
 release_frontend_repo()
 {
+    # See https://github.com/metadatacenter/cedar-docs/wiki/Configuring-NPM-to-use-the-CEDAR-Nexus-Server
+    npm login --registry=https://nexus.bmir.stanford.edu/repository/npm-cedar/
+    
     pushd $CEDAR_HOME/$1
 
     git checkout develop
@@ -281,6 +300,17 @@ release_standalone_repo()
     tag_repo_with_release_version $1
     copy_release_to_master $1
     update_repo_to_next_development_version $1
+
+    popd
+}
+
+release_client_repo()
+{
+    pushd $CEDAR_HOME/$1
+
+    tag_repo_with_release_version $1
+    copy_release_to_master $1
+    git checkout develop
 
     popd
 }
@@ -385,7 +415,7 @@ release_all_client_repos()
     echo "Releasing client repos..."
     for r in "${CEDAR_CLIENT_REPOS[@]}"
     do
-        release_standalone_repo $r
+        release_client_repo $r
     done
 }
 

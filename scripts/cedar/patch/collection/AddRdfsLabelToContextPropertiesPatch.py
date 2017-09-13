@@ -1,19 +1,18 @@
 import jsonpatch
 import re
-import dpath
 from cedar.patch import utils
 
 
-class AddSchemaVersionPatch(object):
+class AddRdfsLabelToContextPropertiesPatch(object):
 
     def __init__(self):
-        self.description = "Add the missing required field in a template element or field"
-        self.from_version = None
-        self.to_version = "1.1.0"
+        self.description = "Fixes the missing 'rdfs:label' in the @context/properties object of a template"
+        self.from_version = "1.1.0"
+        self.to_version = "1.2.0"
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:schemaVersion'(,'.+')*\]\) at /.*$")
+        pattern = re.compile("object has missing required properties \(\[('.+',)*'rdfs:label'(,'.+')*\]\) at /properties/@context/properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
@@ -35,9 +34,18 @@ class AddSchemaVersionPatch(object):
         patches = []
         patch = {
             "op": "add",
-            "value": "1.1.0",
-            "path": self.path + "/schema:schemaVersion"
+            "value": {
+                "type": "object",
+                "properties": {
+                    "@type": {
+                        "type": "string",
+                        "enum": [
+                            "xsd:string"
+                        ]
+                    }
+                }
+            },
+            "path": self.path + "/rdfs:label"
         }
         patches.append(patch)
-
         return patches

@@ -115,6 +115,15 @@ class NoMatchOutOfTwoSchemasPatch(object):
             }
             patches.append(patch)
 
+        schema_version = user_property_object.get("schema:schemaVersion") or ""
+        if not schema_version:
+            patch = {
+                "op": "add",
+                "value": "1.1.0",
+                "path": self.path + "/schema:schemaVersion"
+            }
+            patches.append(patch)
+
         if cedar_helper.is_template_field(user_property_object):
             ui_object = user_property_object.get("_ui")
             ui_title = ui_object.get("title") or ""

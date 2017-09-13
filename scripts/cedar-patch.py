@@ -1,14 +1,16 @@
 import argparse
-import json
-from urllib.parse import quote
-from cedar.utils import downloader, validator, finder
+import requests.exceptions
+from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
 
 server_address = None
 cedar_api_key = None
-staging_api_key = None
+report = {
+    "resolved": [],
+    "unresolved": []
+}
 
 
 def main():
@@ -21,14 +23,18 @@ def main():
                         choices=['template', 'element', 'field', 'instance'],
                         default="template",
                         help="The type of CEDAR resource")
+    parser.add_argument("--lookup",
+                        required=False,
+                        metavar="FILENAME",
+                        help="An input file containing a list of resource identifiers to patch")
     parser.add_argument("--limit",
                         required=False,
                         type=int,
                         help="The maximum number of resources to validate")
-    parser.add_argument("--use-staging-validator",
+    parser.add_argument("--output-dir",
                         required=False,
-                        metavar="CEDAR-STAGING-API-KEY",
-                        help="Use the validator from the staging server (nightly-build)")
+                        metavar="DIRNAME",
+                        help="Set the output directory to store the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -36,35 +42,38 @@ def main():
     parser.add_argument("apikey", metavar="CEDAR-API-KEY",
                         help="The API key used to query the CEDAR resource server")
     args = parser.parse_args()
-    type = args.type
+    resource_type = args.type
+    lookup_file = args.lookup
     limit = args.limit
+    output_dir = args.output_dir
     debug = args.debug
 
-    global server_address, cedar_api_key, staging_api_key
+    global server_address, cedar_api_key
     server_address = get_server_address(args.server)
     cedar_api_key = args.apikey
-    staging_api_key = args.use_staging_validator
 
     patch_engine = build_patch_engine()
-
-    report = {
-        "resolved": [],
-        "unresolved": []
-    }
-    if type == 'template':
-        patch_template(patch_engine, limit, report, debug)
-    elif type == 'element':
+    if resource_type == 'template':
+        template_ids = get_template_ids(lookup_file, limit)
+        patch_template(patch_engine, template_ids, output_dir, debug)
+    elif resource_type == 'element':
         pass
-    elif type == 'field':
+    elif resource_type == 'field':
         pass
-    elif type == 'instance':
+    elif resource_type == 'instance':
         pass
 
-    show(report)
+    if not debug:
+        show_report()
 
 
 def build_patch_engine():
     patch_engine = Engine()
+    patch_engine.add_patch(RenameValueLabelToRdfsLabelPatch())
+    patch_engine.add_patch(AddSchemaDescriptionToContextPatch())
+    patch_engine.add_patch(AddSchemaNameToContextPatch())
+    patch_engine.add_patch(AddRdfsLabelToContextPropertiesPatch())
+    patch_engine.add_patch(AddRdfsToContextPropertiesPatch())
     patch_engine.add_patch(FillEmptyValuePatch())
     patch_engine.add_patch(AddSchemaVersionPatch())
     patch_engine.add_patch(NoMatchOutOfFourSchemasPatch())
@@ -83,106 +92,102 @@ def build_patch_engine():
     patch_engine.add_patch(RemoveValueFromPropertiesPatch())
     patch_engine.add_patch(RemovePageFromInnerUiPatch())
     patch_engine.add_patch(RecreateRequiredArrayPatch())
+    patch_engine.add_patch(RemovePatternPropertiesPatch())
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
+    patch_engine.add_patch(RestructureMultiValuedFieldPatch())
     return patch_engine
 
 
-def patch_template(patch_engine, limit, report, debug=False):
-    template_ids = get_template_ids(cedar_api_key, server_address, limit)
+def patch_template(patch_engine, template_ids, output_dir, debug):
     total_templates = len(template_ids)
-    for index, template_id in enumerate(template_ids, start=1):
+    for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
-            print_progressbar(template_id, iteration=index, total_count=total_templates)
-        template = get_template(cedar_api_key, server_address, template_id)
-        is_success = patch_engine.execute(template, template_validator, debug=debug)
-        if is_success:
-            report["resolved"].append(template_id)
-        else:
-            report["unresolved"].append(template_id)
+            print_progressbar(template_id, counter, total_templates)
+        try:
+            template = get_template(template_id)
+            is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
+            if is_success:
+                if patched_template is not None:
+                    create_report("resolved", template_id)
+                    filename = create_filename_from_id(template_id)
+                    write_to_file(patched_template, filename, output_dir)
+            else:
+                create_report("unresolved", template_id)
+                filename = create_filename_from_id(template_id)
+                write_to_file(patched_template, filename, output_dir)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
 
 
-def template_validator(template):
-    status_code, report = run_validator(template)
-    is_valid = json.loads(report["validates"])
-    return is_valid, [ error_detail["message"] + " at " + error_detail["location"] for error_detail in report["errors"] if not is_valid ]
+def validate_template(template):
+    is_valid, message = validator.validate_template(server_address, cedar_api_key, template)
+    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
+                      for error_detail in message["errors"]
+                      if not is_valid]
 
 
-def run_validator(template):
-    return validator.validate_template(
-        get_api_key(),
-        template,
-        request_url=get_validator_endpoint())
+def create_report(report_entry, template_id):
+    report[report_entry].append(template_id)
 
 
-def get_validator_endpoint():
-    url = server_address + "/command/validate?resource_type=template"
-    if staging_api_key is not None:
-        url = "https://resource.staging.metadatacenter.net/command/validate?resource_type=template"
-    return url
+def create_filename_from_id(resource_id):
+    resource_hash = extract_resource_hash(resource_id)
+    return "template-" + resource_hash + ".patched.json"
 
 
-def get_api_key():
-    api_key = cedar_api_key
-    if staging_api_key is not None:
-        api_key = staging_api_key
-    return api_key
+def print_progressbar(resource_id, counter, total_count):
+    resource_hash = extract_resource_hash(resource_id)
+    percent = 100 * (counter / total_count)
+    filled_length = int(percent)
+    bar = "#" * filled_length + '-' * (100 - filled_length)
+    print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
-def print_progressbar(template_id, **kwargs):
-    template_hash = template_id[template_id.rfind('/')+1:]
-    if 'iteration' in kwargs and 'total_count' in kwargs:
-        iteration = kwargs["iteration"]
-        total_count = kwargs["total_count"]
-        percent = 100 * (iteration / total_count)
-        filled_length = int(percent)
-        bar = "#" * filled_length + '-' * (100 - filled_length)
-        print("\rPatching (%d/%d): |%s| %d%% Complete [%s]" % (iteration, total_count, bar, percent, template_hash), end='\r')
+def get_template_ids(lookup_file, limit):
+    template_ids = []
+    if lookup_file is not None:
+        template_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        template_ids = searcher.search_templates(server_address, cedar_api_key, max_count=limit)
+    return template_ids
 
 
-def get_template_ids(api_key, server_address, limit):
-    request_url = server_address + "/search?q=*&resource_types=template"
-    return finder.all_templates(api_key, request_url, max_count=limit)
+def get_ids_from_file(filename):
+    with open(filename) as infile:
+        resource_ids = infile.readlines()
+        return [id.strip() for id in resource_ids]
 
 
-def get_template(api_key, server_address, template_id):
-    request_url = server_address + "/templates/" + escape(template_id)
-    return downloader.get_resource(api_key, request_url)
+def get_template(template_id):
+    return getter.get_template(server_address, cedar_api_key, template_id)
 
 
-def escape(s):
-    return quote(str(s), safe='')
+def extract_resource_hash(resource_id):
+    return resource_id[resource_id.rfind('/')+1:]
 
 
-def get_server_address(server):
-    address = "http://localhost"
-    if server == 'local':
-        address = "https://resource.metadatacenter.orgx"
-    elif server == 'staging':
-        address = "https://resource.staging.metadatacenter.net"
-    elif server == 'production':
-        address = "https://resource.metadatacenter.net"
-    return address
-
-
-def show(report):
+def show_report():
     resolved_size = len(report["resolved"])
     unresolved_size = len(report["unresolved"])
-    total_size = resolved_size + unresolved_size
-    message = "All templates were successfully patched."
-    if unresolved_size > 0:
-        message = "Unable to patch %d out of %d templates. (Success rate: %.0f%%)" % \
-                  (unresolved_size, total_size, resolved_size*100/total_size)
-        message += "\n"
-        message += "Details: " + to_json_string(dict(report))
-    print("\n" + message)
+    print()
+    print(create_report_message(resolved_size, unresolved_size))
     print()
 
 
-def to_json_string(obj, pretty=True):
-    if pretty:
-        return json.dumps(obj, indent=2, sort_keys=True)
+def create_report_message(solved_size, unsolved_size):
+    report_message = ""
+    if unsolved_size == 0:
+        report_message = "All templates were successfully patched."
     else:
-        return json.dumps(obj)
+        if solved_size == 0:
+            report_message = "Unable to completely fix the invalid templates"
+        else:
+            total_size = solved_size + unsolved_size
+            report_message += "Successfully fix %d out of %d invalid templates. (Success rate: %.0f%%)" % \
+                              (solved_size, total_size, solved_size * 100 / total_size)
+        report_message += "\n"
+        report_message += "Details: " + to_json_string(dict(report))
+    return report_message
 
 
 if __name__ == "__main__":

@@ -2,18 +2,19 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
+from cedar.patch.collection import utils as cedar_helper
 
 
-class AddSchemaVersionPatch(object):
+class RestructureMultiValuedFieldPatch(object):
 
     def __init__(self):
-        self.description = "Add the missing required field in a template element or field"
-        self.from_version = None
-        self.to_version = "1.1.0"
+        self.description = "Restructure the model schema of a multi-valued field (i.e., checkbox and multi-select list)"
+        self.from_version = "1.1.0"
+        self.to_version = "1.2.0"
         self.path = None
 
     def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'schema:schemaVersion'(,'.+')*\]\) at /.*$")
+        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at [/properties/[^/]+]+")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
@@ -33,10 +34,25 @@ class AddSchemaVersionPatch(object):
             self.path = path
 
         patches = []
+
+        patch = {
+            "op": "move",
+            "from": self.path,
+            "to": self.path + "/items"
+        }
+        patches.append(patch)
+
         patch = {
             "op": "add",
-            "value": "1.1.0",
-            "path": self.path + "/schema:schemaVersion"
+            "value": "array",
+            "path": self.path + "/type"
+        }
+        patches.append(patch)
+
+        patch = {
+            "op": "add",
+            "value": 1,
+            "path": self.path + "/minItems"
         }
         patches.append(patch)
 
