@@ -85,6 +85,7 @@ def build_patch_engine():
     patch_engine.add_patch(AddSchemaVersionPatch())
     patch_engine.add_patch(NoMatchOutOfFourSchemasPatch())
     patch_engine.add_patch(NoMatchOutOfTwoSchemasPatch())
+    patch_engine.add_patch(MoveTitleAndDescriptionPatch())
     patch_engine.add_patch(MoveContentToUiPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(AddIdToPropertiesPatch())
