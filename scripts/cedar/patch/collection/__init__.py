@@ -34,6 +34,7 @@ from cedar.patch.collection.RemoveInstanceOfPatch import RemoveInstanceOfPatch
 from cedar.patch.collection.RemoveValueFromPropertiesPatch import RemoveValueFromPropertiesPatch
 from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInnerUiPatch
 from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
+from cedar.patch.collection.RemoveProvenanceFromFieldOrElementPropertiesPatch import RemoveProvenanceFromFieldOrElementPropertiesPatch
 from cedar.patch.collection.RemoveSchemaVersionPatch import RemoveSchemaVersionPatch
 from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueLabelToRdfsLabelPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
@@ -76,6 +77,7 @@ __all__ = [
     "RemoveValueFromPropertiesPatch",
     "RemovePageFromInnerUiPatch",
     "RemovePatternPropertiesPatch",
+    "RemoveProvenanceFromFieldOrElementPropertiesPatch",
     "RemoveSchemaVersionPatch",
     "RenameValueLabelToRdfsLabelPatch",
     "RestructureMultiValuedFieldPatch",
