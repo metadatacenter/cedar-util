@@ -16,7 +16,7 @@ class RenameValueLabelToRdfsLabelPatch(object):
         utils.check_argument('doc', doc, isreq=False)
 
         error_description = error
-        pattern = re.compile("object instance has properties which are not allowed by the schema: \['_valueLabel'\] at /.*$")
+        pattern = re.compile("object instance has properties which are not allowed by the schema: \[('.+',)*'_valueLabel'(,'.+')*\] at /.*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
