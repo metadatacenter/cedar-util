@@ -17,8 +17,8 @@ class AddProvenanceToFieldOrElementPatch(object):
         utils.check_argument('doc', doc, isreq=False)
 
         error_description = error
-        pattern = re.compile("object has missing required properties \(\[('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')" +
-                             "[,('oslc:modifiedBy'|'pav:createdBy'|'pav:createdOn'|'pav:lastUpdatedOn')]*\]\) " +
+        pattern = re.compile("object has missing required properties " \
+                             "\(\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\]\) " \
                              "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
@@ -37,61 +37,25 @@ class AddProvenanceToFieldOrElementPatch(object):
         error_description = error
         path = utils.get_error_location(error_description)
 
-        patches = []
-
-        resource_object = dpath.util.get(doc, path)
-        title = resource_object.get("title") or ""
-        if not title:  # if title is empty
-            patch = {
-                "op": "add",
-                "value": "blank",
-                "path": path + "/title"
-            }
-            patches.append(patch)
-
-        description = resource_object.get("description") or ""
-        if not description:
-            patch = {
-                "op": "add",
-                "value": "blank",
-                "path": path + "/description"
-            }
-            patches.append(patch)
-
-        created_on = resource_object.get("pav:createdOn") or ""
-        if not created_on:
-            patch = {
-                "op": "add",
-                "value": None,
-                "path": path + "/pav:createdOn"
-            }
-            patches.append(patch)
-
-        created_by = resource_object.get("pav:createdBy") or ""
-        if not created_by:
-            patch = {
-                "op": "add",
-                "value": None,
-                "path": path + "/pav:createdBy"
-            }
-            patches.append(patch)
-
-        last_updated_on = resource_object.get("pav:lastUpdatedOn") or ""
-        if not last_updated_on:
-            patch = {
-                "op": "add",
-                "value": None,
-                "path": path + "/pav:lastUpdatedOn"
-            }
-            patches.append(patch)
-
-        modified_by = resource_object.get("oslc:modifiedBy") or ""
-        if not modified_by:
-            patch = {
-                "op": "add",
-                "value": None,
-                "path": path + "/oslc:modifiedBy"
-            }
-            patches.append(patch)
+        patches = [{
+            "op": "add",
+            "value": None,
+            "path": path + "/pav:createdOn"
+        },
+        {
+            "op": "add",
+            "value": None,
+            "path": path + "/pav:createdBy"
+        },
+        {
+            "op": "add",
+            "value": None,
+            "path": path + "/pav:lastUpdatedOn"
+        },
+        {
+            "op": "add",
+            "value": None,
+            "path": path + "/oslc:modifiedBy"
+        }]
 
         return jsonpatch.JsonPatch(patches)
