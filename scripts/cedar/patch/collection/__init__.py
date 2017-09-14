@@ -38,7 +38,7 @@ from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPro
 from cedar.patch.collection.RemovePavFromElementContextPropertiesPatch import RemovePavFromElementContextPropertiesPatch
 from cedar.patch.collection.RemoveSchemaFromElementContextPropertiesPatch import RemoveSchemaFromElementContextPropertiesPatch
 from cedar.patch.collection.RemoveXsdFromElementContextPropertiesPatch import RemoveXsdFromElementContextPropertiesPatch
-from cedar.patch.collection.RemoveProvenanceFromFieldOrElementPropertiesPatch import RemoveProvenanceFromFieldOrElementPropertiesPatch
+from cedar.patch.collection.RemoveProvenanceFromPropertiesPatch import RemoveProvenanceFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaDescriptionFromPropertiesPatch import RemoveSchemaDescriptionFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaIsBasedOnFromPropertiesPatch import RemoveSchemaIsBasedOnFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaNameFromPropertiesPatch import RemoveSchemaNameFromPropertiesPatch
@@ -88,7 +88,7 @@ __all__ = [
     "RemovePavFromElementContextPropertiesPatch",
     "RemoveSchemaFromElementContextPropertiesPatch",
     "RemoveXsdFromElementContextPropertiesPatch",
-    "RemoveProvenanceFromFieldOrElementPropertiesPatch",
+    "RemoveProvenanceFromPropertiesPatch",
     "RemoveSchemaDescriptionFromPropertiesPatch",
     "RemoveSchemaIsBasedOnFromPropertiesPatch",
     "RemoveSchemaNameFromPropertiesPatch",

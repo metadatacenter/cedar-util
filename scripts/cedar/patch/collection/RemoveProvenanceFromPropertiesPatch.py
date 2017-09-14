@@ -3,7 +3,7 @@ import re
 from cedar.patch import utils
 
 
-class RemoveProvenanceFromFieldOrElementPropertiesPatch(object):
+class RemoveProvenanceFromPropertiesPatch(object):
 
     def __init__(self):
         self.description = "Removes the provenance fields (i.e., 'oslc:modifiedBy','pav:createdBy'," \

@@ -110,7 +110,7 @@ def build_patch_engine():
     patch_engine.add_patch(RemoveSchemaFromElementContextPropertiesPatch())
     patch_engine.add_patch(RemoveOslcFromElementContextPropertiesPatch())
     patch_engine.add_patch(RemoveXsdFromElementContextPropertiesPatch())
-    patch_engine.add_patch(RemoveProvenanceFromFieldOrElementPropertiesPatch())
+    patch_engine.add_patch(RemoveProvenanceFromPropertiesPatch())
     patch_engine.add_patch(RemoveSchemaDescriptionFromPropertiesPatch())
     patch_engine.add_patch(RemoveSchemaIsBasedOnFromPropertiesPatch())
     patch_engine.add_patch(RemoveSchemaNameFromPropertiesPatch())
