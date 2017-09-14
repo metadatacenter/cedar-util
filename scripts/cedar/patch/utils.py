@@ -1,5 +1,6 @@
 import re
 import dpath
+import json
 
 
 def is_template(resource, at=None):
@@ -53,6 +54,18 @@ def is_multivalued_field(resource, at=None):
     except KeyError:
         pass  # Ignore
     return False
+
+
+def get_json_object(doc, at):
+    json_object = {}
+    value = dpath.util.get(doc, at)
+    if isinstance(value, dict):
+        json_object = value
+    return json_object
+
+
+def to_json(string):
+    return json.loads(string)
 
 
 def get_parent_path(path):
