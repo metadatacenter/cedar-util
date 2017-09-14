@@ -36,6 +36,8 @@ from cedar.patch.collection.RemoveValueFromPropertiesPatch import RemoveValueFro
 from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInnerUiPatch
 from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
 from cedar.patch.collection.RemovePavFromElementContextPropertiesPatch import RemovePavFromElementContextPropertiesPatch
+from cedar.patch.collection.RemoveSchemaFromElementContextPropertiesPatch import RemoveSchemaFromElementContextPropertiesPatch
+from cedar.patch.collection.RemoveXsdFromElementContextPropertiesPatch import RemoveXsdFromElementContextPropertiesPatch
 from cedar.patch.collection.RemoveProvenanceFromFieldOrElementPropertiesPatch import RemoveProvenanceFromFieldOrElementPropertiesPatch
 from cedar.patch.collection.RemoveSchemaDescriptionFromPropertiesPatch import RemoveSchemaDescriptionFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaIsBasedOnFromPropertiesPatch import RemoveSchemaIsBasedOnFromPropertiesPatch
@@ -84,6 +86,8 @@ __all__ = [
     "RemovePageFromInnerUiPatch",
     "RemovePatternPropertiesPatch",
     "RemovePavFromElementContextPropertiesPatch",
+    "RemoveSchemaFromElementContextPropertiesPatch",
+    "RemoveXsdFromElementContextPropertiesPatch",
     "RemoveProvenanceFromFieldOrElementPropertiesPatch",
     "RemoveSchemaDescriptionFromPropertiesPatch",
     "RemoveSchemaIsBasedOnFromPropertiesPatch",
