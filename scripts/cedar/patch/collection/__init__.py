@@ -22,7 +22,7 @@ from cedar.patch.collection.AddXsdToContextPropertiesPatch import AddXsdToContex
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.MoveTitleAndDescriptionPatch import MoveTitleAndDescriptionPatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
-from cedar.patch.collection.NoMatchOutOfFourSchemasPatch import NoMatchOutOfFourSchemasPatch
+from cedar.patch.collection.NoMatchOutOfFiveSchemasPatch import NoMatchOutOfFiveSchemasPatch
 from cedar.patch.collection.NoMatchOutOfTwoSchemasPatch import NoMatchOutOfTwoSchemasPatch
 from cedar.patch.collection.RecreateElementRequiredPatch import RecreateElementRequiredPatch
 from cedar.patch.collection.RecreateTemplateRequiredPatch import RecreateTemplateRequiredPatch
@@ -67,7 +67,7 @@ __all__ = [
     "FillEmptyValuePatch",
     "MoveTitleAndDescriptionPatch",
     "MoveContentToUiPatch",
-    "NoMatchOutOfFourSchemasPatch",
+    "NoMatchOutOfFiveSchemasPatch",
     "NoMatchOutOfTwoSchemasPatch",
     "RecreateElementRequiredPatch",
     "RecreateTemplateRequiredPatch",
