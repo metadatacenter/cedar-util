@@ -1,6 +1,5 @@
 import jsonpatch
 import re
-import dpath
 from cedar.patch import utils
 
 
@@ -29,13 +28,46 @@ class NoMatchOutOfTwoSchemasPatch(object):
         patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
         return patched_doc
 
-    @staticmethod
-    def get_patch(doc, error):
+    def get_patch(self, doc, error):
         utils.check_argument_not_none("doc", doc)
         error_description = error
         path = utils.get_error_location(error_description)
+        property_path = path[:path.rfind("/items")]  # Get the root path of /items
+
+        user_property_paths = []
+        self.collect_user_property_paths(user_property_paths, doc, property_path)
 
         patches = []
+        for user_property_path in user_property_paths:
+            self.collect_patches(patches, doc, user_property_path)
+
+        return jsonpatch.JsonPatch(patches)
+
+    def collect_user_property_paths(self, user_property_paths, doc, property_path):
+        property_object = utils.get_json_object(doc, property_path)
+        properties_path = property_path + "/properties"
+        user_property_path = property_path
+        if "items" in property_object:
+            properties_path = property_path + "/items/properties"
+            user_property_path = property_path + "/items"
+
+        user_property_paths.append(user_property_path)
+
+        properties_object = utils.get_json_object(doc, properties_path)
+        for propname in list(properties_object.keys()):
+            property_path = properties_path + "/" + propname
+            property_object = utils.get_json_object(doc, property_path)
+            if "items" in property_object:
+                property_path = property_path + "/items"
+                property_object = utils.get_json_object(doc, property_path)
+
+            if utils.is_template_element(property_object):
+                self.collect_user_property_paths(user_property_paths, doc, property_path)
+            elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
+                user_property_paths.append(property_path)
+
+    def collect_patches(self, patches, doc, path):
+        # Fix @context
         patch = {
             "op": "replace",
             "value": {
@@ -43,6 +75,12 @@ class NoMatchOutOfTwoSchemasPatch(object):
                 "pav": "http://purl.org/pav/",
                 "oslc": "http://open-services.net/ns/core#",
                 "schema": "http://schema.org/",
+                "schema:name": {
+                    "@type": "xsd:string"
+                },
+                "schema:description": {
+                    "@type": "xsd:string"
+                },
                 "pav:createdOn": {
                     "@type": "xsd:dateTime"
                 },
@@ -60,12 +98,221 @@ class NoMatchOutOfTwoSchemasPatch(object):
         }
         patches.append(patch)
 
-        user_property_object = dpath.util.get(doc, path)
+        user_property_object = utils.get_json_object(doc, path)
+        properties_object = user_property_object.get("properties")
+
+        # Recreate the required array for template element
+        if utils.is_template_element(user_property_object):
+            patch = {
+                "op": "remove",
+                "path": path + "/required"
+            }
+            patches.append(patch)
+            patch = {
+                "op": "add",
+                "value": self.get_element_required_properties(user_property_object),
+                "path": path + "/required"
+            }
+            patches.append(patch)
+
+        # Remove pav and oslc prefixes from properties/@context/properties for template element
+        if utils.is_template_element(user_property_object):
+            if properties_object is not None:
+                pav_path = path + "/properties/@context/properties/pav"
+                pav_object = utils.get_json_object(doc, pav_path)
+                if pav_object is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": pav_path
+                    }
+                    patches.append(patch)
+                oslc_path = path + "/properties/@context/properties/oslc"
+                oslc_object = utils.get_json_object(doc, oslc_path)
+                if oslc_object is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": oslc_path
+                    }
+                    patches.append(patch)
+
+        # Remove patternProperties from properties/@context for template element and field
+        if utils.is_template_element(user_property_object):
+            if properties_object is not None:
+                pattern_properties_path = path + "/properties/@context/patternProperties"
+                pattern_properties_object = utils.get_json_object(doc, pattern_properties_path)
+                if pattern_properties_object is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": pattern_properties_path
+                    }
+                    patches.append(patch)
+
+        # Remove properties object from static template field
+        if properties_object is not None:
+            if utils.is_static_template_field(user_property_object):
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties"
+                }
+                patches.append(patch)
+
+        # Fix the oneOf object
+        if properties_object is not None:
+            at_type = properties_object.get("@type")
+            if at_type is not None:
+                one_of = at_type.get("oneOf")
+                if one_of is None:
+                    patch = {
+                        "op": "replace",
+                        "value": {
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "format": "uri"
+                                },
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    },
+                                    "uniqueItems": True
+                                }
+                            ]
+                        },
+                        "path": path + "/properties/@type"
+                    }
+                    patches.append(patch)
+
+        # Rename _valueLabel to rdfs:label
+        if properties_object is not None:
+            value_label = properties_object.get("_valueLabel")
+            if value_label is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties/_valueLabel"
+                }
+                patches.append(patch)
+                patch = {
+                    "op": "add",
+                    "value": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "path": path + "/properties/rdfs:label"
+                }
+                patches.append(patch)
+
+        # Remove provenance from properties
+        if properties_object is not None:
+            modified_by = properties_object.get("oslc:modifiedBy")
+            if modified_by is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties/oslc:modifiedBy"
+                }
+                patches.append(patch)
+
+            created_by = properties_object.get("pav:createdBy")
+            if created_by is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties/pav:createdBy"
+                }
+                patches.append(patch)
+
+            created_on = properties_object.get("pav:createdOn")
+            if created_on is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties/pav:createdOn"
+                }
+                patches.append(patch)
+
+            last_updated_on = properties_object.get("pav:lastUpdatedOn")
+            if last_updated_on is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/properties/pav:lastUpdatedOn"
+                }
+                patches.append(patch)
+
+        # Move title out from _ui, if exists, and rename it to schema:name
+        ui_object = user_property_object.get("_ui")
+        if ui_object:
+            ui_title = ui_object.get("title")
+            if ui_title is not None:
+                patch = {
+                    "op": "move",
+                    "from": path + "/_ui/title",
+                    "path": path + "/schema:name"
+                }
+                patches.append(patch)
+            else:
+                patch = {
+                    "op": "add",
+                    "value": "Title is auto-generated by CEDAR Patch",
+                    "path": path + "/schema:name"
+                }
+                patches.append(patch)
+
+        # Move description out from _ui, if exists, and rename it to schema:description
+        if ui_object:
+            ui_description = ui_object.get("description")
+            if ui_description is not None:
+                patch = {
+                    "op": "move",
+                    "from": path + "/_ui/description",
+                    "path": path + "/schema:description"
+                }
+                patches.append(patch)
+            else:
+                patch = {
+                    "op": "add",
+                    "value": "Description is auto-generated by CEDAR Patch",
+                    "path": path + "/schema:description"
+                }
+                patches.append(patch)
+
+        # Add missing fields in the _ui
+        if ui_object:
+            if utils.is_template_field(user_property_object):
+                input_type = ui_object.get("inputType") or ""
+                if not input_type:
+                    patch = {
+                        "op": "add",
+                        "value": "textfield",
+                        "path": path + "/_ui/inputType"
+                    }
+                    patches.append(patch)
+            elif utils.is_template_element(user_property_object):
+                ui_object = user_property_object.get("_ui")
+                ui_order = ui_object.get("order") or ""
+                if not ui_order:
+                    patch = {
+                        "op": "add",
+                        "value": [],
+                        "path": path + "/_ui/order"
+                    }
+                    patches.append(patch)
+                ui_property_labels = ui_object.get("propertyLabels") or ""
+                if not ui_property_labels:
+                    patch = {
+                        "op": "add",
+                        "value": {},
+                        "path": path + "/_ui/propertyLabels"
+                    }
+                    patches.append(patch)
+
+        # Add missing fields in the document root
         title = user_property_object.get("title") or ""
         if not title:  # if title is empty
             patch = {
                 "op": "add",
-                "value": "blank",
+                "value": "Schema title is auto-generated by CEDAR Patch",
                 "path": path + "/title"
             }
             patches.append(patch)
@@ -74,7 +321,7 @@ class NoMatchOutOfTwoSchemasPatch(object):
         if not description:
             patch = {
                 "op": "add",
-                "value": "blank",
+                "value": "Schema description is auto-generated by CEDAR Patch",
                 "path": path + "/description"
             }
             patches.append(patch)
@@ -124,65 +371,14 @@ class NoMatchOutOfTwoSchemasPatch(object):
             }
             patches.append(patch)
 
-        if utils.is_template_field(user_property_object):
-            ui_object = user_property_object.get("_ui")
-            ui_title = ui_object.get("title") or ""
-            if not ui_title:
-                patch = {
-                    "op": "add",
-                    "value": "Title is auto-generated by CEDAR Patch",
-                    "path": path + "/_ui/title"
-                }
-                patches.append(patch)
-            ui_description = ui_object.get("description") or ""
-            if not ui_description:
-                patch = {
-                    "op": "add",
-                    "value": "Description is auto-generated by CEDAR Patch",
-                    "path": path + "/_ui/description"
-                }
-                patches.append(patch)
-            input_type = ui_object.get("inputType") or ""
-            if not input_type:
-                patch = {
-                    "op": "add",
-                    "value": "textfield",
-                    "path": path + "/_ui/inputType"
-                }
-                patches.append(patch)
-        elif utils.is_template_element(user_property_object):
-            ui_object = user_property_object.get("_ui")
-            ui_title = ui_object.get("title") or ""
-            if not ui_title:
-                patch = {
-                    "op": "add",
-                    "value": "Title is auto-generated by CEDAR Patch",
-                    "path": path + "/_ui/title"
-                }
-                patches.append(patch)
-            ui_description = ui_object.get("description") or ""
-            if not ui_description:
-                patch = {
-                    "op": "add",
-                    "value": "Description is auto-generated by CEDAR Patch",
-                    "path": path + "/_ui/description"
-                }
-                patches.append(patch)
-            ui_order = ui_object.get("order") or ""
-            if not ui_order:
-                patch = {
-                    "op": "add",
-                    "value": [],
-                    "path": path + "/_ui/order"
-                }
-                patches.append(patch)
-            ui_property_labels = ui_object.get("propertyLabels") or ""
-            if not ui_property_labels:
-                patch = {
-                    "op": "add",
-                    "value": {},
-                    "path": path + "/_ui/propertyLabels"
-                }
-                patches.append(patch)
+    def get_element_required_properties(self, element_object):
+        user_properties = self.get_user_properties(element_object.get("properties"))
+        required_properties = ["@context", "@id"]
+        required_properties.extend(user_properties)
+        return required_properties
 
-        return jsonpatch.JsonPatch(patches)
+    @staticmethod
+    def get_user_properties(properties_object):
+        exclude_list = ["@context", "@id", "@type", "pav:createdOn", "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        property_names = list(properties_object.keys())
+        return [item for item in property_names if item not in exclude_list]
