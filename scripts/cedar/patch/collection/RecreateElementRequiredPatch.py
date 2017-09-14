@@ -19,7 +19,13 @@ class RecreateElementRequiredPatch(object):
             "array is too short: must have at least 2 elements but instance has \d elements at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required$|" +
             "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required/\d+$")
         if pattern.match(error_description):
-            return True
+            path = utils.get_error_location(error_description)
+            property_path = path[:path.rfind("/required")]
+            property_object = utils.get_json_object(doc, property_path)
+            if utils.is_template_element(property_object):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -32,17 +38,17 @@ class RecreateElementRequiredPatch(object):
         utils.check_argument_not_none("doc", doc)
         error_description = error
         path = utils.get_error_location(error_description)
-        required_path = path[:path.rfind("/required")+9]
+        property_path = path[:path.rfind("/required")]
 
         properties_list = self.get_all_properties(doc)
         patches = [{
             "op": "remove",
-            "path": required_path
+            "path": property_path + "/required"
         },
         {
             "op": "add",
             "value": properties_list,
-            "path": required_path
+            "path": property_path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)
 
