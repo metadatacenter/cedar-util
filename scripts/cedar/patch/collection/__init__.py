@@ -37,6 +37,9 @@ from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInne
 from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
 from cedar.patch.collection.RemovePavFromElementContextPropertiesPatch import RemovePavFromElementContextPropertiesPatch
 from cedar.patch.collection.RemoveProvenanceFromFieldOrElementPropertiesPatch import RemoveProvenanceFromFieldOrElementPropertiesPatch
+from cedar.patch.collection.RemoveSchemaDescriptionFromPropertiesPatch import RemoveSchemaDescriptionFromPropertiesPatch
+from cedar.patch.collection.RemoveSchemaIsBasedOnFromPropertiesPatch import RemoveSchemaIsBasedOnFromPropertiesPatch
+from cedar.patch.collection.RemoveSchemaNameFromPropertiesPatch import RemoveSchemaNameFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaVersionPatch import RemoveSchemaVersionPatch
 from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueLabelToRdfsLabelPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
@@ -82,6 +85,9 @@ __all__ = [
     "RemovePatternPropertiesPatch",
     "RemovePavFromElementContextPropertiesPatch",
     "RemoveProvenanceFromFieldOrElementPropertiesPatch",
+    "RemoveSchemaDescriptionFromPropertiesPatch",
+    "RemoveSchemaIsBasedOnFromPropertiesPatch",
+    "RemoveSchemaNameFromPropertiesPatch",
     "RemoveSchemaVersionPatch",
     "RenameValueLabelToRdfsLabelPatch",
     "RestructureMultiValuedFieldPatch",
