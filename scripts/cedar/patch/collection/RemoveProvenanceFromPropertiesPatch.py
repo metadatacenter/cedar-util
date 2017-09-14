@@ -16,9 +16,9 @@ class RemoveProvenanceFromPropertiesPatch(object):
         utils.check_argument('error', error, isreq=True)
 
         error_description = error
-        pattern = re.compile("object instance has properties which are not allowed by the schema: \[('.+',)*" \
-                             "'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\] at " \
-                             "((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
+        pattern = re.compile("object instance has properties which are not allowed by the schema: " \
+                             "\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\] " \
+                             "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
