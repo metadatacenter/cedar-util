@@ -17,7 +17,9 @@ class MoveTitleAndDescriptionPatch(object):
         utils.check_argument('doc', doc, isreq=True)
 
         error_description = error
-        pattern = re.compile("object has missing required properties \(\['schema:description','schema:name'\]\) at (/?(/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
+        pattern = re.compile("object has missing required properties " \
+                             "\(\['schema:description','schema:name'\]\) " \
+                             "at (/?(/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
         if pattern.match(error_description):
             self.path = utils.get_error_location(error_description)
             return True
