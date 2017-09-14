@@ -31,6 +31,7 @@ from cedar.patch.collection.RemoveEnumFromOneOfPatch import RemoveEnumFromOneOfP
 from cedar.patch.collection.RemoveEnumFromTypePatch import RemoveEnumFromTypePatch
 from cedar.patch.collection.RemoveIdFromPropertiesPatch import RemoveIdFromPropertiesPatch
 from cedar.patch.collection.RemoveInstanceOfPatch import RemoveInstanceOfPatch
+from cedar.patch.collection.RemoveOslcFromElementContextPropertiesPatch import RemoveOslcFromElementContextPropertiesPatch
 from cedar.patch.collection.RemoveValueFromPropertiesPatch import RemoveValueFromPropertiesPatch
 from cedar.patch.collection.RemovePageFromInnerUiPatch import RemovePageFromInnerUiPatch
 from cedar.patch.collection.RemovePatternPropertiesPatch import RemovePatternPropertiesPatch
@@ -75,6 +76,7 @@ __all__ = [
     "RemoveEnumFromTypePatch",
     "RemoveIdFromPropertiesPatch",
     "RemoveInstanceOfPatch",
+    "RemoveOslcFromElementContextPropertiesPatch",
     "RemoveValueFromPropertiesPatch",
     "RemovePageFromInnerUiPatch",
     "RemovePatternPropertiesPatch",
