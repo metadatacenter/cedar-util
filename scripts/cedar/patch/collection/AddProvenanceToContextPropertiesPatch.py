@@ -31,8 +31,13 @@ class AddProvenanceToContextPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        context_path = path[:path.rfind("/properties")]
+
         patches = [{
             "op": "add",
             "value": {
@@ -47,6 +52,11 @@ class AddProvenanceToContextPropertiesPatch(object):
                 }
             },
             "path": path + "/oslc:modifiedBy"
+        },
+        {
+            "op": "add",
+            "value": "oslc:modifiedBy",
+            "path": context_path + "/required/-"
         },
         {
             "op": "add",
@@ -65,6 +75,11 @@ class AddProvenanceToContextPropertiesPatch(object):
         },
         {
             "op": "add",
+            "value": "pav:createdBy",
+            "path": context_path + "/required/-"
+        },
+        {
+            "op": "add",
             "value": {
                 "type": "object",
                 "properties": {
@@ -80,6 +95,11 @@ class AddProvenanceToContextPropertiesPatch(object):
         },
         {
             "op": "add",
+            "value": "pav:createdOn",
+            "path": context_path + "/required/-"
+        },
+        {
+            "op": "add",
             "value": {
                 "type": "object",
                 "properties": {
@@ -92,5 +112,10 @@ class AddProvenanceToContextPropertiesPatch(object):
                 }
             },
             "path": path + "/pav:lastUpdatedOn"
+        },
+        {
+            "op": "add",
+            "value": "pav:lastUpdatedOn",
+            "path": context_path + "/required/-"
         }]
         return jsonpatch.JsonPatch(patches)

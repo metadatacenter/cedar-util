@@ -30,8 +30,13 @@ class AddXsdToContextPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        context_path = path[:path.rfind("/properties")]
+
         patches = [{
             "op": "add",
             "value": {
@@ -42,5 +47,10 @@ class AddXsdToContextPropertiesPatch(object):
                 ]
             },
             "path": path + "/xsd"
+        },
+        {
+            "op": "add",
+            "value": "xsd",
+            "path": context_path + "/required/0"
         }]
         return jsonpatch.JsonPatch(patches)

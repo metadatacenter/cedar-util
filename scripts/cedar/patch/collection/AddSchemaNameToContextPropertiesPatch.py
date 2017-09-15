@@ -30,8 +30,13 @@ class AddSchemaNameToContextPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        context_path = path[:path.rfind("/properties")]
+
         patches = [{
             "op": "add",
             "value": {
@@ -46,5 +51,10 @@ class AddSchemaNameToContextPropertiesPatch(object):
                 }
             },
             "path": path + "/schema:name"
+        },
+        {
+            "op": "add",
+            "value": "schema:name",
+            "path": context_path + "/required/-"
         }]
         return jsonpatch.JsonPatch(patches)

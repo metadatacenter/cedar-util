@@ -30,8 +30,13 @@ class AddRdfsLabelToContextPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        context_path = path[:path.rfind("/properties")]
+
         patches = [{
             "op": "add",
             "value": {
@@ -46,5 +51,10 @@ class AddRdfsLabelToContextPropertiesPatch(object):
                 }
             },
             "path": path + "/rdfs:label"
+        },
+        {
+            "op": "add",
+            "value": "rdfs:label",
+            "path": context_path + "/required/-"
         }]
         return jsonpatch.JsonPatch(patches)
