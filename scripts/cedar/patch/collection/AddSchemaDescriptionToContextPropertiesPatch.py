@@ -34,8 +34,7 @@ class AddSchemaDescriptionToContextPropertiesPatch(object):
 
         error_description = error
         path = utils.get_error_location(error_description)
-
-        context_path = path[:path.rfind("/properties")]
+        parent_path = utils.get_parent_path(path)
 
         patches = [{
             "op": "add",
@@ -55,6 +54,6 @@ class AddSchemaDescriptionToContextPropertiesPatch(object):
         {
             "op": "add",
             "value": "schema:description",
-            "path": context_path + "/required/-"
+            "path": parent_path + "/required/-"
         }]
         return jsonpatch.JsonPatch(patches)
