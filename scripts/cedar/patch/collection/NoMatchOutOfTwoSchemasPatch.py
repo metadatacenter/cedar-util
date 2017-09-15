@@ -383,6 +383,23 @@ class NoMatchOutOfTwoSchemasPatch(object):
                 }
                 patches.append(patch)
 
+        # Add rdfs:label in the template field properties, if missing
+        if utils.is_template_field(user_property_object):
+            if properties_object is not None:
+                rdfs_label_property = properties_object.get("rdfs:label")
+                if rdfs_label_property is None:
+                    patch = {
+                        "op": "add",
+                        "value": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "path": path + "/properties/rdfs:label"
+                    }
+                    patches.append(patch)
+                    
     def get_element_required_properties(self, element_object):
         user_properties = self.get_user_properties(element_object.get("properties"))
         required_properties = ["@context", "@id"]
