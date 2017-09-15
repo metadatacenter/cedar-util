@@ -373,6 +373,18 @@ class NoMatchOutOfFiveSchemasPatch(object):
             }
             patches.append(patch)
 
+        # Rearrange the required list for @context of the properties field
+        if properties_object is not None:
+            context_object = properties_object.get("@context")
+            if context_object is not None:
+                context_properties_object = context_object.get("properties")
+                patch = {
+                    "op": "replace",
+                    "value": self.get_user_properties(context_properties_object),
+                    "path": path + "/properties/@context/required"
+                }
+                patches.append(patch)
+
     def get_element_required_properties(self, element_object):
         user_properties = self.get_user_properties(element_object.get("properties"))
         required_properties = ["@context", "@id"]
@@ -381,6 +393,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
 
     @staticmethod
     def get_user_properties(properties_object):
-        exclude_list = ["@context", "@id", "@type", "pav:createdOn", "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        exclude_list = ["@context", "@id", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
         property_names = list(properties_object.keys())
         return [item for item in property_names if item not in exclude_list]
