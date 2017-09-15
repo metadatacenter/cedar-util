@@ -35,6 +35,6 @@ class RemoveIdFromPropertiesPatch(object):
         path = utils.get_error_location(error_description)
         patches = [{
             "op": "remove",
-            "path": path
+            "path": path + "/@id"
         }]
         return jsonpatch.JsonPatch(patches)
