@@ -38,28 +38,32 @@ class RecreateElementRequiredPatch(object):
         utils.check_argument_not_none("doc", doc)
         error_description = error
         path = utils.get_error_location(error_description)
-        property_path = path[:path.rfind("/required")]
 
-        properties_list = self.get_all_properties(doc)
+        property_path = path[:path.rfind("/required")]
+        property_object = utils.get_json_object(doc, property_path)
+
         patches = [{
             "op": "remove",
             "path": property_path + "/required"
         },
         {
             "op": "add",
-            "value": properties_list,
+            "value": self.get_element_required_properties(property_object),
             "path": property_path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)
 
-    @staticmethod
-    def get_all_properties(doc):
-        default_properties = [
+    def get_element_required_properties(self, element_object):
+        user_properties = self.get_user_properties(element_object.get("properties"))
+        required_properties = [
             "@context",
-            "@id"
-        ]
-        properties = list(doc["properties"].keys())
-        for prop in properties:
-            if prop not in default_properties:
-                default_properties.append(prop)
-        return default_properties
+            "@id"]  # mandatory property names
+        required_properties.extend(user_properties)
+        return required_properties
+
+    @staticmethod
+    def get_user_properties(properties_object):
+        exclude_list = ["@context", "@id", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        property_names = list(properties_object.keys())
+        return [item for item in property_names if item not in exclude_list]

@@ -31,21 +31,22 @@ class RecreateTemplateRequiredPatch(object):
 
     def get_patch(self, doc, error):
         utils.check_argument_not_none("doc", doc)
-        properties_list = self.get_all_properties(doc)
+
         patches = [{
             "op": "remove",
             "path": "/required"
         },
         {
             "op": "add",
-            "value": properties_list,
+            "value": self.get_template_required_properties(doc),
             "path": "/required"
         }]
         return jsonpatch.JsonPatch(patches)
 
-    @staticmethod
-    def get_all_properties(doc):
-        default_properties = [
+
+    def get_template_required_properties(self, template_object):
+        user_properties = self.get_user_properties(template_object.get("properties"))
+        required_properties = [
             "@context",
             "@id",
             "schema:isBasedOn",
@@ -54,9 +55,13 @@ class RecreateTemplateRequiredPatch(object):
             "pav:createdOn",
             "pav:createdBy",
             "pav:lastUpdatedOn",
-            "oslc:modifiedBy"]
-        properties = list(doc["properties"].keys())
-        for prop in properties:
-            if prop not in default_properties:
-                default_properties.append(prop)
-        return default_properties
+            "oslc:modifiedBy"]  # mandatory property names
+        required_properties.extend(user_properties)
+        return required_properties
+
+    @staticmethod
+    def get_user_properties(properties_object):
+        exclude_list = ["@context", "@id", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        property_names = list(properties_object.keys())
+        return [item for item in property_names if item not in exclude_list]
