@@ -31,10 +31,22 @@ class RemoveSchemaIsBasedOnFromPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+        utils.check_argument_not_none("error", error)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        parent_object, parent_path = utils.get_parent_object(doc, path)
+        required_list = parent_object.get("required")
+
         patches = [{
             "op": "remove",
             "path": path + "/schema:isBasedOn"
+        },
+        {
+            "op": "replace",
+            "value": [item for item in required_list if item != "schema:isBasedOn"],
+            "path": parent_path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)

@@ -32,8 +32,12 @@ class RemoveProvenanceFromPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+        utils.check_argument_not_none("error", error)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
         patches = [{
             "op": "remove",
             "path": path + "/oslc:modifiedBy"
@@ -50,4 +54,16 @@ class RemoveProvenanceFromPropertiesPatch(object):
             "op": "remove",
             "path": path + "/pav:lastUpdatedOn"
         }]
+
+        parent_object, parent_path = utils.get_parent_object(doc, path)
+
+        remove_list = ["oslc:modifiedBy", "pav:createdBy", "pav:createdOn", "pav:lastUpdateOn"]
+        required_list = [item for item in parent_object.get("required") if item is not remove_list]
+
+        patches.append({
+            "op": "replace",
+            "value": required_list,
+            "path": parent_path + "/required"
+        })
+
         return jsonpatch.JsonPatch(patches)

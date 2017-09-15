@@ -31,10 +31,23 @@ class RemoveSchemaNameFromPropertiesPatch(object):
 
     @staticmethod
     def get_patch(doc, error):
+        utils.check_argument_not_none("doc", doc)
+        utils.check_argument_not_none("error", error)
+
         error_description = error
         path = utils.get_error_location(error_description)
+
+        property_path = path[:path.rfind("/properties")]
+        property_object = utils.get_json_object(doc, property_path)
+        required_list = property_object.get("required")
+
         patches = [{
             "op": "remove",
             "path": path + "/schema:name"
+        },
+        {
+            "op": "replace",
+            "value": [item for item in required_list if item != "schema:name"],
+            "path": property_path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)

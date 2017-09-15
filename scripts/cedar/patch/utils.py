@@ -58,14 +58,22 @@ def is_multivalued_field(resource, at=None):
 
 def get_json_object(doc, at):
     json_object = {}
-    value = dpath.util.get(doc, at)
-    if isinstance(value, dict):
-        json_object = value
+    if at == '':
+        json_object = doc
+    else:
+        value = dpath.util.get(doc, at)
+        if isinstance(value, dict):
+            json_object = value
     return json_object
 
 
 def to_json(string):
     return json.loads(string)
+
+
+def get_parent_object(doc, at):
+    parent_path = get_parent_path(at)
+    return get_json_object(doc, parent_path), parent_path
 
 
 def get_parent_path(path):
