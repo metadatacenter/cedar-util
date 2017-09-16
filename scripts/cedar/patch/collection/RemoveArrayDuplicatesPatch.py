@@ -17,15 +17,14 @@ class RemoveArrayDuplicatesPatch(object):
         pattern = re.compile("array must not contain duplicate elements at /.*$")
         return pattern.match(error_message)
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message, doc)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
-    def get_patch(self, doc, error):
-        utils.check_argument_not_none("doc", doc)
-        error_description = error
-        path = utils.get_error_location(error_description)
+    @staticmethod
+    def get_patch(error_message, doc=None):
+        path = utils.get_error_location(error_message)
 
         array_items = dpath.util.get(doc, path)
         non_duplicate_list = list(OrderedDict.fromkeys(array_items))

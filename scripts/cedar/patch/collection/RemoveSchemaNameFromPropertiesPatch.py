@@ -18,22 +18,16 @@ class RemoveSchemaNameFromPropertiesPatch(object):
             "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
         return pattern.match(error_message)
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message, doc)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
     @staticmethod
-    def get_patch(doc, error):
-        utils.check_argument_not_none("doc", doc)
-        utils.check_argument_not_none("error", error)
-
-        error_description = error
-        path = utils.get_error_location(error_description)
-
-        property_path = path[:path.rfind("/properties")]
-        property_object = utils.get_json_object(doc, property_path)
-        required_list = property_object.get("required")
+    def get_patch(error_message, doc=None):
+        path = utils.get_error_location(error_message)
+        parent_object, parent_path = utils.get_parent_object(doc, path)
+        required_list = parent_object.get("required")
 
         patches = [{
             "op": "remove",
@@ -42,6 +36,6 @@ class RemoveSchemaNameFromPropertiesPatch(object):
         {
             "op": "replace",
             "value": [item for item in required_list if item != "schema:name"],
-            "path": property_path + "/required"
+            "path": parent_path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)

@@ -18,15 +18,14 @@ class MoveContentToUiPatch(object):
             "at (/properties/[^/]+)*/properties$")
         return pattern.match(error_message)
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
     @staticmethod
-    def get_patch(doc, error):
-        error_description = error
-        path = utils.get_error_location(error_description)
+    def get_patch(error_message, doc=None):
+        path = utils.get_error_location(error_message)
         parent_path = utils.get_parent_path(path)
         patches = [{
             "op": "move",

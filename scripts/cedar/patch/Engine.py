@@ -17,7 +17,7 @@ class Engine(object):
         copy_template = copy.deepcopy(template)
 
         if debug:
-            print("[INFO] Patching the template <" + template["@id"] + ">")
+            print(" INFO     | Patching the template <" + template["@id"] + ">")
 
         patched_template = None
 
@@ -39,13 +39,13 @@ class Engine(object):
         if debug:
             if resolvable:
                 if patched_template is None:
-                    print("[INFO] Template is already valid!\n")
+                    print(" INFO     | Template is already valid!\n")
                 else:
-                    print("[SUCCESS] Template is successfully patched!\n")
+                    print(" SUCCESS  | Template is successfully patched!\n")
             else:
                 for unsolved_error in self.__unsolved_errors:
-                    print("[ERROR] Unable to fix " + unsolved_error);
-                print("[FATAL] Unable to fix the template!\n")
+                    print(" ERROR    | Unable to fix " + unsolved_error);
+                print(" FATAL    | Unable to fix the template!\n")
 
         return resolvable, patched_template
 
@@ -57,12 +57,12 @@ class Engine(object):
             for patch in self.patches:
                 if patch.is_applied(error_message, template) and error_message not in self.__solved_errors:
                     found_patch = True
-                    patched_template = patch.get_patch(template, error_message).apply(template)
+                    patched_template = patch.apply_patch(template, error_message)
                     break
 
             if found_patch:
                 if debug:
-                    print("[FIXED] " + error_message)
+                    print(" PATCHED  | " + error_message)
                 self.__solved_errors.append(error_message)
                 break
             else:

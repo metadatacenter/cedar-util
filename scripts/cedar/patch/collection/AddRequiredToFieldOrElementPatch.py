@@ -24,14 +24,13 @@ class AddRequiredToFieldOrElementPatch(object):
                 is_applied = True
         return is_applied
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message, doc)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
-    def get_patch(self, doc, error):
-        error_description = error
-        path = utils.get_error_location(error_description)
+    def get_patch(self, error_message, doc=None):
+        path = utils.get_error_location(error_message)
         property_object = utils.get_json_object(doc, path)
         patches = [{
             "op": "add",

@@ -49,7 +49,7 @@ def is_multivalued_field(resource, at=None):
     try:
         input_type = dpath.util.get(resource, "/_ui/inputType")
         multiple_choice = dpath.util.get(resource, "/_valueConstraints/multipleChoice")
-        if input_type and multiple_choice: # if both parameters present
+        if input_type and multiple_choice:  # if both parameters present
             return (input_type == "list" or input_type == "checkbox") and multiple_choice == True
     except KeyError:
         pass  # Ignore
@@ -87,14 +87,3 @@ def get_error_location(text):
     except AttributeError:
         found = ''
     return found
-
-
-def check_argument(argname, argobj, isreq=True):
-    if isreq:
-        if argobj is None:
-            raise Exception("The method requires the '" + argname + "' argument")
-
-
-def check_argument_not_none(argname, arg):
-    if arg is None:
-        raise Exception("The method requires the '" + argname + "' argument")
