@@ -10,19 +10,14 @@ class AddProvenanceToContextPatch(object):
                            "'pav:createdOn','pav:lastUpdatedOn' in the @context object of a template"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = None
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=False)
-
-        error_description = error
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/@context$")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "object has missing required properties " \
+            "\(\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\]\) " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/@context$")
+        return pattern.match(error_message)
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)

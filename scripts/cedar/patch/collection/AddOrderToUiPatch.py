@@ -10,18 +10,17 @@ class AddOrderToUiPatch(object):
         self.description = "Adds the missing order field in the _ui object"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = None
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=True)
-
-        error_description = error
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "object has missing required properties " \
+            "\(\[('.+',)*'order'(,'.+')*\]\) " \
+            "at (/.+)?/_ui$")
         is_applied = False
-        pattern = re.compile("object has missing required properties \(\[('.+',)*'order'(,'.+')*\]\) at (/.+)?/_ui$")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            parent_path = utils.get_parent_path(self.path)
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
+            parent_path = utils.get_parent_path(path)
             if utils.is_template(doc, at=parent_path) or utils.is_template_element(doc, at=parent_path):
                 is_applied = True
         return is_applied

@@ -10,18 +10,18 @@ class RestructureStaticTemplateFieldPatch(object):
         self.description = "Restructure the model schema for the static template field"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = None
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=True)
-
-        error_description = error
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "instance value \('https://schema.metadatacenter.org/core/StaticTemplateField'\) not found in enum " \
+            "\(possible values: \['https://schema.metadatacenter.org/core/TemplateElement'\]\) " \
+            "at (/properties/[^/]+)*/properties/[^/]+/@type$")
         is_applied = False
-        pattern = re.compile("instance value \('https://schema.metadatacenter.org/core/StaticTemplateField'\) not found in enum \(possible values: \['https://schema.metadatacenter.org/core/TemplateElement'\]\) at (/properties/[^/]+)*/properties/[^/]+/@type$")
-        if pattern.match(error_description):
-            self.path = self.get_user_property_path(error_description)
-            if utils.is_static_template_field(doc, at=self.path):
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
+            parent_path = utils.get_parent_path(path)
+            if utils.is_static_template_field(doc, at=parent_path):
                 is_applied = True
         return is_applied
 
@@ -33,34 +33,29 @@ class RestructureStaticTemplateFieldPatch(object):
     def get_patch(self, doc, error):
         utils.check_argument_not_none("doc", doc)
         error_description = error
-        path = self.get_user_property_path(error_description)
+        path = utils.get_error_location(error_description)
+        parent_path = utils.get_parent_path(path)
 
         patches = []
         if self.has_content(doc, path):
             patch = {
                 "op": "move",
-                "from": path + "/properties/_content",
-                "path": path + "/_ui/_content"
+                "from": parent_path + "/properties/_content",
+                "path": parent_path + "/_ui/_content"
             }
             patches.append(patch)
 
         patch = {
             "op": "remove",
-            "path": path + "/properties",
+            "path": parent_path + "/properties",
         }
         patches.append(patch)
         patch = {
             "op": "remove",
-            "path": path + "/required",
+            "path": parent_path + "/required",
         }
         patches.append(patch)
         return jsonpatch.JsonPatch(patches)
-
-    @staticmethod
-    def get_user_property_path(error_description):
-        original_path = utils.get_error_location(error_description)
-        user_property_path = original_path[:original_path.rfind('/@type')]
-        return user_property_path
 
     @staticmethod
     def has_content(doc, path):

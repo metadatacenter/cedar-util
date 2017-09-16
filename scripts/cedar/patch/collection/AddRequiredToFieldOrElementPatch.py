@@ -10,22 +10,19 @@ class AddRequiredToFieldOrElementPatch(object):
         self.description = "Add the missing required field in a template element or field"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = None
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=False)
-
-        error_description = error
-        pattern = re.compile("object has missing required properties \(\['required'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            if not utils.is_static_template_field(doc):
-                return True
-            else:
-                return False
-        else:
-            return False
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "object has missing required properties " \
+            "\(\['required'\]\) " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
+        is_applied = False
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
+            if utils.is_template_element(doc, at=path) or utils.is_template_field(doc, at=path):
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
@@ -35,23 +32,18 @@ class AddRequiredToFieldOrElementPatch(object):
     def get_patch(self, doc, error):
         error_description = error
         path = utils.get_error_location(error_description)
-        user_property = self.get_all_properties(doc, path)
+        property_object = utils.get_json_object(doc, path)
         patches = [{
             "op": "add",
-            "value": user_property,
+            "value": self.get_required_properties(property_object),
             "path": path + "/required"
         }]
         return jsonpatch.JsonPatch(patches)
 
     @staticmethod
-    def get_all_properties(doc, path):
-        properties = list(dpath.util.get(doc, path + "/properties").keys())
-        system_properties = [
-            "@id",
-            "@type",
-            "_valueLabel",
-            "pav:createdOn",
-            "pav:createdBy",
-            "pav:lastUpdatedOn",
-            "oslc:modifiedBy"]
-        return [prop for prop in properties if prop not in system_properties]
+    def get_required_properties(property_object):
+        exclude_list = ["@type", "xsd", "schema", "pav", "oslc", "rdfs:label", "pav:createdOn",
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        properties_object = property_object.get("properties")
+        property_names = list(properties_object.keys())
+        return [item for item in property_names if item not in exclude_list]

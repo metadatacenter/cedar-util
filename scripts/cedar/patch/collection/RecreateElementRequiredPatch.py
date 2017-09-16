@@ -10,24 +10,22 @@ class RecreateElementRequiredPatch(object):
         self.from_version = "1.1.0"
         self.to_version = "1.2.0"
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=False)
-
-        error_description = error
+    @staticmethod
+    def is_applied(error_message, doc=None):
         pattern = re.compile(
-            "array is too short: must have at least 2 elements but instance has \d elements at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required$|" +
-            "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required/\d+$")
-        if pattern.match(error_description):
-            path = utils.get_error_location(error_description)
+            "array is too short: must have at least 2 elements but instance has \d elements " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required$" \
+            "|" \
+            "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)+/required/\d+$")
+        is_applied = False
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
             property_path = path[:path.rfind("/required")]
             property_object = utils.get_json_object(doc, property_path)
             if utils.is_template_element(property_object):
-                return True
-            else:
-                return False
-        else:
-            return False
+                is_applied = True
+        return is_applied
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)

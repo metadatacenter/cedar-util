@@ -9,20 +9,16 @@ class RecreateTemplateRequiredPatch(object):
         self.description = "Fixes the property list of a template's required array"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = "/required"
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=False)
-
-        error_description = error
+    @staticmethod
+    def is_applied(error_message, doc=None):
         pattern = re.compile(
-            "array is too short: must have at least 9 elements but instance has \d elements at /required$|" +
-            "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) at /required/\d+$")
-        if pattern.match(error_description):
-            return True
-        else:
-            return False
+            "array is too short: must have at least 9 elements but instance has \d elements " \
+            "at /required$" \
+            "|" \
+            "instance value \('.+'\) not found in enum \(possible values: \['.+'\]\) " \
+            "at /required/\d+$")
+        return pattern.match(error_message)
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)

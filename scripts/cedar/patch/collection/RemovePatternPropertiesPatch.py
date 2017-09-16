@@ -6,23 +6,16 @@ from cedar.patch import utils
 class RemovePatternPropertiesPatch(object):
 
     def __init__(self):
-        self.description = "Removes the requirement to have 'patternProperties' field in @context"
+        self.description = "Removes the 'patternProperties' field in @context"
         self.from_version = "1.1.0"
         self.to_version = "1.2.0"
-        self.path = None
 
-    def is_applied(self, error, doc=None):
-        utils.check_argument('error', error, isreq=True)
-        utils.check_argument('doc', doc, isreq=False)
-
-        error_description = error
+    @staticmethod
+    def is_applied(error_message, doc=None):
         pattern = re.compile(
-            "object instance has properties which are not allowed by the schema: \['patternProperties'\] at /.*$")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+            "object instance has properties which are not allowed by the schema: \['patternProperties'\] " \
+            "at /.*$")
+        return pattern.match(error_message)
 
     def apply(self, doc, path=None):
         patch = self.get_json_patch(doc, path)
