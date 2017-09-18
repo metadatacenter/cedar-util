@@ -31,37 +31,41 @@ def main():
 
 def migrate(source_server_address, target_server_address, source_api_key, target_api_key, include_instances):
     template_ids = get_template_ids(source_server_address, source_api_key)
-    for template_id in template_ids:
-        print("Copying template: " + template_id)
+    for template_counter, template_id in enumerate(template_ids, start=1):
         template = get_template(source_server_address, source_api_key, template_id)
+        print(" INFO     | Copying template %s (%d/%d)" % (get_id(template), template_counter, len(template_ids)))
         store_template(target_server_address, target_api_key, template)
 
         if include_instances:
             instance_ids = get_instance_ids(source_server_address, source_api_key, template_id)
             for counter, instance_id in enumerate(instance_ids, start=1):
-                print_progressbar(instance_id, "instance", counter, len(instance_ids))
                 instance = get_instance(source_server_address, source_api_key, instance_id)
+                show_instance_copying_progressbar(instance_id, counter, len(instance_ids))
                 store_instance(target_server_address, target_api_key, instance)
 
     element_ids = get_element_ids(source_server_address, source_api_key)
-    for counter, element_id in enumerate(element_ids, start=1):
-        print_progressbar(element_id, "element", counter, len(element_ids))
+    for element_counter, element_id in enumerate(element_ids, start=1):
         element = get_element(source_server_address, source_api_key, element_id)
+        print(" INFO     | Copying element %s (%d/%d)" % (get_id(element), element_counter, len(element_ids)))
         store_element(target_server_address, target_api_key, element)
 
 
 def get_template_ids(server_address, api_key):
-    print("Collecting all the templates...", end="\r")
-    return searcher.search_templates(server_address, api_key)
+    print(" INFO     | Collecting all the templates... ", end="")
+    templates = searcher.search_templates(server_address, api_key)
+    print(len(templates), " templates found")
+    return templates
 
 
 def get_element_ids(server_address, api_key):
-    print("Collecting all the elements...", end="\r")
-    return searcher.search_elements(server_address, api_key)
+    print(" INFO     | Collecting all the elements... ", end="")
+    elements = searcher.search_elements(server_address, api_key)
+    print(len(elements), " elements found")
+    return elements
 
 
 def get_instance_ids(server_address, api_key, template_id):
-    print("Collecting all the corresponding instances...", end="\r")
+    print(" INFO     | Collecting all the corresponding instances...", end="\r")
     return searcher.search_instances_of(server_address, api_key, template_id)
 
 
@@ -89,19 +93,25 @@ def store_instance(server_address, api_key, instance):
     storer.store_instance(server_address, api_key, instance, import_mode=True)
 
 
-def print_progressbar(resource_id, resource_type, counter, total_count):
+def show_instance_copying_progressbar(resource_id, counter, total_count):
     resource_hash = extract_resource_hash(resource_id)
     percent = 100 * (counter / total_count)
     filled_length = int(percent)
     bar = "#" * filled_length + '-' * (100 - filled_length)
-    if (counter < total_count):
-        print("\rCopying %s (%d/%d): |%s| %d%% Complete [%s]" % (resource_type, counter, total_count, bar, percent, resource_hash), end="\r")
+    if counter < total_count:
+        print("\r PROGRESS | Copying instances (%d/%d): |%s| %d%% Complete [%s]"
+              % (counter, total_count, bar, percent, resource_hash), end="\r")
     else:
-        print("\rCopying %s (%d/%d): |%s| %d%% Complete [%s]" % (resource_type, counter, total_count, bar, percent, resource_hash))
+        print("\r PROGRESS | Copying instances (%d/%d): |%s| %d%% Complete [%s]"
+              % (counter, total_count, bar, percent, resource_hash))
 
 
 def extract_resource_hash(resource_id):
     return resource_id[resource_id.rfind('/')+1:]
+
+
+def get_id(resource):
+    return resource.get("@id")
 
 
 if __name__ == "__main__":
