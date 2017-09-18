@@ -136,8 +136,8 @@ def patch_template(patch_engine, template_ids, output_dir, debug):
                     write_to_file(patched_template, filename, output_dir)
             else:
                 create_report("unresolved", template_id)
-                filename = create_filename_from_id(template_id)
-                write_to_file(patched_template, filename, output_dir)
+                filename = create_filename_from_id(template_id, prefix="template-unresolved-")
+                write_to_file(patched_template, filename, "/tmp")
         except requests.exceptions.HTTPError as error:
             exit(error)
 
@@ -164,8 +164,8 @@ def patch_element(patch_engine, element_ids, output_dir, debug):
                     write_to_file(patched_element, filename, output_dir)
             else:
                 create_report("unresolved", element_id)
-                filename = create_filename_from_id(element_id)
-                write_to_file(patched_element, filename, output_dir)
+                filename = create_filename_from_id(element_id, prefix="element-unresolved-")
+                write_to_file(patched_element, filename, "/tmp")
         except requests.exceptions.HTTPError as error:
             exit(error)
 
