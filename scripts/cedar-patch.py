@@ -57,7 +57,8 @@ def main():
         template_ids = get_template_ids(lookup_file, limit)
         patch_template(patch_engine, template_ids, output_dir, debug)
     elif resource_type == 'element':
-        pass
+        element_ids = get_element_ids(lookup_file, limit)
+        patch_element(patch_engine, element_ids, output_dir, debug)
     elif resource_type == 'field':
         pass
     elif resource_type == 'instance':
@@ -131,7 +132,7 @@ def patch_template(patch_engine, template_ids, output_dir, debug):
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
-                    filename = create_filename_from_id(template_id)
+                    filename = create_filename_from_id(template_id, prefix="template-")
                     write_to_file(patched_template, filename, output_dir)
             else:
                 create_report("unresolved", template_id)
@@ -148,13 +149,41 @@ def validate_template(template):
                       if not is_valid]
 
 
+def patch_element(patch_engine, element_ids, output_dir, debug):
+    total_elements = len(element_ids)
+    for counter, element_id in enumerate(element_ids, start=1):
+        if not debug:
+            print_progressbar(element_id, counter, total_elements)
+        try:
+            element = get_element(element_id)
+            is_success, patched_element = patch_engine.execute(element, validate_element, debug=debug)
+            if is_success:
+                if patched_element is not None:
+                    create_report("resolved", element_id)
+                    filename = create_filename_from_id(element_id, prefix="element-")
+                    write_to_file(patched_element, filename, output_dir)
+            else:
+                create_report("unresolved", element_id)
+                filename = create_filename_from_id(element_id)
+                write_to_file(patched_element, filename, output_dir)
+        except requests.exceptions.HTTPError as error:
+            exit(error)
+
+
+def validate_element(element):
+    is_valid, message = validator.validate_element(server_address, cedar_api_key, element)
+    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
+                      for error_detail in message["errors"]
+                      if not is_valid]
+
+
 def create_report(report_entry, template_id):
     report[report_entry].append(template_id)
 
 
-def create_filename_from_id(resource_id):
+def create_filename_from_id(resource_id, prefix=""):
     resource_hash = extract_resource_hash(resource_id)
-    return "template-" + resource_hash + ".patched.json"
+    return prefix + resource_hash + ".patched.json"
 
 
 def print_progressbar(resource_id, counter, total_count):
@@ -174,6 +203,15 @@ def get_template_ids(lookup_file, limit):
     return template_ids
 
 
+def get_element_ids(lookup_file, limit):
+    element_ids = []
+    if lookup_file is not None:
+        element_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        element_ids = searcher.search_elements(server_address, cedar_api_key, max_count=limit)
+    return element_ids
+
+
 def get_ids_from_file(filename):
     with open(filename) as infile:
         resource_ids = infile.readlines()
@@ -182,6 +220,10 @@ def get_ids_from_file(filename):
 
 def get_template(template_id):
     return getter.get_template(server_address, cedar_api_key, template_id)
+
+
+def get_element(element_id):
+    return getter.get_element(server_address, cedar_api_key, element_id)
 
 
 def extract_resource_hash(resource_id):
@@ -199,13 +241,13 @@ def show_report():
 def create_report_message(solved_size, unsolved_size):
     report_message = ""
     if unsolved_size == 0:
-        report_message = "All templates were successfully patched."
+        report_message = "All resources were successfully patched."
     else:
         if solved_size == 0:
-            report_message = "Unable to completely fix the invalid templates"
+            report_message = "Unable to completely fix the invalid resources"
         else:
             total_size = solved_size + unsolved_size
-            report_message += "Successfully fix %d out of %d invalid templates. (Success rate: %.0f%%)" % \
+            report_message += "Successfully fix %d out of %d invalid resources. (Success rate: %.0f%%)" % \
                               (solved_size, total_size, solved_size * 100 / total_size)
         report_message += "\n"
         report_message += "Details: " + to_json_string(dict(report))

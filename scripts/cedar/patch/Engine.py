@@ -1,5 +1,4 @@
 import copy
-import jsonpatch
 
 
 class Engine(object):
@@ -12,52 +11,52 @@ class Engine(object):
     def add_patch(self, patch):
         self.patches.append(patch)
 
-    def execute(self, template, validate_template, debug=False):
+    def execute(self, resource, validation_callback, debug=False):
         self.__solved_errors[:] = []
-        copy_template = copy.deepcopy(template)
+        copy_resource = copy.deepcopy(resource)
 
         if debug:
-            print(" INFO     | Patching the template <" + template["@id"] + ">")
+            print(" INFO     | Patching the resource " + resource["@id"])
 
-        patched_template = None
+        patched_resource = None
 
         stop_trying = False
         resolvable = True
         while not stop_trying:
-            is_valid, report = validate_template(copy_template)
+            is_valid, report = validation_callback(copy_resource)
             if is_valid:
                 stop_trying = True
                 resolvable = True
             else:
-                output = self.__apply_patch(copy_template, report, debug)
+                output = self.__apply_patch(copy_resource, report, debug)
                 if output is not None:
-                    copy_template = copy.deepcopy(output)
-                    patched_template = output
+                    copy_resource = copy.deepcopy(output)
+                    patched_resource = output
                 else:
                     stop_trying = True
                     resolvable = False
         if debug:
             if resolvable:
-                if patched_template is None:
-                    print(" INFO     | Template is already valid!\n")
+                if patched_resource is None:
+                    print(" INFO     | Resource is already valid!\n")
                 else:
-                    print(" SUCCESS  | Template is successfully patched!\n")
+                    print(" SUCCESS  | Resource is successfully patched!\n")
             else:
                 for unsolved_error in self.__unsolved_errors:
                     print(" ERROR    | Unable to fix " + unsolved_error);
-                print(" FATAL    | Unable to fix the template!\n")
+                print(" FATAL    | Unable to fix the resource!\n")
 
-        return resolvable, patched_template
+        return resolvable, patched_resource
 
-    def __apply_patch(self, template, report, debug=False):
+    def __apply_patch(self, resource, report, debug=False):
         self.__unsolved_errors[:] = []
-        patched_template = None
+        patched_resource = None
         for error_message in report:
             found_patch = False
             for patch in self.patches:
-                if patch.is_applied(error_message, template) and error_message not in self.__solved_errors:
+                if patch.is_applied(error_message, resource) and error_message not in self.__solved_errors:
                     found_patch = True
-                    patched_template = patch.apply_patch(template, error_message)
+                    patched_resource = patch.apply_patch(resource, error_message)
                     break
 
             if found_patch:
@@ -68,4 +67,4 @@ class Engine(object):
             else:
                 self.__unsolved_errors.append(error_message)
 
-        return patched_template
+        return patched_resource
