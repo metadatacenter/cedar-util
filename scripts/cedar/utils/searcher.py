@@ -63,7 +63,7 @@ def get_total_paging(total_count, limit_per_page):
 
 
 def get_total_count(api_key, request_url):
-    search_result = do_search(api_key, request_url, 0, 1)
+    search_result = do_search(api_key, request_url, 0, 100)
     total_count = search_result["totalCount"]
     return total_count
 
