@@ -59,7 +59,7 @@ usage: cedar-patch.py [-h] [-s {local,staging,production}]
                       [-t {template,element,field,instance}]
                       [--lookup FILENAME] [--limit LIMIT]
                       [--output-dir DIRNAME] [--output-mongodb DBCONN]
-                      [--model-version VERSION] [--debug]
+                      [--model-version VERSION] [--keep-unresolved] [--debug]
                       CEDAR-API-KEY
 
 positional arguments:
@@ -76,6 +76,7 @@ optional arguments:
                         set the MongoDB connection URI to store the patched resources
   --model-version VERSION
                         set the CEDAR model version of the patched resources
+  --keep-unresolved     include the unresolved resources as part of the output
   --debug               print the debugging messages
 ```
 

@@ -44,6 +44,10 @@ def main():
                         required=False,
                         metavar="VERSION",
                         help="set the CEDAR model version of the patched resources")
+    parser.add_argument("--keep-unresolved",
+                        required=False,
+                        action="store_true",
+                        help="include the unresolved resources as part of the output")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -58,6 +62,7 @@ def main():
     mongo_database = setup_mongodb(args.output_mongodb)
     model_version = args.model_version
 
+    keep_unresolved = args.keep_unresolved
     debug = args.debug
 
     global server_address, cedar_api_key
@@ -67,10 +72,10 @@ def main():
     patch_engine = build_patch_engine()
     if resource_type == 'template':
         template_ids = get_template_ids(lookup_file, limit)
-        patch_template(patch_engine, template_ids, model_version, output_dir, mongo_database, debug)
+        patch_template(patch_engine, template_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
     elif resource_type == 'element':
         element_ids = get_element_ids(lookup_file, limit)
-        patch_element(patch_engine, element_ids, model_version, output_dir, mongo_database, debug)
+        patch_element(patch_engine, element_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
     elif resource_type == 'field':
         pass
     elif resource_type == 'instance':
@@ -133,7 +138,8 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, mongo_database=None, debug=False):
+def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, mongo_database=None,
+                   keep_unresolved=False, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -147,14 +153,27 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                     if model_version is not None or model_version != "":
                         set_model_version(patched_template, model_version)
                     if output_dir is not None:
-                        filename = create_filename_from_id(template_id, prefix="template-")
+                        filename = create_filename_from_id(template_id, prefix="template-patched-")
                         write_to_file(patched_template, filename, output_dir)
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "templates", patched_template)
             else:
                 create_report("unresolved", template_id)
-                filename = create_filename_from_id(template_id, prefix="template-unresolved-")
-                write_to_file(patched_template, filename, "/tmp")
+                if keep_unresolved:
+                    if model_version is not None or model_version != "":
+                        set_model_version(patched_template, model_version)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(template_id, prefix="template-unresolved-")
+                        write_to_file(patched_template, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "templates", patched_template)
+                else:
+                    if output_dir is not None:
+                        filename = create_filename_from_id(template_id, prefix="template-original-")
+                        write_to_file(template, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "templates", template)
+
         except requests.exceptions.HTTPError as error:
             exit(error)
 
@@ -166,7 +185,8 @@ def validate_template(template):
                       if not is_valid]
 
 
-def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, mongo_database=None, debug=False):
+def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, mongo_database=None,
+                  keep_unresolved=False, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
@@ -180,14 +200,27 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                     if model_version is not None or model_version != "":
                         set_model_version(patched_element, model_version)
                     if output_dir is not None:
-                        filename = create_filename_from_id(element_id, prefix="element-")
+                        filename = create_filename_from_id(element_id, prefix="element-patched-")
                         write_to_file(patched_element, filename, output_dir)
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "template-elements", patched_element)
             else:
                 create_report("unresolved", element_id)
-                filename = create_filename_from_id(element_id, prefix="element-unresolved-")
-                write_to_file(patched_element, filename, "/tmp")
+                if keep_unresolved:
+                    if model_version is not None or model_version != "":
+                        set_model_version(patched_element, model_version)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(element_id, prefix="element-unresolved-")
+                        write_to_file(patched_element, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "templates", patched_element)
+                else:
+                    if output_dir is not None:
+                        filename = create_filename_from_id(element_id, prefix="element-original-")
+                        write_to_file(element, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "templates", element)
+
         except requests.exceptions.HTTPError as error:
             exit(error)
 
@@ -251,7 +284,7 @@ def create_report(report_entry, template_id):
 
 def create_filename_from_id(resource_id, prefix=""):
     resource_hash = extract_resource_hash(resource_id)
-    return prefix + resource_hash + ".patched.json"
+    return prefix + resource_hash + ".json"
 
 
 def print_progressbar(resource_id, counter, total_count):
