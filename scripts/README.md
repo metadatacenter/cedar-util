@@ -11,88 +11,152 @@ cedar
          +-- *Patch.py
          +--- ...
 +-- utils                   : some utility methods to interact with the CEDAR server
-    +--- downloader.py      : Get a template/element/instance using a specific ID
-    +--- finder.py          : Query and get the meta-information about templates/elements/instancea
-    +--- validator.py       : Validate a template/element/instance
+    +--- getter.py          : Get a CEDAR resource (i.e., template/element/instance) via a GET request
+    +--- remover.py         : Remove a CEDAR resource (i.e., template/element/instance) via a DELETE request
+    +--- searcher.py        : Search a CEDAR resource (i.e., template/element/instance) by specifying the search keywords
+    +--- storer.py          : Create a CEDAR resource (i.e., template/element/instance) via a POST request
+    +--- updater.py         : Update a CEDAR resource (i.e., template/element/instance) via a PUT request
+    +--- validator.py       : Validate a CEDAR resource (i.e., template/element/instance)
 ```
 
 **Example usage**:
 ```
-from cedar.utils import downloader
-from cedar.patch.collection import *
+from cedar.utils import getter, storer, validator
 ```
 
 ## Executable programs
 
-### model-validator
+### Validate Resources
 
 ```buildoutcfg
 usage: cedar-validator.py [-h] [-s {local,staging,production}]
                           [-t {template,element,field,instance}]
-                          [--limit LIMIT]
-                          apiKey
+                          [--lookup FILENAME] [--limit LIMIT]
+                          CEDAR-API-KEY
 
 positional arguments:
-  apiKey                The API key used to query the CEDAR resource server
+  CEDAR-API-KEY         the API key used to access the CEDAR resource server
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s {local,staging,production}, --server {local,staging,production}
-                        The type of CEDAR server
-  -t {template,element,field,instance}, --type {template,element,field,instance}
-                        The type of CEDAR resource
-  --limit LIMIT         The maximum number of resources to validate
-
+  -s, --server          the type of CEDAR server. The options are {local,staging,production}
+  -t, --type            the type of CEDAR resource. The options are {template,element,field,instance}
+  --lookup FILENAME     an input file containing a list of resource identifiers to validate
+  --limit LIMIT         the maximum number of resources to validate
 ```
 
 **Example usage**:
 
 Validate all the templates in the staging server
 ```buildoutcfg
-$ python cedar-validator.py --server staging --type template "<CEDAR-API-KEY>"
+$ python cedar-validator.py --server staging --type template "apiKey 1234567890"
 ```
 
-### model-updater
+### Patch Resources
 
 ```buildoutcfg
 usage: cedar-patch.py [-h] [-s {local,staging,production}]
-                      [-t {template,element,field,instance}] [--limit LIMIT]
-                      [--use-staging-validator CEDAR-STAGING-API-KEY]
-                      [--debug]
+                      [-t {template,element,field,instance}]
+                      [--lookup FILENAME] [--limit LIMIT]
+                      [--output-dir DIRNAME] [--output-mongodb DBCONN]
+                      [--model-version VERSION] [--debug]
                       CEDAR-API-KEY
 
 positional arguments:
-  CEDAR-API-KEY         The API key used to query the CEDAR resource server
+  CEDAR-API-KEY         the API key used to access the CEDAR resource server
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s {local,staging,production}, --server {local,staging,production}
-                        The type of CEDAR server
-  -t {template,element,field,instance}, --type {template,element,field,instance}
-                        The type of CEDAR resource
-  --limit LIMIT         The maximum number of resources to validate
-  --use-staging-validator CEDAR-STAGING-API-KEY
-                        Use the validator from the staging server (nightly-
-                        build)
-  --debug               Enter debug mode
+  -s, --server          the type of CEDAR server. The options are {local,staging,production}
+  -t, --type            the type of CEDAR resource. The options are {template,element,field,instance}
+  --lookup FILENAME     an input file containing a list of resource identifiers to patch
+  --limit LIMIT         the maximum number of resources to patch
+  --output-dir DIRNAME  set the output directory to store the patched resources
+  --output-mongodb DBCONN
+                        set the MongoDB connection URI to store the patched resources
+  --model-version VERSION
+                        set the CEDAR model version of the patched resources
+  --debug               print the debugging messages
 ```
 
 **Example usage**:
 
-Patch all the templates in the production server
+Patch all the templates in the production server and set the output to the `/tmp` directory
 ```buildoutcfg
-$ python cedar-patch.py --server production --type template "<CEDAR-API-KEY>"
+$ python cedar-patch.py --server production --type template "apiKey 1234567890" --output-dir=/tmp
 ```
 
-Patch all the templates in the production server but use the most recent model-validator from the staging server.
+Patch all the templates in the production server and set the output to a MongoDB database called `cedar-patch` (see the Troubleshooting section to prepare a MongoDB database)
 ```buildoutcfg
-$ python cedar-patch.py --server production --type template "<CEDAR-API-KEY>" --use-staging-validator "<STAGING-API-KEY>"
+$ python cedar-patch.py --server production --type template "apiKey 1234567890" --output-mongodb=mongodb://myuser:mypass@localhost:27017/cedar-patch
 ```
 
-Patch the first 100 templates in the staging server
+Patch the first 100 elements in the staging server
 ```buildoutcfg
-$ python cedar-patch.py --server staging --type template "<CEDAR-API-KEY>" --limit 100
+$ python cedar-patch.py --server staging --type element "apiKey 1234567890" --limit 100 --output-dir=/tmp
 ```
 
-Note that the script will not make any data change to the server but it will run the updating workflow to apply the
-corresponding patches based on the error report returned by the model-validator
+Patch all the templates specified by the `template.txt`
+```buildoutcfg
+$ python cedar-patch.py --server staging --type element "apiKey 1234567890" --lookup=template.txt --output-dir=/tmp
+```
+
+### Copy Resources
+
+```buildoutcfg
+usage: cedar-migrate.py [-h] --from SERVER-ADDRESS CEDAR-API-KEY --to
+                        SERVER-ADDRESS CEDAR-API-KEY [--include-instances]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --from                the source server
+  --to                  the destination server
+  --include-instances   copy all the template instances as well
+```
+
+**Example usage**:
+
+Copy all the resources from the CEDAR staging server to a local server (Note: use the *resource.** sub-domain of the server)
+```buildoutcfg
+python cedar-migrate.py --from https://resource.staging.metadatacenter.net "apiKey 1234567890" --to https://resource.metadatacenter.orgx "apiKey abcdefghij" --include-instances
+```
+
+## Troubleshooting
+
+You need to create a new MongoDB database and set the proper roles to the user that will enable the script to store the patched resources.
+
+1. Open a terminal and login to MongoDB
+```buildoutcfg
+$ mongo -u <YourAdminUser> --authenticationDatabase admin -p
+```
+
+2. Create a role that will have the privilege list all the databases
+```buildoutcfg
+>> use admin
+>> db.runCommand({ createRole: "listDatabases",
+     	privileges: [
+            { resource: { cluster : true }, actions: ["listDatabases"]}
+     	],
+     	roles: []
+})
+```
+
+3. Create another role that will have the privilege to drop a database. Set this role locally within your selected database.
+```buildoutcfg
+>> use cedar-patch
+>> db.runCommand({ createRole: "dropDatabase",
+	    privileges: [
+            { resource: { db: "cedar-patch", collection: "" }, actions: ["dropDatabase"]}
+	    ],
+	    roles: []
+})
+```
+
+4. Create a new user that owns those roles. Use the username and the password in the MongoDB connection URI.
+```buildoutcfg
+>> db.createUser({
+   	    user: "myuser",
+  	    pwd: "mypass",
+   	    roles: [ "readWrite”, “listDatabases”, “dropDatabase” ]
+})
+```
