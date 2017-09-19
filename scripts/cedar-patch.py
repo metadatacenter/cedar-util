@@ -40,6 +40,10 @@ def main():
                         required=False,
                         metavar="DBCONN",
                         help="Set the MongoDB connection URI to store the patched resources")
+    parser.add_argument("--model-version",
+                        required=False,
+                        metavar="VERSION",
+                        help="Set the CEDAR model version used by the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -52,6 +56,8 @@ def main():
     limit = args.limit
     output_dir = args.output_dir
     mongo_database = setup_mongodb(args.output_mongodb)
+    model_version = args.model_version
+
     debug = args.debug
 
     global server_address, cedar_api_key
@@ -61,10 +67,10 @@ def main():
     patch_engine = build_patch_engine()
     if resource_type == 'template':
         template_ids = get_template_ids(lookup_file, limit)
-        patch_template(patch_engine, template_ids, output_dir, mongo_database, debug)
+        patch_template(patch_engine, template_ids, model_version, output_dir, mongo_database, debug)
     elif resource_type == 'element':
         element_ids = get_element_ids(lookup_file, limit)
-        patch_element(patch_engine, element_ids, output_dir, mongo_database, debug)
+        patch_element(patch_engine, element_ids, model_version, output_dir, mongo_database, debug)
     elif resource_type == 'field':
         pass
     elif resource_type == 'instance':
@@ -127,7 +133,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, template_ids, output_dir=None, mongo_database=None, debug=False):
+def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, mongo_database=None, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -138,6 +144,8 @@ def patch_template(patch_engine, template_ids, output_dir=None, mongo_database=N
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
+                    if model_version is not None or model_version != "":
+                        set_model_version(patched_template, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-")
                         write_to_file(patched_template, filename, output_dir)
@@ -158,7 +166,7 @@ def validate_template(template):
                       if not is_valid]
 
 
-def patch_element(patch_engine, element_ids, output_dir=None, mongo_database=None, debug=False):
+def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, mongo_database=None, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
@@ -169,6 +177,8 @@ def patch_element(patch_engine, element_ids, output_dir=None, mongo_database=Non
             if is_success:
                 if patched_element is not None:
                     create_report("resolved", element_id)
+                    if model_version is not None or model_version != "":
+                        set_model_version(patched_element, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-")
                         write_to_file(patched_element, filename, output_dir)
@@ -187,6 +197,16 @@ def validate_element(element):
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
+
+
+def set_model_version(resource, model_version):
+    for k, v in resource.items():
+        if isinstance(v, dict):
+            set_model_version(v, model_version)
+        elif isinstance(v, str):
+            if k == "schema:schemaVersion":
+                resource[k] = model_version
+                return
 
 
 def setup_mongodb(mongodb_conn):
