@@ -9,18 +9,18 @@ def main():
                         required=True,
                         nargs=2,
                         metavar=("SERVER-ADDRESS", "CEDAR-API-KEY"),
-                        help="The source server that holds all the resources to copy")
+                        help="the source server")
     parser.add_argument("--to",
                         dest='to_server',
                         required=True,
                         nargs=2,
                         metavar=("SERVER-ADDRESS", "CEDAR-API-KEY"),
-                        help="The destination server into which all the resources are copied")
+                        help="the destination server")
     parser.add_argument("--include-instances",
                         dest="include_instances",
                         default=False,
                         action="store_true",
-                        help="Import all the template instances as well")
+                        help="copy all the template instances as well")
     args = parser.parse_args()
     source_server_address, source_api_key = args.from_server
     target_server_address, target_api_key = args.to_server
