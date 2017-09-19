@@ -38,8 +38,8 @@ def main():
                         help="Set the output directory to store the patched resources")
     parser.add_argument("--output-mongodb",
                         required=False,
-                        metavar="DBNAME",
-                        help="Set the MongoDB database name to store the patched resources")
+                        metavar="DBCONN",
+                        help="Set the MongoDB connection URI to store the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -189,21 +189,26 @@ def validate_element(element):
                       if not is_valid]
 
 
-def setup_mongodb(db_name):
-    if db_name is None:
+def setup_mongodb(mongodb_conn):
+    if mongodb_conn is None:
         return None
 
-    client = MongoClient('mongodb://cedarMongoUser:changeme@localhost:27017/cedar-patch')
+    client = MongoClient(mongodb_conn)
     db_names = client.database_names()
 
+    db_name = get_db_name(mongodb_conn)
     if db_name == "cedar":
-        raise Exception("Refused to store the patched resources to the main 'cedar' database")
+        raise Exception("Refused to store the patched resources into the main 'cedar' database")
 
     if db_name in db_names:
         if confirm("The database '" + db_name + "' already exists. Drop the content ([Y]/N)?", yes_if_blank=True):
             client.drop_database(db_name)
 
     return client[db_name]
+
+
+def get_db_name(mongodb_conn):
+    return mongodb_conn[mongodb_conn.rfind("/")+1:]
 
 
 def write_to_mongodb(database, collection_name, resource):
