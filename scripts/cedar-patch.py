@@ -202,6 +202,7 @@ def setup_mongodb(mongodb_conn):
 
     if db_name in db_names:
         if confirm("The database '" + db_name + "' already exists. Drop the content ([Y]/N)?", yes_if_blank=True):
+            print("Dropping database...")
             client.drop_database(db_name)
 
     return client[db_name]
