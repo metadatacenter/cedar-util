@@ -145,18 +145,18 @@ $ mongo -u <YourAdminUser> --authenticationDatabase admin -p
 ```buildoutcfg
 >> use cedar-patch
 >> db.runCommand({ createRole: "dropDatabase",
-	    privileges: [
+        privileges: [
             { resource: { db: "cedar-patch", collection: "" }, actions: ["dropDatabase"]}
-	    ],
-	    roles: []
+	],
+	roles: []
 })
 ```
 
 4. Create a new user that owns those roles. Use the username and the password in the MongoDB connection URI.
 ```buildoutcfg
 >> db.createUser({
-   	    user: "myuser",
-  	    pwd: "mypass",
-   	    roles: [ "readWrite”, “listDatabases”, “dropDatabase” ]
+   	user: "myuser",
+  	pwd: "mypass",
+   	roles: [ "readWrite”, “listDatabases”, “dropDatabase” ]
 })
 ```
