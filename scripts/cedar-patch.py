@@ -19,37 +19,37 @@ def main():
     parser.add_argument("-s", "--server",
                         choices=['local', 'staging', 'production'],
                         default="staging",
-                        help="The type of CEDAR server")
+                        help="the type of CEDAR server")
     parser.add_argument("-t", "--type",
                         choices=['template', 'element', 'field', 'instance'],
                         default="template",
-                        help="The type of CEDAR resource")
+                        help="the type of CEDAR resource")
     parser.add_argument("--lookup",
                         required=False,
                         metavar="FILENAME",
-                        help="An input file containing a list of resource identifiers to patch")
+                        help="an input file containing a list of resource identifiers to patch")
     parser.add_argument("--limit",
                         required=False,
                         type=int,
-                        help="The maximum number of resources to validate")
+                        help="the maximum number of resources to patch")
     parser.add_argument("--output-dir",
                         required=False,
                         metavar="DIRNAME",
-                        help="Set the output directory to store the patched resources")
+                        help="set the output directory to store the patched resources")
     parser.add_argument("--output-mongodb",
                         required=False,
                         metavar="DBCONN",
-                        help="Set the MongoDB connection URI to store the patched resources")
+                        help="set the MongoDB connection URI to store the patched resources")
     parser.add_argument("--model-version",
                         required=False,
                         metavar="VERSION",
-                        help="Set the CEDAR model version used by the patched resources")
+                        help="set the CEDAR model version of the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
-                        help="Enter debug mode")
+                        help="print the debugging messages")
     parser.add_argument("apikey", metavar="CEDAR-API-KEY",
-                        help="The API key used to query the CEDAR resource server")
+                        help="the API key used to access the CEDAR resource server")
     args = parser.parse_args()
     resource_type = args.type
     lookup_file = args.lookup
