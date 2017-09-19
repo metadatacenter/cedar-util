@@ -1,5 +1,6 @@
 import argparse
 import requests.exceptions
+from pymongo import MongoClient
 from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
@@ -35,6 +36,10 @@ def main():
                         required=False,
                         metavar="DIRNAME",
                         help="Set the output directory to store the patched resources")
+    parser.add_argument("--output-mongodb",
+                        required=False,
+                        metavar="DBNAME",
+                        help="Set the MongoDB database name to store the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -46,6 +51,7 @@ def main():
     lookup_file = args.lookup
     limit = args.limit
     output_dir = args.output_dir
+    mongo_database = setup_mongodb(args.output_mongodb)
     debug = args.debug
 
     global server_address, cedar_api_key
@@ -55,10 +61,10 @@ def main():
     patch_engine = build_patch_engine()
     if resource_type == 'template':
         template_ids = get_template_ids(lookup_file, limit)
-        patch_template(patch_engine, template_ids, output_dir, debug)
+        patch_template(patch_engine, template_ids, output_dir, mongo_database, debug)
     elif resource_type == 'element':
         element_ids = get_element_ids(lookup_file, limit)
-        patch_element(patch_engine, element_ids, output_dir, debug)
+        patch_element(patch_engine, element_ids, output_dir, mongo_database, debug)
     elif resource_type == 'field':
         pass
     elif resource_type == 'instance':
@@ -121,7 +127,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, template_ids, output_dir, debug):
+def patch_template(patch_engine, template_ids, output_dir=None, mongo_database=None, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -132,8 +138,11 @@ def patch_template(patch_engine, template_ids, output_dir, debug):
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
-                    filename = create_filename_from_id(template_id, prefix="template-")
-                    write_to_file(patched_template, filename, output_dir)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(template_id, prefix="template-")
+                        write_to_file(patched_template, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "templates", patched_template)
             else:
                 create_report("unresolved", template_id)
                 filename = create_filename_from_id(template_id, prefix="template-unresolved-")
@@ -149,7 +158,7 @@ def validate_template(template):
                       if not is_valid]
 
 
-def patch_element(patch_engine, element_ids, output_dir, debug):
+def patch_element(patch_engine, element_ids, output_dir=None, mongo_database=None, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
@@ -160,8 +169,11 @@ def patch_element(patch_engine, element_ids, output_dir, debug):
             if is_success:
                 if patched_element is not None:
                     create_report("resolved", element_id)
-                    filename = create_filename_from_id(element_id, prefix="element-")
-                    write_to_file(patched_element, filename, output_dir)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(element_id, prefix="element-")
+                        write_to_file(patched_element, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "template-elements", patched_element)
             else:
                 create_report("unresolved", element_id)
                 filename = create_filename_from_id(element_id, prefix="element-unresolved-")
@@ -175,6 +187,36 @@ def validate_element(element):
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
+
+
+def setup_mongodb(db_name):
+    if db_name is None:
+        return None
+
+    client = MongoClient('mongodb://cedarMongoUser:changeme@localhost:27017/cedar-patch')
+    db_names = client.database_names()
+
+    if db_name == "cedar":
+        raise Exception("Refused to store the patched resources to the main 'cedar' database")
+
+    if db_name in db_names:
+        if confirm("The database '" + db_name + "' already exists. Drop the content ([Y]/N)?", yes_if_blank=True):
+            client.drop_database(db_name)
+
+    return client[db_name]
+
+
+def write_to_mongodb(database, collection_name, resource):
+    database[collection_name].insert_one(prepare(resource))
+
+
+def prepare(resource):
+    new = {}
+    for k, v in resource.items():
+        if isinstance(v, dict):
+            v = prepare(v)
+        new[k.replace('$schema', '_$schema')] = v
+    return new
 
 
 def create_report(report_entry, template_id):
@@ -252,6 +294,20 @@ def create_report_message(solved_size, unsolved_size):
         report_message += "\n"
         report_message += "Details: " + to_json_string(dict(report))
     return report_message
+
+
+def confirm(prompt, yes_if_blank=False):
+    while True:
+        answer = input(prompt)
+        if answer == "" and yes_if_blank:
+            return True
+        else:
+            if answer == "y" or answer == "Y" or answer == "yes" or answer == "Yes":
+                return True
+            elif answer == "n" or answer == "N" or answer == "no" or answer == "No":
+                return False
+            else:
+                continue
 
 
 if __name__ == "__main__":
