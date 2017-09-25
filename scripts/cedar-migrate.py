@@ -1,4 +1,7 @@
 import argparse
+
+from requests import HTTPError
+
 from cedar.utils import getter, searcher, storer
 
 
@@ -82,15 +85,24 @@ def get_instance(server_address, api_key, instance_id):
 
 
 def store_template(server_address, api_key, template):
-    storer.store_template(server_address, api_key, template, import_mode=True)
+    try:
+        storer.store_template(server_address, api_key, template, import_mode=True)
+    except HTTPError as err:
+        print(" ERROR    | Error copying template %s (Cause: %s)" % (get_id(template), err))
 
 
 def store_element(server_address, api_key, element):
-    storer.store_element(server_address, api_key, element, import_mode=True)
+    try:
+        storer.store_element(server_address, api_key, element, import_mode=True)
+    except HTTPError as err:
+        print(" ERROR    | Error copying element %s (Cause: %s)" % (get_id(element), err))
 
 
 def store_instance(server_address, api_key, instance):
-    storer.store_instance(server_address, api_key, instance, import_mode=True)
+    try:
+        storer.store_instance(server_address, api_key, instance, import_mode=True)
+    except HTTPError as err:
+        print(" ERROR    | Error copying instance %s (Cause: %s)" % (get_id(instance), err))
 
 
 def show_instance_copying_progressbar(resource_id, counter, total_count):
