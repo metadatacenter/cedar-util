@@ -1,6 +1,7 @@
 import argparse
-import requests.exceptions
 from pymongo import MongoClient
+from requests import HTTPError
+
 from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
@@ -10,7 +11,8 @@ server_address = None
 cedar_api_key = None
 report = {
     "resolved": [],
-    "unresolved": []
+    "unresolved": [],
+    "error": []
 }
 
 
@@ -173,9 +175,8 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                         write_to_file(template, filename, output_dir)
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "templates", template)
-
-        except requests.exceptions.HTTPError as error:
-            exit(error)
+        except (HTTPError, KeyError) as error:
+            create_report("error", [template_id, str(error)])
 
 
 def validate_template(template):
@@ -220,9 +221,8 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                         write_to_file(element, filename, output_dir)
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "templates", element)
-
-        except requests.exceptions.HTTPError as error:
-            exit(error)
+        except (HTTPError, KeyError) as error:
+            create_report("error", [element_id, str(error)])
 
 
 def validate_element(element):
