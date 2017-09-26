@@ -47,7 +47,7 @@ def main():
         pass
     elif resource_type == 'instance':
         instance_ids = get_instance_ids(lookup_file, limit)
-        validate_instance(lookup_file, limit)
+        validate_instance(instance_ids)
 
     show_report()
 
