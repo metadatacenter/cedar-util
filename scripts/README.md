@@ -135,29 +135,36 @@ $ mongo -u <YourAdminUser> --authenticationDatabase admin -p
 ```buildoutcfg
 >> use admin
 >> db.runCommand({ createRole: "listDatabases",
-     	privileges: [
-            { resource: { cluster : true }, actions: ["listDatabases"]}
-     	],
-     	roles: []
-})
+      privileges: [
+         { resource: { cluster : true }, actions: ["listDatabases"]}
+      ],
+      roles: []
+   })
 ```
 
-3. Create another role that will have the privilege to drop a database. Set this role locally within your selected database.
+3. Create another role that will have the privilege to drop the `patch` database
 ```buildoutcfg
 >> use cedar-patch
 >> db.runCommand({ createRole: "dropDatabase",
-        privileges: [
-            { resource: { db: "cedar-patch", collection: "" }, actions: ["dropDatabase"]}
-	],
-	roles: []
-})
+      privileges: [
+         { resource: { db: "cedar-patch", collection: "" }, actions: ["dropDatabase"]}
+      ],
+      roles: []
+   })
 ```
 
-4. Create a new user that owns those roles. Use the username and the password in the MongoDB connection URI.
+4. Create a new user with some roles and additionally we will also grant a permission to list the databases in the `admin` store
 ```buildoutcfg
+>> use cedar-patch
 >> db.createUser({
-   	user: "myuser",
-  	pwd: "mypass",
-   	roles: [ "readWrite”, “listDatabases”, “dropDatabase” ]
-})
+   	  user: "myuser",
+  	  pwd: "mypass",
+   	  roles: [ "readWrite”, “dropDatabase” ]
+   })
+>> db.grantRolesToUser(
+      "myuser",
+      [
+         { role: "listDatabases", db: "admin" }
+      ]
+   )
 ```
