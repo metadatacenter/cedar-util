@@ -313,7 +313,8 @@ def write_to_mongodb(database, collection_name, resource):
 
 
 def read_from_mongodb(database, collection_name, id):
-    return database[collection_name].get_one({"_id": id})
+    doc = database[collection_name].find({"@id": id}).next()
+    return prepare_output(doc)
 
 
 def prepare(resource):
@@ -322,6 +323,17 @@ def prepare(resource):
         if isinstance(v, dict):
             v = prepare(v)
         new[k.replace('$schema', '_$schema')] = v
+    return new
+
+
+def prepare_output(resource):
+    new = {}
+    for k, v in resource.items():
+        if k == '_id':
+            continue
+        if isinstance(v, dict):
+            v = prepare(v)
+        new[k.replace('_$schema', '$schema')] = v
     return new
 
 
