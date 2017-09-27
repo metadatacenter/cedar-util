@@ -20,6 +20,7 @@ from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddV
 from cedar.patch.collection.AddXsdToContextPatch import AddXsdToContextPatch
 from cedar.patch.collection.AddXsdToContextPropertiesPatch import AddXsdToContextPropertiesPatch
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
+from cedar.patch.collection.FillNullValuePatch import FillNullValuePatch
 from cedar.patch.collection.MoveTitleAndDescriptionPatch import MoveTitleAndDescriptionPatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoMatchOutOfFiveSchemasPatch import NoMatchOutOfFiveSchemasPatch
@@ -70,6 +71,7 @@ __all__ = [
     "AddXsdToContextPatch",
     "AddXsdToContextPropertiesPatch",
     "FillEmptyValuePatch",
+    "FillNullValuePatch",
     "MoveTitleAndDescriptionPatch",
     "MoveContentToUiPatch",
     "NoMatchOutOfFiveSchemasPatch",
