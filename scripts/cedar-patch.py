@@ -82,7 +82,7 @@ def main():
         pass
     elif resource_type == 'instance':
         instance_ids = get_instance_ids(lookup_file, limit)
-        patch_instance(patch_engine, instance_ids, output_dir, mongo_database, keep_unresolved, debug)
+        patch_instance(instance_ids, output_dir, mongo_database, debug)
     if not debug:
         show_report()
 
@@ -180,7 +180,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
             create_report("error", [template_id, "Error details: " + str(error)])
 
 
-def validate_template(template, schema=None):
+def validate_template(template):
     is_valid, message = validator.validate_template(server_address, cedar_api_key, template)
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
@@ -226,53 +226,69 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
             create_report("error", [element_id, "Error details: " + str(error)])
 
 
-def validate_element(element, schema=None):
+def validate_element(element):
     is_valid, message = validator.validate_element(server_address, cedar_api_key, element)
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
 
 
-def patch_instance(patch_engine, instance_ids, output_dir=None, mongo_database=None, keep_unresolved=False, debug=False):
+def patch_instance(instance_ids, output_dir=None, mongo_database=None, debug=False):
     total_instances = len(instance_ids)
+    print(" WARNING  | Patching the instances might still leave some errors. Please run the validator manually to check thoroughly")
     for counter, instance_id in enumerate(instance_ids, start=1):
         if not debug:
             print_progressbar(instance_id, counter, total_instances)
         try:
             instance = get_instance(instance_id)
-            template = read_from_mongodb(mongo_database, "templates", instance["schema:isBasedOn"])
-            is_success, patch_instance = patch_engine.execute(instance, validate_instance, schema=template, debug=debug)
-            if is_success:
-                if patch_instance is not None:
-                    create_report("resolved", instance_id)
-                    if output_dir is not None:
-                        filename = create_filename_from_id(instance_id, prefix="instance-patched-")
-                        write_to_file(patch_instance, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-instances", patch_instance)
-            else:
-                create_report("unresolved", instance_id)
-                if keep_unresolved:
-                    if output_dir is not None:
-                        filename = create_filename_from_id(instance_id, prefix="instance-unresolved-")
-                        write_to_file(patch_instance, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-instances", patch_instance)
-                else:
-                    if output_dir is not None:
-                        filename = create_filename_from_id(instance_id, prefix="instance-original-")
-                        write_to_file(instance, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-instances", instance)
+            patched_instance = fix_context(instance)
+            patched_instance = rename(patched_instance, replace_valuelabel)
+
+            create_report("resolved", instance_id)
+
+            if output_dir is not None:
+                filename = create_filename_from_id(instance_id, prefix="instance-patched-")
+                write_to_file(patched_instance, filename, output_dir)
+            if mongo_database is not None:
+                write_to_mongodb(mongo_database, "template-instances", patched_instance)
         except (HTTPError, KeyError) as error:
             create_report("error", [instance_id, "Error details: " + str(error)])
 
 
-def validate_instance(instance, schema):
-    is_valid, message = validator.validate_instance(server_address, cedar_api_key, {"schema": schema, "instance": instance})
-    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
-                      for error_detail in message["errors"]
-                      if not is_valid]
+def fix_context(instance):
+    context = instance["@context"]
+    context["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#"
+    context["xsd"] = "http://www.w3.org/2001/XMLSchema#"
+    context["pav"] = "http://purl.org/pav/"
+    context["schema"] = "http://schema.org/"
+    context["oslc"] = "http://open-services.net/ns/core#"
+    context["rdfs:label"] = {"@type": "xsd:string"}
+    context["schema:isBasedOn"] = {"@type": "@id"}
+    context["schema:name"] = {"@type": "xsd:string"}
+    context["schema:description"] = {"@type": "xsd:string"}
+    context["pav:createdOn"] = {"@type": "xsd:dateTime"}
+    context["pav:createdBy"] = {"@type": "@id"}
+    context["pav:lastUpdatedOn"] = {"@type": "xsd:dateTime"}
+    context["oslc:modifiedBy"] = {"@type": "@id"}
+    return instance
+
+
+def rename(obj, replace_function):
+    if isinstance(obj, (str, int, float)):
+        return obj
+    if isinstance(obj, dict):
+        new = obj.__class__()
+        for k, v in obj.items():
+            new[replace_function(k)] = rename(v, replace_function)
+    elif isinstance(obj, (list, set, tuple)):
+        new = obj.__class__(rename(v, replace_function) for v in obj)
+    else:
+        return obj
+    return new
+
+
+def replace_valuelabel(k):
+    return k.replace('_valueLabel', 'rdfs:label')
 
 
 def set_model_version(resource, model_version):
@@ -312,28 +328,12 @@ def write_to_mongodb(database, collection_name, resource):
     database[collection_name].insert_one(prepare(resource))
 
 
-def read_from_mongodb(database, collection_name, id):
-    doc = database[collection_name].find({"@id": id}).next()
-    return prepare_output(doc)
-
-
 def prepare(resource):
     new = {}
     for k, v in resource.items():
         if isinstance(v, dict):
             v = prepare(v)
         new[k.replace('$schema', '_$schema')] = v
-    return new
-
-
-def prepare_output(resource):
-    new = {}
-    for k, v in resource.items():
-        if k == '_id':
-            continue
-        if isinstance(v, dict):
-            v = prepare(v)
-        new[k.replace('_$schema', '$schema')] = v
     return new
 
 

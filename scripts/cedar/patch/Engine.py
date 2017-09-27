@@ -11,7 +11,7 @@ class Engine(object):
     def add_patch(self, patch):
         self.patches.append(patch)
 
-    def execute(self, resource, validation_callback, schema=None, debug=False):
+    def execute(self, resource, validation_callback, debug=False):
         self.__solved_errors[:] = []
         copy_resource = copy.deepcopy(resource)
 
@@ -23,7 +23,7 @@ class Engine(object):
         stop_trying = False
         resolvable = True
         while not stop_trying:
-            is_valid, report = validation_callback(copy_resource, schema)
+            is_valid, report = validation_callback(copy_resource)
             if is_valid:
                 stop_trying = True
                 resolvable = True
