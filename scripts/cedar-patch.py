@@ -177,7 +177,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "templates", template)
         except (HTTPError, KeyError) as error:
-            create_report("error", [template_id, str(error)])
+            create_report("error", [template_id, "Error details: " + str(error)])
 
 
 def validate_template(template, schema=None):
@@ -223,7 +223,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "template-elements", element)
         except (HTTPError, KeyError) as error:
-            create_report("error", [element_id, str(error)])
+            create_report("error", [element_id, "Error details: " + str(error)])
 
 
 def validate_element(element, schema=None):
@@ -265,7 +265,7 @@ def patch_instance(patch_engine, instance_ids, output_dir=None, mongo_database=N
                     if mongo_database is not None:
                         write_to_mongodb(mongo_database, "template-instances", instance)
         except (HTTPError, KeyError) as error:
-            create_report("error", [instance_id, str(error)])
+            create_report("error", [instance_id, "Error details: " + str(error)])
 
 
 def validate_instance(instance, schema):
