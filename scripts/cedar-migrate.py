@@ -52,6 +52,8 @@ def migrate(source_server_address, target_server_address, source_api_key, target
         print(" INFO     | Copying element %s (%d/%d)" % (get_id(element), element_counter, len(element_ids)))
         store_element(target_server_address, target_api_key, element)
 
+    print(" INFO     | Migration was successful")
+    print()
 
 def get_template_ids(server_address, api_key):
     print(" INFO     | Collecting all the templates... ", end="")
