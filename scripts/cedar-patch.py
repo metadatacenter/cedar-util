@@ -81,8 +81,8 @@ def main():
     elif resource_type == 'field':
         pass
     elif resource_type == 'instance':
-        pass
-
+        instance_ids = get_instance_ids(lookup_file, limit)
+        patch_instance(patch_engine, instance_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
     if not debug:
         show_report()
 
@@ -179,7 +179,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
             create_report("error", [template_id, str(error)])
 
 
-def validate_template(template):
+def validate_template(template, schema=None):
     is_valid, message = validator.validate_template(server_address, cedar_api_key, template)
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
@@ -214,19 +214,61 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                         filename = create_filename_from_id(element_id, prefix="element-unresolved-")
                         write_to_file(patched_element, filename, output_dir)
                     if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "templates", patched_element)
+                        write_to_mongodb(mongo_database, "template-elements", patched_element)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-original-")
                         write_to_file(element, filename, output_dir)
                     if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "templates", element)
+                        write_to_mongodb(mongo_database, "template-elements", element)
         except (HTTPError, KeyError) as error:
             create_report("error", [element_id, str(error)])
 
 
-def validate_element(element):
+def validate_element(element, schema=None):
     is_valid, message = validator.validate_element(server_address, cedar_api_key, element)
+    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
+                      for error_detail in message["errors"]
+                      if not is_valid]
+
+
+def patch_instance(patch_engine, instance_ids, output_dir=None, mongo_database=None, keep_unresolved=False, debug=False):
+    total_instances = len(instance_ids)
+    for counter, instance_id in enumerate(instance_ids, start=1):
+        if not debug:
+            print_progressbar(instance_id, counter, total_instances)
+        try:
+            instance = get_instance(instance_id)
+            template = read_from_mongodb(mongo_database, "templates", instance["schema:isBasedOn"])
+            is_success, patch_instance = patch_engine.execute(instance, validate_instance, schema=template, debug=debug)
+            if is_success:
+                if patch_instance is not None:
+                    create_report("resolved", instance_id)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(instance_id, prefix="instance-patched-")
+                        write_to_file(patch_instance, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "template-instances", patch_instance)
+            else:
+                create_report("unresolved", instance_id)
+                if keep_unresolved:
+                    if output_dir is not None:
+                        filename = create_filename_from_id(instance_id, prefix="instance-unresolved-")
+                        write_to_file(patch_instance, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "template-instances", patch_instance)
+                else:
+                    if output_dir is not None:
+                        filename = create_filename_from_id(instance_id, prefix="instance-original-")
+                        write_to_file(instance, filename, output_dir)
+                    if mongo_database is not None:
+                        write_to_mongodb(mongo_database, "template-instances", instance)
+        except (HTTPError, KeyError) as error:
+            create_report("error", [instance_id, str(error)])
+
+
+def validate_instance(instance, schema):
+    is_valid, message = validator.validate_instance(server_address, cedar_api_key, {"schema": schema, "instance": instance})
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
@@ -267,6 +309,10 @@ def get_db_name(mongodb_conn):
 
 def write_to_mongodb(database, collection_name, resource):
     database[collection_name].insert_one(prepare(resource))
+
+
+def read_from_mongodb(database, collection_name, id):
+    return database[collection_name].get_one({"_id": id})
 
 
 def prepare(resource):
@@ -313,6 +359,15 @@ def get_element_ids(lookup_file, limit):
     return element_ids
 
 
+def get_instance_ids(lookup_file, limit):
+    instance_ids = []
+    if lookup_file is not None:
+        instance_ids.extend(get_ids_from_file(lookup_file))
+    else:
+        instance_ids = searcher.search_instances(server_address, cedar_api_key, max_count=limit)
+    return instance_ids
+
+
 def get_ids_from_file(filename):
     with open(filename) as infile:
         resource_ids = infile.readlines()
@@ -325,6 +380,10 @@ def get_template(template_id):
 
 def get_element(element_id):
     return getter.get_element(server_address, cedar_api_key, element_id)
+
+
+def get_instance(instance_id):
+    return getter.get_instance(server_address, cedar_api_key, instance_id)
 
 
 def extract_resource_hash(resource_id):
