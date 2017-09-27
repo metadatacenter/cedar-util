@@ -297,7 +297,7 @@ def setup_mongodb(mongodb_conn):
         raise Exception("Refused to store the patched resources into the main 'cedar' database")
 
     if db_name in db_names:
-        if confirm("The database '" + db_name + "' already exists. Drop the content ([Y]/N)?", yes_if_blank=True):
+        if confirm("The database '" + db_name + "' already exists. Drop the content (Y/[N])?", default_response=False):
             print("Dropping database...")
             client.drop_database(db_name)
 
@@ -415,11 +415,11 @@ def create_report_message(solved_size, unsolved_size):
     return report_message
 
 
-def confirm(prompt, yes_if_blank=False):
+def confirm(prompt, default_response=False):
     while True:
         answer = input(prompt)
-        if answer == "" and yes_if_blank:
-            return True
+        if answer == "":
+            return default_response
         else:
             if answer == "y" or answer == "Y" or answer == "yes" or answer == "Yes":
                 return True
