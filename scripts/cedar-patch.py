@@ -82,7 +82,7 @@ def main():
         pass
     elif resource_type == 'instance':
         instance_ids = get_instance_ids(lookup_file, limit)
-        patch_instance(patch_engine, instance_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
+        patch_instance(patch_engine, instance_ids, output_dir, mongo_database, keep_unresolved, debug)
     if not debug:
         show_report()
 
