@@ -15,7 +15,7 @@ class AddSchemaVersionPatch(object):
         pattern = re.compile(
             "object has missing required properties " \
             "\(\[('.+',)*'schema:schemaVersion'(,'.+')*\]\) " \
-            "at /.*$")
+            "at (/?(/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):

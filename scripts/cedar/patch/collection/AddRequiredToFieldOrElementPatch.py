@@ -16,7 +16,7 @@ class AddRequiredToFieldOrElementPatch(object):
         pattern = re.compile(
             "object has missing required properties " \
             "\(\['required'\]\) " \
-            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
+            "at ((/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         is_applied = False
         if pattern.match(error_message):
             path = utils.get_error_location(error_message)
