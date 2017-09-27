@@ -406,20 +406,21 @@ def extract_resource_hash(resource_id):
 def show_report():
     resolved_size = len(report["resolved"])
     unresolved_size = len(report["unresolved"])
+    error_size = len(report["error"])
     print()
-    print(create_report_message(resolved_size, unresolved_size))
+    print(create_report_message(resolved_size, unresolved_size, error_size))
     print()
 
 
-def create_report_message(solved_size, unsolved_size):
+def create_report_message(solved_size, unsolved_size, error_size):
     report_message = ""
-    if unsolved_size == 0:
+    if unsolved_size == 0 and error_size == 0:
         report_message = "All resources were successfully patched."
     else:
         if solved_size == 0:
             report_message = "Unable to completely fix the invalid resources"
         else:
-            total_size = solved_size + unsolved_size
+            total_size = solved_size + unsolved_size + error_size
             report_message += "Successfully fix %d out of %d invalid resources. (Success rate: %.0f%%)" % \
                               (solved_size, total_size, solved_size * 100 / total_size)
         report_message += "\n"
