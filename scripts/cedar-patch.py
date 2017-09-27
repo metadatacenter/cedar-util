@@ -153,7 +153,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
-                    if model_version is not None or model_version != "":
+                    if model_version:
                         set_model_version(patched_template, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-patched-")
@@ -163,7 +163,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
             else:
                 create_report("unresolved", template_id)
                 if keep_unresolved:
-                    if model_version is not None or model_version != "":
+                    if model_version:
                         set_model_version(patched_template, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-unresolved-")
@@ -199,7 +199,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
             if is_success:
                 if patched_element is not None:
                     create_report("resolved", element_id)
-                    if model_version is not None or model_version != "":
+                    if model_version:
                         set_model_version(patched_element, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-patched-")
@@ -209,7 +209,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
             else:
                 create_report("unresolved", element_id)
                 if keep_unresolved:
-                    if model_version is not None or model_version != "":
+                    if model_version:
                         set_model_version(patched_element, model_version)
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-unresolved-")
