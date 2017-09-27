@@ -16,8 +16,9 @@ class AddProvenanceToFieldOrElementPatch(object):
         pattern = re.compile(
             "object has missing required properties " \
             "\(\[('.+',)*'oslc:modifiedBy','pav:createdBy','pav:createdOn','pav:lastUpdatedOn'(,'.+')*\]\) " \
-            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
-        return pattern.match(error_message)
+            "at ((/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
+        path = utils.get_error_location(error_message)
+        return pattern.match(error_message) and (utils.is_template_element(doc, at=path) or utils.is_template_field(doc, at=path))
 
     def apply_patch(self, doc, error_message):
         patch = self.get_patch(error_message)

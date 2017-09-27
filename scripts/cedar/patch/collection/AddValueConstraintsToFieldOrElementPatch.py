@@ -15,11 +15,11 @@ class AddValueConstraintsToFieldOrElementPatch(object):
         pattern = re.compile(
             "object has missing required properties " \
             "\(\[('.+',)*'_valueConstraints'(,'.+')*\]\) " \
-            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
+            "at ((/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         is_applied = False
         if pattern.match(error_message):
             path = utils.get_error_location(error_message)
-            if utils.is_template_field(doc, at=path):
+            if utils.is_template_element(doc, at=path) or utils.is_template_field(doc, at=path):
                 is_applied = True
         return is_applied
 
