@@ -23,8 +23,8 @@ def main():
                         default="staging",
                         help="the type of CEDAR server")
     parser.add_argument("-t", "--type",
-                        choices=['template', 'element', 'field', 'instance'],
-                        default="template",
+                        choices=['all', 'template', 'element', 'field', 'instance'],
+                        default="all",
                         help="the type of CEDAR resource")
     parser.add_argument("--lookup",
                         required=False,
@@ -38,10 +38,22 @@ def main():
                         required=False,
                         metavar="DIRNAME",
                         help="set the output directory to store the patched resources")
-    parser.add_argument("--output-mongodb",
+    parser.add_argument("--mongodb-connection",
                         required=False,
                         metavar="DBCONN",
-                        help="set the MongoDB connection URI to store the patched resources")
+                        help="set the MongoDB connection URI to get access to the database")
+    parser.add_argument("--output-mongodb",
+                        required=False,
+                        metavar="DBNAME",
+                        help="set the MongoDB database name to store the patched resources")
+    parser.add_argument("--commit",
+                        required=False,
+                        action="store_true",
+                        help="commit the integration of the patched resources to the CEDAR system")
+    parser.add_argument("--revert",
+                        required=False,
+                        action="store_true",
+                        help="revert the integration of the patched resources from the CEDAR system")
     parser.add_argument("--model-version",
                         required=False,
                         metavar="VERSION",
@@ -61,9 +73,12 @@ def main():
     lookup_file = args.lookup
     limit = args.limit
     output_dir = args.output_dir
-    mongo_database = setup_mongodb(args.output_mongodb)
+    mongodb_conn = args.mongodb_connection;
+    patch_db_name = args.output_mongodb
     model_version = args.model_version
 
+    commit_patching = args.commit
+    revert_patching = args.revert
     keep_unresolved = args.keep_unresolved
     debug = args.debug
 
@@ -71,20 +86,37 @@ def main():
     server_address = get_server_address(args.server)
     cedar_api_key = args.apikey
 
-    patch_engine = build_patch_engine()
-    if resource_type == 'template':
-        template_ids = get_template_ids(lookup_file, limit)
-        patch_template(patch_engine, template_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
-    elif resource_type == 'element':
-        element_ids = get_element_ids(lookup_file, limit)
-        patch_element(patch_engine, element_ids, model_version, output_dir, mongo_database, keep_unresolved, debug)
-    elif resource_type == 'field':
-        pass
-    elif resource_type == 'instance':
-        instance_ids = get_instance_ids(lookup_file, limit)
-        patch_instance(instance_ids, output_dir, mongo_database, debug)
-    if not debug:
-        show_report()
+    mongodb_client = setup_mongodb_client(mongodb_conn)
+    mongodb_database = setup_mongodb_database(mongodb_client, patch_db_name)
+
+    if revert_patching:
+        perform_revert_patching(mongodb_client, patch_db_name)
+    else:
+        patch_engine = build_patch_engine()
+        if resource_type == 'all':
+            template_ids = get_template_ids(None, limit)
+            patch_template(patch_engine, template_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            element_ids = get_element_ids(None, limit)
+            patch_element(patch_engine, element_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            instance_ids = get_instance_ids(None, limit)
+            patch_instance(instance_ids, output_dir, mongodb_database, debug)
+        elif resource_type == 'template':
+            template_ids = get_template_ids(lookup_file, limit)
+            patch_template(patch_engine, template_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+        elif resource_type == 'element':
+            element_ids = get_element_ids(lookup_file, limit)
+            patch_element(patch_engine, element_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+        elif resource_type == 'field':
+            pass
+        elif resource_type == 'instance':
+            instance_ids = get_instance_ids(lookup_file, limit)
+            patch_instance(instance_ids, output_dir, mongodb_database, debug)
+
+        if not debug:
+            show_report()
+
+        if commit_patching:
+            perform_commit_patching(mongodb_client, patch_db_name)
 
 
 def build_patch_engine():
@@ -301,23 +333,27 @@ def set_model_version(resource, model_version):
                 return
 
 
-def setup_mongodb(mongodb_conn):
+def setup_mongodb_client(mongodb_conn):
     if mongodb_conn is None:
         return None
+    return MongoClient(mongodb_conn)
 
-    client = MongoClient(mongodb_conn)
-    db_names = client.database_names()
 
-    db_name = get_db_name(mongodb_conn)
+def setup_mongodb_database(mongodb_client, db_name):
+    if mongodb_client is None:
+        return None
+
+    db_names = mongodb_client.database_names()
+
     if db_name == "cedar":
         raise Exception("Refused to store the patched resources into the main 'cedar' database")
 
     if db_name in db_names:
         if confirm("The database '" + db_name + "' already exists. Drop the content (Y/[N])?", default_response=False):
             print("Dropping database...")
-            client.drop_database(db_name)
+            mongodb_client.drop_database(db_name)
 
-    return client[db_name]
+    return mongodb_client[db_name]
 
 
 def get_db_name(mongodb_conn):
@@ -335,6 +371,30 @@ def prepare(resource):
             v = prepare(v)
         new[k.replace('$schema', '_$schema')] = v
     return new
+
+
+def perform_revert_patching(mongodb_client, patch_db_name):
+    print(" INFO     | Revert the patched resources from the CEDAR system")
+    mongodb_client.admin.command("copydb", fromdb="cedar", todb=patch_db_name)
+    mongodb_client.drop_database("cedar")
+    mongodb_client.admin.command("copydb", fromdb="cedar-orig", todb="cedar")
+    mongodb_client.drop_database("cedar-orig")
+    print(" INFO     | Revert was successful")
+
+
+def perform_commit_patching(mongodb_client, patch_db_name):
+    db_names = mongodb_client.database_names()
+    if "cedar-orig" in db_names:
+        if confirm("The database 'cedar-orig' contains the CEDAR backup. Drop the content (Y/[N])?", default_response=False):
+            print("Dropping database...")
+            mongodb_client.drop_database("cedar-orig")
+
+    print(" INFO     | Commit the patched resources into the CEDAR system")
+    mongodb_client.admin.command("copydb", fromdb="cedar", todb="cedar-orig")
+    mongodb_client.drop_database("cedar")
+    mongodb_client.admin.command('copydb', fromdb=patch_db_name, todb="cedar")
+    mongodb_client.drop_database(patch_db_name)
+    print(" INFO     | Commit was successful")
 
 
 def create_report(report_entry, template_id):
