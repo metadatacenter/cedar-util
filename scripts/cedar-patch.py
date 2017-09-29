@@ -1,5 +1,6 @@
 import argparse
 from pymongo import MongoClient
+from pymongo.errors import OperationFailure
 from requests import HTTPError
 
 from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
@@ -41,9 +42,10 @@ def main():
     parser.add_argument("--mongodb-connection",
                         required=False,
                         metavar="DBCONN",
-                        help="set the MongoDB connection URI to get access to the database")
+                        help="set the MongoDB admin connection URI to perform administration operations")
     parser.add_argument("--output-mongodb",
                         required=False,
+                        default="cedar-patch",
                         metavar="DBNAME",
                         help="set the MongoDB database name to store the patched resources")
     parser.add_argument("--commit",
@@ -66,14 +68,16 @@ def main():
                         required=False,
                         action="store_true",
                         help="print the debugging messages")
-    parser.add_argument("apikey", metavar="CEDAR-API-KEY",
+    parser.add_argument("--apikey",
+                        required=False,
+                        metavar="CEDAR-API-KEY",
                         help="the API key used to access the CEDAR resource server")
     args = parser.parse_args()
     resource_type = args.type
     lookup_file = args.lookup
     limit = args.limit
     output_dir = args.output_dir
-    mongodb_conn = args.mongodb_connection;
+    mongodb_conn = args.mongodb_connection
     patch_db_name = args.output_mongodb
     model_version = args.model_version
 
@@ -87,7 +91,7 @@ def main():
     cedar_api_key = args.apikey
 
     mongodb_client = setup_mongodb_client(mongodb_conn)
-    mongodb_database = setup_mongodb_database(mongodb_client, patch_db_name)
+    patch_database = setup_patch_database(mongodb_client, patch_db_name)
 
     if revert_patching:
         perform_revert_patching(mongodb_client, patch_db_name)
@@ -95,22 +99,22 @@ def main():
         patch_engine = build_patch_engine()
         if resource_type == 'all':
             template_ids = get_template_ids(None, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
             element_ids = get_element_ids(None, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
             instance_ids = get_instance_ids(None, limit)
-            patch_instance(instance_ids, output_dir, mongodb_database, debug)
+            patch_instance(instance_ids, output_dir, patch_database, debug)
         elif resource_type == 'template':
             template_ids = get_template_ids(lookup_file, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
         elif resource_type == 'element':
             element_ids = get_element_ids(lookup_file, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, mongodb_database, keep_unresolved, debug)
+            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
             instance_ids = get_instance_ids(lookup_file, limit)
-            patch_instance(instance_ids, output_dir, mongodb_database, debug)
+            patch_instance(instance_ids, output_dir, patch_database, debug)
 
         if not debug:
             show_report()
@@ -173,7 +177,7 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, mongo_database=None,
+def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, patch_database=None,
                    keep_unresolved=False, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
@@ -190,8 +194,8 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-patched-")
                         write_to_file(patched_template, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "templates", patched_template)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "templates", patched_template)
             else:
                 create_report("unresolved", template_id)
                 if keep_unresolved:
@@ -200,16 +204,17 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-unresolved-")
                         write_to_file(patched_template, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "templates", patched_template)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "templates", patched_template)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-original-")
                         write_to_file(template, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "templates", template)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "templates", template)
         except (HTTPError, KeyError) as error:
             create_report("error", [template_id, "Error details: " + str(error)])
+    print()  # console printing separator
 
 
 def validate_template(template):
@@ -219,7 +224,7 @@ def validate_template(template):
                       if not is_valid]
 
 
-def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, mongo_database=None,
+def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, patch_database=None,
                   keep_unresolved=False, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
@@ -236,8 +241,8 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-patched-")
                         write_to_file(patched_element, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-elements", patched_element)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "template-elements", patched_element)
             else:
                 create_report("unresolved", element_id)
                 if keep_unresolved:
@@ -246,16 +251,17 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-unresolved-")
                         write_to_file(patched_element, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-elements", patched_element)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "template-elements", patched_element)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-original-")
                         write_to_file(element, filename, output_dir)
-                    if mongo_database is not None:
-                        write_to_mongodb(mongo_database, "template-elements", element)
+                    if patch_database is not None:
+                        write_to_mongodb(patch_database, "template-elements", element)
         except (HTTPError, KeyError) as error:
             create_report("error", [element_id, "Error details: " + str(error)])
+    print()  # console printing separator
 
 
 def validate_element(element):
@@ -285,6 +291,7 @@ def patch_instance(instance_ids, output_dir=None, mongo_database=None, debug=Fal
                 write_to_mongodb(mongo_database, "template-instances", patched_instance)
         except (HTTPError, KeyError) as error:
             create_report("error", [instance_id, "Error details: " + str(error)])
+    print()  # console printing separator
 
 
 def fix_context(instance):
@@ -339,21 +346,24 @@ def setup_mongodb_client(mongodb_conn):
     return MongoClient(mongodb_conn)
 
 
-def setup_mongodb_database(mongodb_client, db_name):
+def setup_patch_database(mongodb_client, patch_db_name):
     if mongodb_client is None:
         return None
 
-    db_names = mongodb_client.database_names()
-
-    if db_name == "cedar":
+    if patch_db_name == "cedar":
         raise Exception("Refused to store the patched resources into the main 'cedar' database")
 
-    if db_name in db_names:
-        if confirm("The database '" + db_name + "' already exists. Drop the content (Y/[N])?", default_response=False):
+    db_names = mongodb_client.database_names()
+    if patch_db_name in db_names:
+        if confirm("The patch database '" + patch_db_name + "' already exists. Drop the content to proceed (Y/[N])?", default_response=False):
             print("Dropping database...")
-            mongodb_client.drop_database(db_name)
+            mongodb_client.drop_database(patch_db_name)
+        else:
+            exit(0)
 
-    return mongodb_client[db_name]
+    mongodb_client.admin.command("copydb", fromdb="cedar", todb=patch_db_name)
+
+    return mongodb_client[patch_db_name]
 
 
 def get_db_name(mongodb_conn):
@@ -361,7 +371,7 @@ def get_db_name(mongodb_conn):
 
 
 def write_to_mongodb(database, collection_name, resource):
-    database[collection_name].insert_one(prepare(resource))
+    database[collection_name].replace_one({'@id':resource['@id']}, prepare(resource))
 
 
 def prepare(resource):
@@ -375,7 +385,10 @@ def prepare(resource):
 
 def perform_revert_patching(mongodb_client, patch_db_name):
     print(" INFO     | Revert the patched resources from the CEDAR system")
-    mongodb_client.admin.command("copydb", fromdb="cedar", todb=patch_db_name)
+    try:
+        mongodb_client.admin.command("copydb", fromdb="cedar", todb=patch_db_name)
+    except OperationFailure as error:
+        print(error)
     mongodb_client.drop_database("cedar")
     mongodb_client.admin.command("copydb", fromdb="cedar-orig", todb="cedar")
     mongodb_client.drop_database("cedar-orig")
