@@ -259,7 +259,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                         write_to_file(element, filename, output_dir)
                     if patch_database is not None:
                         write_to_mongodb(patch_database, "template-elements", element)
-        except (HTTPError, KeyError) as error:
+        except (HTTPError, KeyError, TypeError) as error:
             create_report("error", [element_id, "Error details: " + str(error)])
     print()  # console printing separator
 
