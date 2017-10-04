@@ -360,5 +360,6 @@ ol#kc-totp-settings li:first-of-type {
     background-color: #3a5366 ;
 }
 
-#video-player{
+#video-player {
+    overflow: hidden;
 }

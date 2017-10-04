@@ -39,8 +39,13 @@
 
             <div id="cedar-header" class="col-sm-12 col-md-12 col-lg-12">
                 <div class="row" id="cedar-content-wrapper">
-                    <div id="cedar-small-logo-wrapper" class="col-xs-12 col-sm-8 col-md-8 col-lg-3"><div id="cedar-small-logo"></div></div>
-                    <div id="cedar-intro-text" class="col-xs-12 col-sm-4 col-md-4 col-lg-5">
+                    <div id="cedar-small-logo-wrapper" class="col-xs-12 col-sm-12 col-md-3 col-lg-3"><div id="cedar-small-logo"></div></div>
+                    <div id="cedar-intro-text2" class="col-xs-12 col-sm-12 col-md-6 col-lg-5">
+                        <div id="video-player">
+                            <iframe width="450" height="253" src="https://www.youtube.com/embed/videoseries?list=PLRFrKQ_tBSltHFumG7TLkpuLGv_dz8xwO" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    <div id="cedar-intro-text" class="col-xs-12 col-sm-12 col-md-3 col-lg-4">
                         <p style="text-align:justify">
                             Thanks for visiting the CEDAR Workbench, your tool for creating better metadata.
                         </p>
@@ -51,9 +56,6 @@
                             <a href="http://metadatacenter.org/tools-training/orientation">CEDAR Orientation</a>, or get support from the 
                             <a href="https://mailman.stanford.edu/mailman/listinfo/cedar-incoming">CEDAR Support List</a>.
                         </p>
-                        <div id="video-player">
-                        <iframe width="620" height="349" src="https://www.youtube.com/embed/videoseries?list=PLRFrKQ_tBSltHFumG7TLkpuLGv_dz8xwO" frameborder="0" allowfullscreen></iframe>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -109,6 +111,7 @@
             </div>
         </div>
     </div>
+
 </body>
 </html>
 </#macro>
