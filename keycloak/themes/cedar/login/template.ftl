@@ -46,10 +46,14 @@
                         </p>
                         <p style="text-align:justify">
                             You can create an account from this page, and immediately start making well-structured metadata.
+                            <br />
                             To learn more about CEDAR, please visit our 
                             <a href="http://metadatacenter.org/tools-training/orientation">CEDAR Orientation</a>, or get support from the 
                             <a href="https://mailman.stanford.edu/mailman/listinfo/cedar-incoming">CEDAR Support List</a>.
                         </p>
+                        <div id="video-player">
+                        <iframe width="620" height="349" src="https://www.youtube.com/embed/videoseries?list=PLRFrKQ_tBSltHFumG7TLkpuLGv_dz8xwO" frameborder="0" allowfullscreen></iframe>
+                        </div>
                     </div>
                 </div>
             </div>
