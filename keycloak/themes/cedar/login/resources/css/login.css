@@ -363,3 +363,7 @@ ol#kc-totp-settings li:first-of-type {
 #video-player {
     overflow: hidden;
 }
+
+#video-player-xs {
+    overflow: hidden;
+}
