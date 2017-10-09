@@ -15,14 +15,16 @@
 
 #kc-form-login .form-group div,
 #kc-register-form .form-group div,
-#kc-reset-password-form .form-group div {
+#kc-reset-password-form .form-group div,
+#kc-passwd-update-form .form-group div {
     left:0 ;
     width:100%;  
 }
 
 #kc-form-login  label,
 #kc-register-form  label,
-#kc-reset-password-form label {
+#kc-reset-password-form label,
+#kc-passwd-update-form label {
     font-size:14px; 
     font-weight: 400;
 }
@@ -236,7 +238,8 @@ div.kc-logo-text span {
 
 input[type="submit"]#kc-login.btn-primary,
 #kc-register-form #kc-form-buttons input[type="submit"].btn-primary,
-#kc-reset-password-form #kc-form-buttons input[type="submit"].btn-primary {
+#kc-reset-password-form #kc-form-buttons input[type="submit"].btn-primary,
+#kc-passwd-update-form #kc-form-buttons input[type="submit"].btn-primary {
             -webkit-appearance: button;
             cursor: pointer;
             margin: 20px 0;
@@ -254,19 +257,18 @@ input[type="submit"]#kc-login.btn-primary,
             float:right;
 }
 
-
 input[type="submit"]:hover#kc-login ,
 input[type="submit"]:focus#kc-login ,
 #kc-register-form #kc-form-buttons input[type="submit"]:hover.btn-primary,
 #kc-register-form #kc-form-buttons input[type="submit"]:focus.btn-primary,
 #kc-reset-password-form #kc-form-buttons input[type="submit"]:hover.btn-primary,
-#kc-reset-password-ryform #kc-form-buttons input[type="submit"]:focus.btn-primary {
+#kc-reset-password-ryform #kc-form-buttons input[type="submit"]:focus.btn-primary,
+#kc-passwd-update-form #kc-form-buttons input[type="submit"]:hover.btn-primary,
+#kc-passwd-update-form #kc-form-buttons input[type="submit"]:focus.btn-primary, {
     background-color: #3689b5;
     box-shadow: 0 0 0 #3689b5 inset, 0 0 0 #3689b5; 
 
 }
-
-
 
 #kc-terms-text {
     margin-bottom: 20px;
