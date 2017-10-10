@@ -31,7 +31,16 @@
     </#if>
 </head>
 
-<body>
+<body style="font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size:14px;color: #333;
+    height: 100%;
+    overflow: hidden;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    background:#eee;">
+
     <div id="content-wrapper" >
         <div id="content-wrapper-padding" >
             <#if realm.internationalizationEnabled>
@@ -51,41 +60,43 @@
 
             <div id="kc-content" >
 
-            <div class="row" >
-                <div id="kc-content-wrapper">
-                    <div id="cedar-small-logo" ></div>
-                    <#if displayMessage && message?has_content>
-                        <div class="${properties.kcFeedbackAreaClass!}">
-                            <div class="alert alert-${message.type}">
-                                <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
-                                <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
-                                <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
-                                <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
-                                <span class="kc-feedback-text">${message.summary}</span>
+                <div class="row" >
+                    <div id="kc-content-wrapper">
+                        <div id="cedar-small-logo" ></div>
+                            <#if displayMessage && message?has_content>
+                                <div class="${properties.kcFeedbackAreaClass!}">
+                                    <div class="alert alert-${message.type}">
+                                        <#if message.type = 'success'><span class="${properties.kcFeedbackSuccessIcon!}"></span></#if>
+                                        <#if message.type = 'warning'><span class="${properties.kcFeedbackWarningIcon!}"></span></#if>
+                                        <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
+                                        <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
+                                        <span class="kc-feedback-text">${message.summary}</span>
+                                    </div>
+                                </div>
+                            </#if>
+
+                        <div id="kc-form" >
+                            <div id="kc-form-wrapper"  >
+                                <#nested "form">
                             </div>
                         </div>
-                    </#if>
 
-                    <div id="kc-form" >
-                        <div id="kc-form-wrapper"  >
-                            <#nested "form">
-                        </div>
+                        <#if displayInfo>
+                            <div id="kc-info" >
+                                <div id="kc-info-wrapper" >
+                                    <#nested "info">
+                                </div>
+                            </div>
+                        </#if>
                     </div>
-
-                    <#if displayInfo>
-                        <div id="kc-info" >
-                            <div id="kc-info-wrapper" >
-                                <#nested "info">
-                            </div>
-                        </div>
-                    </#if>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="kc-video" > 
-        <a  href="https://youtu.be/1NBYWOKo9qo" >Watch the video tutorial</a> 
+        <div id="kc-video" > 
+            <a  target="_blank" href="https://www.youtube.com/watch?v=1NBYWOKo9qo&list=PLRFrKQ_tBSltHFumG7TLkpuLGv_dz8xwO" >Watch the video tutorial</a> 
+        </div>
+
     </div>
   
 </body>
