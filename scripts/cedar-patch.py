@@ -174,6 +174,8 @@ def build_patch_engine():
     patch_engine.add_patch(RemoveSchemaNameFromPropertiesPatch())
     patch_engine.add_patch(RemoveSchemaVersionPatch())
     patch_engine.add_patch(RemoveSelectionTypeFromUiPatch())
+    patch_engine.add_patch(RemoveTemplateIdFromPropertiesPatch())
+    patch_engine.add_patch(RemoveUiFromPropertiesPatch())
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
     patch_engine.add_patch(RestructureMultiValuedFieldPatch())
     return patch_engine
