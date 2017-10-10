@@ -6,6 +6,7 @@ from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsT
 from cedar.patch.collection.AddProvenanceToContextPatch import AddProvenanceToContextPatch
 from cedar.patch.collection.AddProvenanceToContextPropertiesPatch import AddProvenanceToContextPropertiesPatch
 from cedar.patch.collection.AddProvenanceToFieldOrElementPatch import AddProvenanceToFieldOrElementPatch
+from cedar.patch.collection.AddProvenanceToPropertiesPatch import AddProvenanceToPropertiesPatch
 from cedar.patch.collection.AddRdfsLabelToContextPropertiesPatch import AddRdfsLabelToContextPropertiesPatch
 from cedar.patch.collection.AddRdfsLabelToPropertiesPatch import AddRdfsLabelToPropertiesPatch
 from cedar.patch.collection.AddRdfsToContextPropertiesPatch import AddRdfsToContextPropertiesPatch
@@ -15,6 +16,7 @@ from cedar.patch.collection.AddSchemaDescriptionToContextPropertiesPatch import 
 from cedar.patch.collection.AddSchemaIsBasedOnToContextPropertiesPatch import AddSchemaIsBasedOnToContextPropertiesPatch
 from cedar.patch.collection.AddSchemaNameToContextPatch import AddSchemaNameToContextPatch
 from cedar.patch.collection.AddSchemaNameToContextPropertiesPatch import AddSchemaNameToContextPropertiesPatch
+from cedar.patch.collection.AddSchemaPropsToPropertiesPatch import AddSchemaPropsToPropertiesPatch
 from cedar.patch.collection.AddSchemaToContextPatch import AddSchemaToContextPatch
 from cedar.patch.collection.AddSchemaVersionPatch import AddSchemaVersionPatch
 from cedar.patch.collection.AddValueConstraintsToFieldOrElementPatch import AddValueConstraintsToFieldOrElementPatch
@@ -61,12 +63,14 @@ __all__ = [
     "AddProvenanceToContextPatch",
     "AddProvenanceToContextPropertiesPatch",
     "AddProvenanceToFieldOrElementPatch",
+    "AddProvenanceToPropertiesPatch",
     "AddRequiredToFieldOrElementPatch",
     "AddSchemaDescriptionToContextPatch",
     "AddSchemaDescriptionToContextPropertiesPatch",
     "AddSchemaIsBasedOnToContextPropertiesPatch",
     "AddSchemaNameToContextPatch",
     "AddSchemaNameToContextPropertiesPatch",
+    "AddSchemaPropsToPropertiesPatch",
     "AddSchemaToContextPatch",
     "AddRdfsLabelToContextPropertiesPatch",
     "AddRdfsLabelToPropertiesPatch",

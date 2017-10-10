@@ -61,7 +61,9 @@ class AddPropertyLabelsToUiPatch(object):
             "pav:createdOn",
             "pav:createdBy",
             "pav:lastUpdatedOn",
-            "oslc:modifiedBy"]
+            "oslc:modifiedBy",
+            "_ui",
+            "_templateId"]
         return [prop for prop in properties if prop not in system_properties]
 
     @staticmethod
