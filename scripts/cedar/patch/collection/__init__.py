@@ -44,6 +44,7 @@ from cedar.patch.collection.RemoveSchemaDescriptionFromPropertiesPatch import Re
 from cedar.patch.collection.RemoveSchemaIsBasedOnFromPropertiesPatch import RemoveSchemaIsBasedOnFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaNameFromPropertiesPatch import RemoveSchemaNameFromPropertiesPatch
 from cedar.patch.collection.RemoveSchemaVersionPatch import RemoveSchemaVersionPatch
+from cedar.patch.collection.RemoveSelectionTypeFromUiPatch import RemoveSelectionTypeFromUiPatch
 from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueLabelToRdfsLabelPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
 from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureMultiValuedFieldPatch
@@ -95,6 +96,7 @@ __all__ = [
     "RemoveSchemaIsBasedOnFromPropertiesPatch",
     "RemoveSchemaNameFromPropertiesPatch",
     "RemoveSchemaVersionPatch",
+    "RemoveSelectionTypeFromUiPatch",
     "RenameValueLabelToRdfsLabelPatch",
     "RestructureMultiValuedFieldPatch",
     "RestructureStaticTemplateFieldPatch"]
