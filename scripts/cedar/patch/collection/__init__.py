@@ -1,5 +1,6 @@
 from cedar.patch.collection.AddContentToUiPatch import AddContentToUiPatch
 from cedar.patch.collection.AddIdToPropertiesPatch import AddIdToPropertiesPatch
+from cedar.patch.collection.AddMissingContextPatch import AddMissingContextPatch
 from cedar.patch.collection.AddOrderToUiPatch import AddOrderToUiPatch
 from cedar.patch.collection.AddPropertyLabelsToUiPatch import AddPropertyLabelsToUiPatch
 from cedar.patch.collection.AddProvenanceToContextPatch import AddProvenanceToContextPatch
@@ -52,6 +53,7 @@ from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureM
 __all__ = [
     "AddContentToUiPatch",
     "AddIdToPropertiesPatch",
+    "AddMissingContextPatch",
     "AddOrderToUiPatch",
     "AddPropertyLabelsToUiPatch",
     "AddProvenanceToContextPatch",
