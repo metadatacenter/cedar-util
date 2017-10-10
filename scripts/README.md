@@ -140,5 +140,5 @@ optional arguments:
 
 Copy all the resources from the CEDAR staging server to a local server (Note: use the *resource.** sub-domain of the server)
 ```buildoutcfg
-python cedar-migrate.py --from https://resource.staging.metadatacenter.net "apiKey 1234567890" --to https://resource.metadatacenter.orgx "apiKey abcdefghij" --include-instances
+python cedar-migrate.py --from https://resource.staging.metadatacenter.org "apiKey 1234567890" --to https://resource.metadatacenter.orgx "apiKey abcdefghij" --include-instances
 ```
