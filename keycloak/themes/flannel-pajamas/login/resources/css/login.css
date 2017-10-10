@@ -234,6 +234,13 @@ div.kc-logo-text span {
     float:right;
 }
 
+input[type="text"],input[type="password"] {
+    -webkit-transition: none;
+    -moz-transition: none;
+    -o-transition: none;
+    transition: none;
+}
+
 input[type="submit"]#kc-login.btn-primary,
 #kc-register-form #kc-form-buttons input[type="submit"].btn-primary,
 #kc-reset-password-form #kc-form-buttons input[type="submit"].btn-primary,
