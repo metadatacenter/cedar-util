@@ -1,17 +1,5 @@
-.login-pf body {
-    font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
-    font-weight: 400;
-    font-size:14px;
-    color: #333;
-    height: 100%;
-    overflow: hidden;
-    display:flex;
-    justify-content: center;
-    align-items: center;
-    /*background:url('../img/cedar-bg-smaller-copy.jpg') top left repeat;*/
-    background:#eee;
+.login-pf body { 
 }
-
 
 #kc-form-login .form-group div,
 #kc-register-form .form-group div,
@@ -44,9 +32,7 @@
     border-radius: 0px;
     -webkit-box-shadow: 0 0 0 30px white inset;
     box-shadow: 0 0 0 30px white inset;
-    -webkit-transition: none;
-    -o-transition: none;
-    transition: none;
+}
 }
 
 .form-control:hover {
@@ -68,6 +54,7 @@ input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
     background-image: none;
     color: #2e5365;
     outline:none;
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 
 input:-webkit-autofill, input:-webkit-autofill:focus, input:-webkit-autofill:hover {
@@ -75,12 +62,23 @@ input:-webkit-autofill, input:-webkit-autofill:focus, input:-webkit-autofill:hov
     outline:none;
 }
 
+input[type="checkbox"] {
+      background: #61a2c2;
+      border: #61a2c2 1px solid;
+   }
+
+ input[type="checkbox"]:hover {
+      background:  #29688a;
+      border: #29688a 1px solid;
+   } 
+
 a {
-    color: #0099d3;
+    color: #61a2c2;
     text-decoration: none;
     outline:none;
 
 }
+
 a:hover {
     text-decoration:none;
 }
@@ -150,7 +148,7 @@ a#kc-current-locale-link::after {
 }
 
 .login-pf a:hover {
-    color: #0099d3;
+    color: #29688a;
 }
 
 #kc-logo {
@@ -240,21 +238,35 @@ input[type="submit"]#kc-login.btn-primary,
 #kc-register-form #kc-form-buttons input[type="submit"].btn-primary,
 #kc-reset-password-form #kc-form-buttons input[type="submit"].btn-primary,
 #kc-passwd-update-form #kc-form-buttons input[type="submit"].btn-primary {
-            -webkit-appearance: button;
-            cursor: pointer;
-            margin: 20px 0;
-            color: #ffffff;
-            background-color: #61a2c2;
-            box-shadow: 0 0 0 #3689b5 inset, 0 0 0 #3689b5; 
-            background-image: none;
-            font-size: 16px;
-            outline: none;
-            padding: 10px 40px;
-            border-width:0;
-            border: none;
-            -webkit-transition: all 0.3s 0.1s;
-            transition: all 0.3s 0.1s; 
-            float:right;
+    -webkit-appearance: button;
+    cursor: point;
+    margin: 0;
+    color: #ffffff;
+    background-color: #61a2c2;
+    font-size: 16px;
+    padding: 10px 40px;
+    border-width:0;     
+    float:right;
+    background-image:none;
+    text-transform: uppercase;
+}
+
+@supports (transition: initial) {
+    input[type="submit"]#kc-login.btn-primary,
+    #kc-register-form #kc-form-buttons input[type="submit"].btn-primary,
+    #kc-reset-password-form #kc-form-buttons input[type="submit"].btn-primary,
+    #kc-passwd-update-form #kc-form-buttons input[type="submit"].btn-primary {
+        -webkit-transition: all 0.3s 0.1s;
+        -moz-transition: all 0.3s 0.1s;
+        -o-transition: all 0.3s 0.1s;
+        transition: all 0.3s 0.1s;
+    }
+    #kc-form-login {
+        -webkit-transition: all 0.3s 0.1s;
+        -moz-transition: all 0.3s 0.1s;
+        -o-transition: all 0.3s 0.1s;
+        transition: all 0.3s 0.1s;
+    }
 }
 
 input[type="submit"]:hover#kc-login ,
@@ -265,9 +277,13 @@ input[type="submit"]:focus#kc-login ,
 #kc-reset-password-ryform #kc-form-buttons input[type="submit"]:focus.btn-primary,
 #kc-passwd-update-form #kc-form-buttons input[type="submit"]:hover.btn-primary,
 #kc-passwd-update-form #kc-form-buttons input[type="submit"]:focus.btn-primary, {
-    background-color: #3689b5;
-    box-shadow: 0 0 0 #3689b5 inset, 0 0 0 #3689b5; 
+    background-color: #29688a; 
+    box-shadow: 0 0 0 #29688a inset, 0 0 0 #29688a; 
+}
 
+input[type="submit"]:hover {
+    background-color: #29688a !important; 
+    box-shadow: 0 0 0 #29688a inset, 0 0 0 #29688a !important; 
 }
 
 #kc-terms-text {
@@ -514,15 +530,16 @@ ol#kc-totp-settings li:first-of-type {
     padding:20px;
     background:url('../img/video-background.png') top left no-repeat;
     background-size: 400px;
+    background-position: bottom;
     width: 400px;
-    height: 200px;
+    height: 150px;
     font-size:20px;
     font-weight: 200;
     display:flex;justify-content: center;align-items: top;
 }
 
 #kc-video a {
-    margin-top:30px;color:#fff;
+    color:#fff;letter-spacing: .3em;
 }
 
 #kc-video a:hover {
