@@ -5,6 +5,9 @@
 # update_biosample.py: Utility to update all BioSample instances in a local folder to the CEDAR schema version 1.1.0
 # and upload them to the CEDAR system
 
+# Note: use Josef's validator to check that the BioSample instances generated are right. At the minimum, I will need to
+# check that the @context is right because it seems that the old instances did not have it.
+
 import time
 import cedar_util
 import json
