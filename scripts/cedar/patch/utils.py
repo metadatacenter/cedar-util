@@ -48,9 +48,8 @@ def is_multivalued_field(resource, at=None):
         resource = dpath.util.get(resource, at)
     try:
         input_type = dpath.util.get(resource, "/_ui/inputType")
-        multiple_choice = dpath.util.get(resource, "/_valueConstraints/multipleChoice")
-        if input_type and multiple_choice:  # if both parameters present
-            return (input_type == "list" or input_type == "checkbox") and multiple_choice == True
+        if input_type:  # if both parameters present
+            return input_type == "list" or input_type == "checkbox"
     except KeyError:
         pass  # Ignore
     return False
