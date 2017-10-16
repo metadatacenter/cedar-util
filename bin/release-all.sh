@@ -55,7 +55,7 @@ CEDAR_DOCUMENTATION_REPOS=( "cedar-docs" "cedar-swagger-ui" )
 
 CEDAR_CLIENT_REPOS=(
     "biosample-exporter" 
-    "cedar-archetype-instance-reader",
+    "cedar-archetype-instance-reader"
     "cedar-archetype-instance-writer" 
     "cedar-archetype-exporter" 
 )
