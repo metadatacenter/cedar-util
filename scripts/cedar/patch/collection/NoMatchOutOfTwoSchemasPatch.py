@@ -93,16 +93,23 @@ class NoMatchOutOfTwoSchemasPatch(object):
         user_property_object = utils.get_json_object(doc, path)
         properties_object = user_property_object.get("properties")
 
-        # Recreate the required array for template element
+        # Recreate the required array for template element or template field
+        patch = {
+            "op": "remove",
+            "path": path + "/required"
+        }
+        patches.append(patch)
         if utils.is_template_element(user_property_object):
             patch = {
-                "op": "remove",
+                "op": "add",
+                "value": self.get_required_properties_for_template_element(user_property_object),
                 "path": path + "/required"
             }
             patches.append(patch)
+        elif utils.is_template_field(user_property_object):
             patch = {
                 "op": "add",
-                "value": self.get_element_required_properties(user_property_object),
+                "value": self.get_required_properties_for_template_field(user_property_object),
                 "path": path + "/required"
             }
             patches.append(patch)
@@ -363,6 +370,52 @@ class NoMatchOutOfTwoSchemasPatch(object):
             }
             patches.append(patch)
 
+        # Fix the requirement for having the @value (for the template field) and @id (for the template element)
+        if properties_object is not None:
+            if utils.is_template_element(user_property_object):
+                value_object = properties_object.get("@value")
+                if value_object is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/@value"
+                    }
+                    patches.append(patch)
+                id_object = properties_object.get("@id")
+                if id_object is None:
+                    patch = {
+                        "op": "add",
+                        "value": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "format": "uri"
+                        },
+                        "path": path + "/properties/@id"
+                    }
+                    patches.append(patch)
+            elif utils.is_template_field(user_property_object):
+                value_object = properties_object.get("@value")
+                if value_object is None:
+                    patch = {
+                        "op": "add",
+                        "value": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "path": path + "/properties/@value"
+                    }
+                    patches.append(patch)
+                id_object = properties_object.get("@id")
+                if id_object is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/@id"
+                    }
+                    patches.append(patch)
+
         # Rearrange the required list for @context of the properties field
         if properties_object is not None:
             context_object = properties_object.get("@context")
@@ -391,16 +444,22 @@ class NoMatchOutOfTwoSchemasPatch(object):
                         "path": path + "/properties/rdfs:label"
                     }
                     patches.append(patch)
-                    
-    def get_element_required_properties(self, element_object):
+
+    def get_required_properties_for_template_element(self, element_object):
         user_properties = self.get_user_properties(element_object.get("properties"))
         required_properties = ["@context", "@id"]
         required_properties.extend(user_properties)
         return required_properties
 
+    def get_required_properties_for_template_field(self, field_object):
+        user_properties = self.get_user_properties(field_object.get("properties"))
+        required_properties = ["@context", "@value"]
+        required_properties.extend(user_properties)
+        return required_properties
+
     @staticmethod
     def get_user_properties(properties_object):
-        exclude_list = ["@context", "@id", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
+        exclude_list = ["@context", "@id", "@value", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
                         "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
         property_names = list(properties_object.keys())
         return [item for item in property_names if item not in exclude_list]
