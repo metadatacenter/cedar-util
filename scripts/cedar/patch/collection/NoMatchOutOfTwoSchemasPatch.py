@@ -460,6 +460,6 @@ class NoMatchOutOfTwoSchemasPatch(object):
     @staticmethod
     def get_user_properties(properties_object):
         exclude_list = ["@context", "@id", "@value", "@type", "xsd", "schema", "pav", "oslc", "pav:createdOn",
-                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy", "_valueLabel"]
         property_names = list(properties_object.keys())
         return [item for item in property_names if item not in exclude_list]
