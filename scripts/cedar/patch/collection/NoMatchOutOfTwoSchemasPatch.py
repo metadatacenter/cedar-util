@@ -453,7 +453,7 @@ class NoMatchOutOfTwoSchemasPatch(object):
 
     def get_required_properties_for_template_field(self, field_object):
         user_properties = self.get_user_properties(field_object.get("properties"))
-        required_properties = ["@context", "@value"]
+        required_properties = ["@value"]
         required_properties.extend(user_properties)
         return required_properties
 
