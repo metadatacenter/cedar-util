@@ -94,12 +94,12 @@ class NoMatchOutOfTwoSchemasPatch(object):
         properties_object = user_property_object.get("properties")
 
         # Recreate the required array for template element or template field
-        patch = {
-            "op": "remove",
-            "path": path + "/required"
-        }
-        patches.append(patch)
         if utils.is_template_element(user_property_object):
+            patch = {
+                "op": "remove",
+                "path": path + "/required"
+            }
+            patches.append(patch)
             patch = {
                 "op": "add",
                 "value": self.get_required_properties_for_template_element(user_property_object),
@@ -107,6 +107,11 @@ class NoMatchOutOfTwoSchemasPatch(object):
             }
             patches.append(patch)
         elif utils.is_template_field(user_property_object):
+            patch = {
+                "op": "remove",
+                "path": path + "/required"
+            }
+            patches.append(patch)
             patch = {
                 "op": "add",
                 "value": self.get_required_properties_for_template_field(user_property_object),
