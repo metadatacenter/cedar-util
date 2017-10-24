@@ -164,30 +164,28 @@ class NoMatchOutOfTwoSchemasPatch(object):
         if properties_object is not None:
             at_type = properties_object.get("@type")
             if at_type is not None:
-                one_of = at_type.get("oneOf")
-                if one_of is None:
-                    patch = {
-                        "op": "replace",
-                        "value": {
-                            "oneOf": [
-                                {
+                patch = {
+                    "op": "replace",
+                    "value": {
+                        "oneOf": [
+                            {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
                                     "type": "string",
                                     "format": "uri"
                                 },
-                                {
-                                    "type": "array",
-                                    "minItems": 1,
-                                    "items": {
-                                        "type": "string",
-                                        "format": "uri"
-                                    },
-                                    "uniqueItems": True
-                                }
-                            ]
-                        },
-                        "path": path + "/properties/@type"
-                    }
-                    patches.append(patch)
+                                "uniqueItems": True
+                            }
+                        ]
+                    },
+                    "path": path + "/properties/@type"
+                }
+                patches.append(patch)
 
         # Rename _valueLabel to rdfs:label
         if properties_object is not None:
