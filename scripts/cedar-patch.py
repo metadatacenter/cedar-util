@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 from requests import HTTPError
 
-from cedar.utils import getter, searcher, validator, get_server_address, to_json_string, write_to_file
+from cedar.utils import validator, get_server_address, to_json_string, write_to_file
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -43,6 +43,11 @@ def main():
                         required=False,
                         metavar="DBCONN",
                         help="set the MongoDB admin connection URI to perform administration operations")
+    parser.add_argument("--input-mongodb",
+                        required=False,
+                        default="cedar",
+                        metavar="DBNAME",
+                        help="set the MongoDB database name to get the resources to patch")
     parser.add_argument("--output-mongodb",
                         required=False,
                         default="cedar-patch",
@@ -78,6 +83,7 @@ def main():
     limit = args.limit
     output_dir = args.output_dir
     mongodb_conn = args.mongodb_connection
+    source_db_name = args.input_mongodb
     patch_db_name = args.output_mongodb
     model_version = args.model_version
 
@@ -91,6 +97,7 @@ def main():
     cedar_api_key = args.validation_apikey
 
     mongodb_client = setup_mongodb_client(mongodb_conn)
+    source_database = setup_source_database(mongodb_client, source_db_name)
     patch_database = setup_patch_database(mongodb_client, patch_db_name)
 
     if revert_patching:
@@ -98,23 +105,23 @@ def main():
     else:
         patch_engine = build_patch_engine()
         if resource_type == 'all':
-            template_ids = get_template_ids(None, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
-            element_ids = get_element_ids(None, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
-            instance_ids = get_instance_ids(None, limit)
-            patch_instance(instance_ids, output_dir, patch_database, debug)
+            template_ids = get_template_ids(None, source_database, limit)
+            patch_template(patch_engine, template_ids, source_database, model_version, output_dir, patch_database, output_partial_patch, debug)
+            element_ids = get_element_ids(None, source_database, limit)
+            patch_element(patch_engine, element_ids, source_database, model_version, output_dir, patch_database, output_partial_patch, debug)
+            instance_ids = get_instance_ids(None, source_database, limit)
+            patch_instance(instance_ids, source_database, output_dir, patch_database, debug)
         elif resource_type == 'template':
-            template_ids = get_template_ids(lookup_file, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
+            template_ids = get_template_ids(lookup_file, source_database, limit)
+            patch_template(patch_engine, template_ids, source_database, model_version, output_dir, patch_database, output_partial_patch, debug)
         elif resource_type == 'element':
-            element_ids = get_element_ids(lookup_file, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
+            element_ids = get_element_ids(lookup_file, source_database, limit)
+            patch_element(patch_engine, element_ids, source_database, model_version, output_dir, patch_database, output_partial_patch, debug)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
-            instance_ids = get_instance_ids(lookup_file, limit)
-            patch_instance(instance_ids, output_dir, patch_database, debug)
+            instance_ids = get_instance_ids(lookup_file, source_database, limit)
+            patch_instance(instance_ids, source_database, output_dir, patch_database, debug)
 
         if not debug:
             show_report()
@@ -184,14 +191,14 @@ def build_patch_engine():
     return patch_engine
 
 
-def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, patch_database=None,
+def patch_template(patch_engine, template_ids, source_database, model_version=None, output_dir=None, patch_database=None,
                    output_partial_patch=False, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
-            template = get_template(template_id)
+            template = get_template(source_database, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -231,14 +238,14 @@ def validate_template(template):
                       if not is_valid]
 
 
-def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, patch_database=None,
+def patch_element(patch_engine, element_ids, source_database, model_version=None, output_dir=None, patch_database=None,
                   output_partial_patch=False, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
-            element = get_element(element_id)
+            element = get_element(source_database, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element, debug=debug)
             if is_success:
                 if patched_element is not None:
@@ -278,14 +285,14 @@ def validate_element(element):
                       if not is_valid]
 
 
-def patch_instance(instance_ids, output_dir=None, mongo_database=None, debug=False):
+def patch_instance(instance_ids, source_database, output_dir=None, mongo_database=None, debug=False):
     total_instances = len(instance_ids)
     print(" WARNING  | Patching the instances might still leave some errors. Please run the validator manually to check thoroughly")
     for counter, instance_id in enumerate(instance_ids, start=1):
         if not debug:
             print_progressbar(instance_id, counter, total_instances)
         try:
-            instance = get_instance(instance_id)
+            instance = get_instance(source_database, instance_id)
             patched_instance = fix_context(instance)
             patched_instance = rename(patched_instance, replace_valuelabel)
 
@@ -351,6 +358,18 @@ def setup_mongodb_client(mongodb_conn):
     if mongodb_conn is None:
         return None
     return MongoClient(mongodb_conn)
+
+
+def setup_source_database(mongodb_client, source_db_name):
+    if mongodb_client is None:
+        return None
+
+    db_names = mongodb_client.database_names()
+    if source_db_name not in db_names:
+        print(" ERROR    | Input MongoDB database not found: " + source_db_name)
+        exit(0)
+
+    return mongodb_client[source_db_name]
 
 
 def setup_patch_database(mongodb_client, patch_db_name):
@@ -434,30 +453,39 @@ def print_progressbar(resource_id, counter, total_count):
     print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
-def get_template_ids(lookup_file, limit):
+def get_template_ids(lookup_file, source_database, limit):
     template_ids = []
     if lookup_file is not None:
         template_ids.extend(get_ids_from_file(lookup_file))
     else:
-        template_ids = searcher.search_templates(server_address, cedar_api_key, max_count=limit)
+        if limit:
+            template_ids = source_database['templates'].distinct("@id").limit(limit)
+        else:
+            template_ids = source_database['templates'].distinct("@id")
     return template_ids
 
 
-def get_element_ids(lookup_file, limit):
+def get_element_ids(lookup_file, source_database, limit):
     element_ids = []
     if lookup_file is not None:
         element_ids.extend(get_ids_from_file(lookup_file))
     else:
-        element_ids = searcher.search_elements(server_address, cedar_api_key, max_count=limit)
+        if limit:
+            element_ids = source_database['template-elements'].distinct("@id").limit(limit)
+        else:
+            element_ids = source_database['template-elements'].distinct("@id")
     return element_ids
 
 
-def get_instance_ids(lookup_file, limit):
+def get_instance_ids(lookup_file, source_database, limit):
     instance_ids = []
     if lookup_file is not None:
         instance_ids.extend(get_ids_from_file(lookup_file))
     else:
-        instance_ids = searcher.search_instances(server_address, cedar_api_key, max_count=limit)
+        if limit:
+            instance_ids = source_database['template-instances'].distinct("@id").limit(limit)
+        else:
+            instance_ids = source_database['template-instances'].distinct("@id")
     return instance_ids
 
 
@@ -467,16 +495,16 @@ def get_ids_from_file(filename):
         return [id.strip() for id in resource_ids]
 
 
-def get_template(template_id):
-    return getter.get_template(server_address, cedar_api_key, template_id)
+def get_template(source_database, template_id):
+    return source_database['templates'].findOne({'@id': template_id})
 
 
-def get_element(element_id):
-    return getter.get_element(server_address, cedar_api_key, element_id)
+def get_element(source_database, element_id):
+    return source_database['template-elements'].findOne({'@id': element_id})
 
 
-def get_instance(instance_id):
-    return getter.get_instance(server_address, cedar_api_key, instance_id)
+def get_instance(source_database, instance_id):
+    return source_database['template-instances'].findOne({'@id': instance_id})
 
 
 def extract_resource_hash(resource_id):
