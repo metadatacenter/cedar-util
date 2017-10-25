@@ -397,14 +397,14 @@ def get_db_name(mongodb_conn):
 
 
 def write_to_mongodb(database, collection_name, resource):
-    database[collection_name].replace_one({'@id':resource['@id']}, prepare(resource))
+    database[collection_name].replace_one({'@id': resource['@id']}, pre_write(resource))
 
 
-def prepare(resource):
+def pre_write(resource):
     new = {}
     for k, v in resource.items():
         if isinstance(v, dict):
-            v = prepare(v)
+            v = pre_write(v)
         new[k.replace('$schema', '_$schema')] = v
     return new
 
