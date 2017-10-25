@@ -60,10 +60,10 @@ def main():
                         required=False,
                         metavar="VERSION",
                         help="set the CEDAR model version of the patched resources")
-    parser.add_argument("--keep-unresolved",
+    parser.add_argument("--output-partial-patch",
                         required=False,
                         action="store_true",
-                        help="include the unresolved resources as part of the output")
+                        help="output the partially patched resources instead of discarding them")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -83,7 +83,7 @@ def main():
 
     commit_patching = args.commit
     revert_patching = args.revert
-    keep_unresolved = args.keep_unresolved
+    output_partial_patch = args.output_partial_patch
     debug = args.debug
 
     global server_address, cedar_api_key
@@ -99,17 +99,17 @@ def main():
         patch_engine = build_patch_engine()
         if resource_type == 'all':
             template_ids = get_template_ids(None, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
+            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
             element_ids = get_element_ids(None, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
+            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
             instance_ids = get_instance_ids(None, limit)
             patch_instance(instance_ids, output_dir, patch_database, debug)
         elif resource_type == 'template':
             template_ids = get_template_ids(lookup_file, limit)
-            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
+            patch_template(patch_engine, template_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
         elif resource_type == 'element':
             element_ids = get_element_ids(lookup_file, limit)
-            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, keep_unresolved, debug)
+            patch_element(patch_engine, element_ids, model_version, output_dir, patch_database, output_partial_patch, debug)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
@@ -185,7 +185,7 @@ def build_patch_engine():
 
 
 def patch_template(patch_engine, template_ids, model_version=None, output_dir=None, patch_database=None,
-                   keep_unresolved=False, debug=False):
+                   output_partial_patch=False, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
@@ -205,7 +205,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                         write_to_mongodb(patch_database, "templates", patched_template)
             else:
                 create_report("unresolved", template_id)
-                if keep_unresolved:
+                if output_partial_patch:
                     if model_version:
                         set_model_version(patched_template, model_version)
                     if output_dir is not None:
@@ -232,7 +232,7 @@ def validate_template(template):
 
 
 def patch_element(patch_engine, element_ids, model_version=None, output_dir=None, patch_database=None,
-                  keep_unresolved=False, debug=False):
+                  output_partial_patch=False, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
@@ -252,7 +252,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                         write_to_mongodb(patch_database, "template-elements", patched_element)
             else:
                 create_report("unresolved", element_id)
-                if keep_unresolved:
+                if output_partial_patch:
                     if model_version:
                         set_model_version(patched_element, model_version)
                     if output_dir is not None:
