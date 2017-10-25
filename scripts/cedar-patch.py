@@ -511,10 +511,11 @@ def read_instance_from_mongodb(source_database, instance_id):
 def post_read(resource):
     new = {}
     for k, v in resource.items():
+        if k == '_id':
+            continue
         if isinstance(v, dict):
-            v = pre_write(v)
+            v = post_read(v)
         new[k.replace('_$schema', '$schema')] = v
-    del new['_id']
     return new
 
 
