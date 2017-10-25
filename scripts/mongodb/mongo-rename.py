@@ -8,14 +8,18 @@
 import sys, os
 from pymongo import MongoClient
 import uuid
+from os import environ
 
 # =======================
 #        CONSTANTS
 # =======================
 
-MONGO_HOST='localhost'
-MONGO_ROOT_USER_NAME='<yourUsername>'
-MONGO_ROOT_USER_PASSWORD='<yourPassword>'
+# Values extracted from CEDAR environment variables
+MONGO_HOST=environ.get('CEDAR_MONGO_HOST')
+MONGO_PORT=environ.get('CEDAR_MONGO_PORT')
+MONGO_ROOT_USER_NAME=environ.get('CEDAR_MONGO_ROOT_USER_NAME')
+MONGO_ROOT_USER_PASSWORD=environ.get('CEDAR_MONGO_ROOT_USER_PASSWORD')
+
 menu_actions = {}
 
 # =======================
@@ -24,7 +28,8 @@ menu_actions = {}
 
 
 def get_mongo_client():
-    return MongoClient('mongodb://%s:%s@%s' % (MONGO_ROOT_USER_NAME, MONGO_ROOT_USER_PASSWORD, MONGO_HOST))
+    connection_string='mongodb://%s:%s@%s:%s' % (MONGO_ROOT_USER_NAME, MONGO_ROOT_USER_PASSWORD, MONGO_HOST, MONGO_PORT)
+    return MongoClient(connection_string)
 
 # Main menu
 def main_menu():
