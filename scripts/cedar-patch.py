@@ -198,7 +198,7 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
-            template = get_template(source_database, template_id)
+            template = read_template_from_mongodb(source_database, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -245,7 +245,7 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
-            element = get_element(source_database, element_id)
+            element = read_element_from_mongodb(source_database, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element, debug=debug)
             if is_success:
                 if patched_element is not None:
@@ -292,7 +292,7 @@ def patch_instance(instance_ids, source_database, output_dir=None, mongo_databas
         if not debug:
             print_progressbar(instance_id, counter, total_instances)
         try:
-            instance = get_instance(source_database, instance_id)
+            instance = read_instance_from_mongodb(source_database, instance_id)
             patched_instance = fix_context(instance)
             patched_instance = rename(patched_instance, replace_valuelabel)
 
@@ -495,16 +495,29 @@ def get_ids_from_file(filename):
         return [id.strip() for id in resource_ids]
 
 
-def get_template(source_database, template_id):
-    return source_database['templates'].findOne({'@id': template_id})
+def read_template_from_mongodb(source_database, template_id):
+    template = source_database['templates'].findOne({'@id': template_id})
+    return post_read(template)
 
 
-def get_element(source_database, element_id):
-    return source_database['template-elements'].findOne({'@id': element_id})
+def read_element_from_mongodb(source_database, element_id):
+    element = source_database['template-elements'].findOne({'@id': element_id})
+    return post_read(element)
 
 
-def get_instance(source_database, instance_id):
-    return source_database['template-instances'].findOne({'@id': instance_id})
+def read_instance_from_mongodb(source_database, instance_id):
+    instance = source_database['template-instances'].findOne({'@id': instance_id})
+    return post_read(instance)
+
+
+def post_read(resource):
+    new = {}
+    for k, v in resource.items():
+        if isinstance(v, dict):
+            v = pre_write(v)
+        new[k.replace('_$schema', '$schema')] = v
+    del new['_id']
+    return new
 
 
 def extract_resource_hash(resource_id):
