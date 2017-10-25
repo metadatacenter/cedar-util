@@ -209,7 +209,7 @@ def patch_template(patch_engine, template_ids, model_version=None, output_dir=No
                     if model_version:
                         set_model_version(patched_template, model_version)
                     if output_dir is not None:
-                        filename = create_filename_from_id(template_id, prefix="template-unresolved-")
+                        filename = create_filename_from_id(template_id, prefix="template-partially-patched-")
                         write_to_file(patched_template, filename, output_dir)
                     if patch_database is not None:
                         write_to_mongodb(patch_database, "templates", patched_template)
@@ -256,7 +256,7 @@ def patch_element(patch_engine, element_ids, model_version=None, output_dir=None
                     if model_version:
                         set_model_version(patched_element, model_version)
                     if output_dir is not None:
-                        filename = create_filename_from_id(element_id, prefix="element-unresolved-")
+                        filename = create_filename_from_id(element_id, prefix="element-partially-patched-")
                         write_to_file(patched_element, filename, output_dir)
                     if patch_database is not None:
                         write_to_mongodb(patch_database, "template-elements", patched_element)
