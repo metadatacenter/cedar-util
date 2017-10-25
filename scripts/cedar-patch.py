@@ -494,17 +494,17 @@ def get_ids_from_file(filename):
 
 
 def read_template_from_mongodb(source_database, template_id):
-    template = source_database['templates'].findOne({'@id': template_id})
+    template = source_database['templates'].find_one({'@id': template_id})
     return post_read(template)
 
 
 def read_element_from_mongodb(source_database, element_id):
-    element = source_database['template-elements'].findOne({'@id': element_id})
+    element = source_database['template-elements'].find_one({'@id': element_id})
     return post_read(element)
 
 
 def read_instance_from_mongodb(source_database, instance_id):
-    instance = source_database['template-instances'].findOne({'@id': instance_id})
+    instance = source_database['template-instances'].find_one({'@id': instance_id})
     return post_read(instance)
 
 
