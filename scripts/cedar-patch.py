@@ -199,10 +199,11 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
             print_progressbar(template_id, counter, total_templates)
         try:
             template = read_template_from_mongodb(source_database, template_id)
-            if model_version:
-                set_model_version(template, model_version)
-
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
+
+            if model_version:
+                set_model_version(patched_template, model_version)
+
             if is_success:
                 if patched_template is not None:
                     create_report("resolved", template_id)
@@ -245,10 +246,11 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
             print_progressbar(element_id, counter, total_elements)
         try:
             element = read_element_from_mongodb(source_database, element_id)
-            if model_version:
-                set_model_version(element, model_version)
-
             is_success, patched_element = patch_engine.execute(element, validate_element, debug=debug)
+
+            if model_version:
+                set_model_version(patched_element, model_version)
+
             if is_success:
                 if patched_element is not None:
                     create_report("resolved", element_id)
