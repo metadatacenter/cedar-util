@@ -344,6 +344,8 @@ def replace_valuelabel(k):
 
 
 def set_model_version(resource, model_version):
+    if resource is None:
+        return
     for k, v in resource.items():
         if isinstance(v, dict):
             set_model_version(v, model_version)
