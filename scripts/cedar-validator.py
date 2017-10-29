@@ -26,8 +26,10 @@ def main():
                         required=False,
                         type=int,
                         help="the maximum number of resources to validate")
-    parser.add_argument("apikey", metavar="CEDAR-API-KEY",
-                        help="the API key used to access the CEDAR resource server")
+    parser.add_argument("--validation-apikey",
+                        required=False,
+                        metavar="CEDAR-API-KEY",
+                        help="the API key used to access the CEDAR validation service")
     args = parser.parse_args()
     resource_type = args.type
     lookup_file = args.lookup
@@ -35,7 +37,7 @@ def main():
 
     global server_address, cedar_api_key
     server_address = get_server_address(args.server)
-    cedar_api_key = args.apikey
+    cedar_api_key = args.validation_apikey
 
     if resource_type == 'template':
         template_ids = get_template_ids(lookup_file, limit)
