@@ -50,7 +50,6 @@ def main():
                         help="set the MongoDB database name to get the resources to patch")
     parser.add_argument("--output-mongodb",
                         required=False,
-                        default="cedar-patch",
                         metavar="DBNAME",
                         help="set the MongoDB database name to store the patched resources")
     parser.add_argument("--commit",
