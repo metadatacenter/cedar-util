@@ -360,7 +360,7 @@ def setup_mongodb_client(mongodb_conn):
 
 
 def setup_source_database(mongodb_client, source_db_name):
-    if mongodb_client is None:
+    if mongodb_client is None or source_db_name is None:
         return None
 
     db_names = mongodb_client.database_names()
@@ -372,7 +372,7 @@ def setup_source_database(mongodb_client, source_db_name):
 
 
 def setup_patch_database(mongodb_client, patch_db_name):
-    if mongodb_client is None:
+    if mongodb_client is None or patch_db_name is None:
         return None
 
     if patch_db_name == "cedar":
