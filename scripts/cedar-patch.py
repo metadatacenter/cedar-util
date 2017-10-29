@@ -197,7 +197,7 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
-            template = read_template_from_mongodb(source_database, template_id)
+            template = get_template_from_mongodb(source_database, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template, debug=debug)
 
             if model_version:
@@ -244,7 +244,7 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
-            element = read_element_from_mongodb(source_database, element_id)
+            element = get_element_from_mongodb(source_database, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element, debug=debug)
 
             if model_version:
@@ -291,7 +291,7 @@ def patch_instance(instance_ids, source_database, output_dir=None, mongo_databas
         if not debug:
             print_progressbar(instance_id, counter, total_instances)
         try:
-            instance = read_instance_from_mongodb(source_database, instance_id)
+            instance = get_instance_from_mongodb(source_database, instance_id)
             patched_instance = fix_context(instance)
             patched_instance = rename(patched_instance, replace_valuelabel)
 
@@ -496,17 +496,17 @@ def get_ids_from_file(filename):
         return [id.strip() for id in resource_ids]
 
 
-def read_template_from_mongodb(source_database, template_id):
+def get_template_from_mongodb(source_database, template_id):
     template = source_database['templates'].find_one({'@id': template_id})
     return post_read(template)
 
 
-def read_element_from_mongodb(source_database, element_id):
+def get_element_from_mongodb(source_database, element_id):
     element = source_database['template-elements'].find_one({'@id': element_id})
     return post_read(element)
 
 
-def read_instance_from_mongodb(source_database, instance_id):
+def get_instance_from_mongodb(source_database, instance_id):
     instance = source_database['template-instances'].find_one({'@id': instance_id})
     return post_read(instance)
 
