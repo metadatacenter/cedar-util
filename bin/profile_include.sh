@@ -12,6 +12,8 @@ export LSCOLORS=gxBxhxDxfxhxhxhxhxcxcx
 export CEDAR_UTIL_BIN=$CEDAR_HOME/cedar-util/bin
 
 #CEDAR location aliases
+alias gocedar='cd $CEDAR_HOME'
+
 alias goparent='cd $CEDAR_HOME/cedar-parent'
 alias goproject='cd $CEDAR_HOME/cedar-project'
 

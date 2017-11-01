@@ -74,7 +74,7 @@ else:
     studyId = output['study'][0]['identifier']['_value'].replace("/", "") 
 
     del output['@id']
-    output['_templateId'] = 'https://repo.metadatacenter.net/templates/4681316c-b51c-4665-b5c3-1e3173cdd102'
+    output['_templateId'] = 'https://repo.metadatacenter.org/templates/4681316c-b51c-4665-b5c3-1e3173cdd102'
     output['_ui'] = {}
     if data_source == 'immport':
         output['_ui']['templateTitle'] = 'Immport Investigation instance ' + investigationId + ' ' + studyId

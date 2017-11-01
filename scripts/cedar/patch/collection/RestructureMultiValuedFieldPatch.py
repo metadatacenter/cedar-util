@@ -2,7 +2,6 @@ import jsonpatch
 import re
 import dpath
 from cedar.patch import utils
-from cedar.patch.collection import utils as cedar_helper
 
 
 class RestructureMultiValuedFieldPatch(object):
@@ -11,49 +10,51 @@ class RestructureMultiValuedFieldPatch(object):
         self.description = "Restructure the model schema of a multi-valued field (i.e., checkbox and multi-select list)"
         self.from_version = "1.1.0"
         self.to_version = "1.2.0"
-        self.path = None
 
-    def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\['items','minItems'\]\) at [/properties/[^/]+]+")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "object has missing required properties \(\['items','minItems'\]\) " \
+            "at (/properties/[^/]+)+")
+        is_applied = False
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
+            if utils.is_multivalued_field(doc, at=path):
+                is_applied = True
+        return is_applied
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message, doc)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
-        if self.path is None and path is None:
-            raise Exception("The method required a 'path' location")
+    @staticmethod
+    def get_patch(error_message, doc=None):
+        path = utils.get_error_location(error_message)
+        property_object = utils.get_json_object(doc, path)
 
-        if path is not None:
-            self.path = path
-
-        patches = []
-
-        patch = {
-            "op": "move",
-            "from": self.path,
-            "to": self.path + "/items"
-        }
-        patches.append(patch)
-
-        patch = {
+        patches = [{
+            "op": "remove",
+            "path": path
+        },
+        {
+            "op": "add",
+            "value": {},
+            "path": path
+        },
+        {
             "op": "add",
             "value": "array",
-            "path": self.path + "/type"
-        }
-        patches.append(patch)
-
-        patch = {
+            "path": path + "/type"
+        },
+        {
             "op": "add",
             "value": 1,
-            "path": self.path + "/minItems"
-        }
-        patches.append(patch)
-
-        return patches
+            "path": path + "/minItems"
+        },
+        {
+            "op": "add",
+            "value": property_object,
+            "path": path + "/items"
+        }]
+        return jsonpatch.JsonPatch(patches)

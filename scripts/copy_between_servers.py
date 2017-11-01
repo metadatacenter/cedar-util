@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3
 
 # Created:      Oct-31-2016
 # Last updated: Aug-30-2017
@@ -20,26 +20,26 @@ import json
 import urllib
 
 # Server uris
-source_server = "https://resource.staging.metadatacenter.net/"
+source_server = "https://resource.staging.metadatacenter.org/"
 target_server = "https://resource.metadatacenter.orgx/"
 # Api keys
 source_api_key = "<apiKey>"
 target_api_key = "<apiKey>"
 
 # Folder ids
-target_folder_id_templates = "https://repo.metadatacenter.net/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
-target_folder_id_instances = "https://repo.metadatacenter.net/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
-target_folder_id_elements = "https://repo.metadatacenter.net/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
+target_folder_id_templates = "https://repo.metadatacenter.org/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
+target_folder_id_instances = "https://repo.metadatacenter.org/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
+target_folder_id_elements = "https://repo.metadatacenter.org/folders/f5729337-6cb8-4b3c-98a4-4d39ea481bb3"
 
 # Ids of the resources to be copied
-source_templates_ids = ["https://repo.staging.metadatacenter.net/templates/44018509-4aa3-40aa-9041-77b2f89c04ec",
-                        "https://repo.staging.metadatacenter.net/templates/fe51b2c3-4144-4be0-a069-9346227622e6"]
-source_elements_ids = ["https://repo.staging.metadatacenter.net/template-elements/ae325dd7-bb4b-40a3-b730-58c855931a1b",
-                       "https://repo.staging.metadatacenter.net/template-elements/19a7df21-7608-49e3-a002-d488cecb1dc2"]
+source_templates_ids = ["https://repo.staging.metadatacenter.org/templates/44018509-4aa3-40aa-9041-77b2f89c04ec",
+                        "https://repo.staging.metadatacenter.org/templates/fe51b2c3-4144-4be0-a069-9346227622e6"]
+source_elements_ids = ["https://repo.staging.metadatacenter.org/template-elements/ae325dd7-bb4b-40a3-b730-58c855931a1b",
+                       "https://repo.staging.metadatacenter.org/template-elements/19a7df21-7608-49e3-a002-d488cecb1dc2"]
 
 # Replacements to be done in all the resources copied
-old = "staging.metadatacenter.net"
-new = "metadatacenter.net"
+old = "staging.metadatacenter.org"
+new = "metadatacenter.org"
 
 limit_per_call = 500
 # Max number of instances to be created

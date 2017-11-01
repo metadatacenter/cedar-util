@@ -10,52 +10,39 @@ class AddRequiredToFieldOrElementPatch(object):
         self.description = "Add the missing required field in a template element or field"
         self.from_version = None
         self.to_version = "1.1.0"
-        self.path = None
 
-    def is_applied(self, error_description, template=None):
-        pattern = re.compile("object has missing required properties \(\['required'\]\) at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*$")
-        if pattern.match(error_description):
-            self.path = utils.get_error_location(error_description)
-            return True
-        else:
-            return False
+    @staticmethod
+    def is_applied(error_message, doc=None):
+        pattern = re.compile(
+            "object has missing required properties " \
+            "\(\['required'\]\) " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
+        is_applied = False
+        if pattern.match(error_message):
+            path = utils.get_error_location(error_message)
+            if utils.is_template_element(doc, at=path) or utils.is_template_field(doc, at=path):
+                is_applied = True
+        return is_applied
 
-    def apply(self, doc, path=None):
-        patch = self.get_json_patch(doc, path)
-        patched_doc = jsonpatch.JsonPatch(patch).apply(doc)
+    def apply_patch(self, doc, error_message):
+        patch = self.get_patch(error_message, doc)
+        patched_doc = patch.apply(doc)
         return patched_doc
 
-    def get_json_patch(self, doc, path=None):
-        if self.path is None and path is None:
-            raise Exception("The method required a 'path' location")
+    def get_patch(self, error_message, doc=None):
+        path = utils.get_error_location(error_message)
+        property_object = utils.get_json_object(doc, path)
+        patches = [{
+            "op": "add",
+            "value": self.get_required_properties(property_object),
+            "path": path + "/required"
+        }]
+        return jsonpatch.JsonPatch(patches)
 
-        if path is not None:
-            self.path = path
-
-        patches = []
-        if not self.is_static_type(doc):
-            user_property = self.get_all_properties(doc)
-            patch = {
-                "op": "add",
-                "value": user_property,
-                "path": self.path + "/required"
-            }
-            patches.append(patch)
-
-        return patches
-
-    def get_all_properties(self, doc):
-        properties = list(dpath.util.get(doc, self.path + "/properties").keys())
-        system_properties = [
-            "@id",
-            "@type",
-            "_valueLabel",
-            "pav:createdOn",
-            "pav:createdBy",
-            "pav:lastUpdatedOn",
-            "oslc:modifiedBy"]
-        return [prop for prop in properties if prop not in system_properties]
-
-    def is_static_type(self, doc):
-        type_value = dpath.util.get(doc, self.path + "/@type")
-        return "StaticTemplateField" in type_value
+    @staticmethod
+    def get_required_properties(property_object):
+        exclude_list = ["@type", "xsd", "schema", "pav", "oslc", "rdfs:label", "pav:createdOn",
+                        "pav:createdBy", "pav:lastUpdatedOn", "oslc:modifiedBy"]
+        properties_object = property_object.get("properties")
+        property_names = list(properties_object.keys())
+        return [item for item in property_names if item not in exclude_list]
