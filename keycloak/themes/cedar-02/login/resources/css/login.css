@@ -1,10 +1,14 @@
-.login-pf body { 
+.login-pf body {
+    background:url('../img/cedar-bg-smaller.jpg') top left repeat;
+    background-size: 200px;
+    background-position: top; 
 }
 
 #kc-form-login .form-group div,
 #kc-register-form .form-group div,
 #kc-reset-password-form .form-group div,
-#kc-passwd-update-form .form-group div {
+#kc-passwd-update-form .form-group div,
+#kc-form-wrapper .form-group div  {
     left:0 ;
     width:100%;  
 }
@@ -12,7 +16,8 @@
 #kc-form-login  label,
 #kc-register-form  label,
 #kc-reset-password-form label,
-#kc-passwd-update-form label {
+#kc-passwd-update-form label,
+#kc-form-wrapper label {
     font-size:14px; 
     font-weight: 400;
 }
@@ -33,7 +38,7 @@
     -webkit-box-shadow: 0 0 0 30px white inset;
     box-shadow: 0 0 0 30px white inset;
 }
-}
+
 
 .form-control:hover {
     border-bottom: 2px solid black;
@@ -223,6 +228,10 @@ div.kc-logo-text span {
 #kc-form-buttons  {
     margin-left:0;
     width:100%;
+}
+
+#kc-form-buttons.submit {
+    min-height:50px;
 }
 
 #kc-form-options span {
@@ -512,12 +521,21 @@ ol#kc-totp-settings li:first-of-type {
 #cedar-small-logo {
     background-image: url(../img/cedar-logo-image.png);
     background-repeat: no-repeat;
-    background-size: 120px;
-    width: 400px;
+    background-size: 160px;
+    width: 40px;
     height: 40px;
     background-position: left;
     margin-bottom: 20px;
 }
+
+.pajama-header {
+   font-size:20px;
+   font-weight:bold;
+   padding-left:50px;
+   white-space:nowrap;
+   color:#59737a;
+}
+
 
 #cedar-intro-text {
     color: #ffffff;

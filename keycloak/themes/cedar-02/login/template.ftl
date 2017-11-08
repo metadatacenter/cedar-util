@@ -39,7 +39,7 @@
     display:flex;
     justify-content: center;
     align-items: center;
-    background:#eee;">
+    ">
 
     <div id="content-wrapper" >
         <div id="content-wrapper-padding" >
@@ -62,7 +62,7 @@
 
                 <div class="row" >
                     <div id="kc-content-wrapper">
-                        <div id="cedar-small-logo" ></div>
+		        <a href="https://cedar.staging.metadatacenter.org"><div id="cedar-small-logo" ><span class="pajama-header"><#nested "header"></span></div></a>
                             <#if displayMessage && message?has_content>
                                 <div class="${properties.kcFeedbackAreaClass!}">
                                     <div class="alert alert-${message.type}">
@@ -83,7 +83,7 @@
 
                         <#if displayInfo>
                             <div id="kc-info" >
-                                <div id="kc-info-wrapper" >
+                                <div id="kc-info-wrapper">
                                     <#nested "info">
                                 </div>
                             </div>
@@ -93,12 +93,12 @@
             </div>
         </div>
 
-        <div id="kc-video" > 
+        <div id="kc-video">
             <a  target="_blank" href="https://www.youtube.com/watch?v=1NBYWOKo9qo&list=PLRFrKQ_tBSltHFumG7TLkpuLGv_dz8xwO" >Watch the video tutorial</a> 
         </div>
 
     </div>
-  
+
 </body>
 </html>
 </#macro>
