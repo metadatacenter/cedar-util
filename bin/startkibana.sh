@@ -4,4 +4,4 @@ echo Starting Kibana
 echo --------------------------------------------------------------------------------
 echo
 
-brew services start kibana@4.4
+brew services start kibana
