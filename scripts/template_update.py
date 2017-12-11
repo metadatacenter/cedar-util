@@ -106,7 +106,8 @@ def move_value_constraints(tree, parent_tree):
                         move_value_constraints(tree[key], tree)
 
 
-# Move _ui.title and _ui.description to schema:name and schema:description
+# Moves _ui.title and _ui.description to schema:name and schema:description
+# Example: study._ui.title = "title1" will be updated to study.schema:name = "title1"
 def move_title_and_description(tree, parent_tree):
     restart = True
     while restart:
