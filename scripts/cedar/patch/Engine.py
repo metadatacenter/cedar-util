@@ -23,18 +23,22 @@ class Engine(object):
         stop_trying = False
         resolvable = True
         while not stop_trying:
-            is_valid, report = validation_callback(copy_resource)
-            if is_valid:
-                stop_trying = True
-                resolvable = True
-            else:
-                output = self.__apply_patch(copy_resource, report, debug)
-                if output is not None:
-                    copy_resource = copy.deepcopy(output)
-                    patched_resource = output
-                else:
+            try:
+                is_valid, report = validation_callback(copy_resource)
+                if is_valid:
                     stop_trying = True
-                    resolvable = False
+                    resolvable = True
+                else:
+                    output = self.__apply_patch(copy_resource, report, debug)
+                    if output is not None:
+                        copy_resource = copy.deepcopy(output)
+                        patched_resource = output
+                    else:
+                        stop_trying = True
+                        resolvable = False
+            except KeyError as error:
+                print(" ERROR    | Object not found at " + str(error));
+                raise error
         if debug:
             if resolvable:
                 if patched_resource is None:
