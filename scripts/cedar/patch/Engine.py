@@ -37,7 +37,7 @@ class Engine(object):
                         stop_trying = True
                         resolvable = False
             except KeyError as error:
-                print(" ERROR    | Object not found at " + str(error));
+                print(" ERROR    | Object not found at " + str(error) + "\n");
                 raise error
         if debug:
             if resolvable:
