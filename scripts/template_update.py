@@ -105,6 +105,34 @@ def move_value_constraints(tree, parent_tree):
                     if type(tree[key]) is dict or type(tree[key]) is list:
                         move_value_constraints(tree[key], tree)
 
+
+# Moves _ui.title and _ui.description to schema:name and schema:description
+# Example: study._ui.title = "title1" will be updated to study.schema:name = "title1"
+def move_title_and_description(tree, parent_tree):
+    restart = True
+    while restart:
+        restart = False
+        if type(tree) is list:
+            for item in tree:
+                if type(item) is dict or type(item) is list:
+                    move_title_and_description(item, tree)
+        else:
+            for key in tree.keys():
+                if key == '_ui':
+                    if 'title' in tree[key].keys():
+                        tree['schema:name'] = tree[key]['title']
+                        del tree[key]['title']
+                        tree['schema:description'] = tree[key]['description']
+                        del tree[key]['description']
+                        restart = True
+                else:
+                    if type(tree[key]) is dict or type(tree[key]) is list:
+                        move_title_and_description(tree[key], tree)
+
+
+def insert_schema_version(tree, version):
+    tree["schema:schemaVersion"] = version
+
 ###
 
 if len(sys.argv) != 2:
@@ -117,35 +145,39 @@ else:
         data = json.load(input_file)
     
     output = data
+    #
+    # update_name(output, 'info', '_ui');
+    # update_name(output, 'min_length', 'minLength');
+    # update_name(output, 'max_length', 'maxLength');
+    # update_name(output, 'default_option', 'defaultOption');
+    # update_name(output, 'selection_type', 'selectionType');
+    # update_name(output, 'warning_text', 'warningText');
+    # update_name(output, 'date_type', 'dateType');
+    # update_name(output, 'creation_date', 'creationDate');
+    # update_name(output, 'template_description', 'templateDescription');
+    # update_name(output, 'template_title', 'templateTitle');
+    # update_name(output, 'value_sets', 'valueSets');
+    # update_name(output, 'multiple_choice', 'multipleChoice');
+    # update_name(output, 'created_at', 'createdAt');
+    # update_name(output, 'input_type', 'inputType');
+    # update_name(output, 'required_value', 'requiredValue');
+    # update_name(output, 'max_depth', 'maxDepth');
+    # update_name(output, 'value_constraint', '_valueConstraints');
+    # update_name(output, '_value_label', 'valueLabel');
+    # update_name(output, 'template_id', 'templateId');
+    #
+    #
+    # move_order_and_pages_into_ui(output)
+    #
+    # # Move 'valueConstraints' outside of '_ui' field
+    # move_value_constraints(output, None)
+    #
+    # # Move 'requiredValue' from '_ui' to '_valueConstraints'
+    # move_required_value(output, None)
 
-    update_name(output, 'info', '_ui');
-    update_name(output, 'min_length', 'minLength');
-    update_name(output, 'max_length', 'maxLength');
-    update_name(output, 'default_option', 'defaultOption');
-    update_name(output, 'selection_type', 'selectionType');
-    update_name(output, 'warning_text', 'warningText');
-    update_name(output, 'date_type', 'dateType');
-    update_name(output, 'creation_date', 'creationDate');
-    update_name(output, 'template_description', 'templateDescription');
-    update_name(output, 'template_title', 'templateTitle');
-    update_name(output, 'value_sets', 'valueSets');
-    update_name(output, 'multiple_choice', 'multipleChoice');
-    update_name(output, 'created_at', 'createdAt');
-    update_name(output, 'input_type', 'inputType');
-    update_name(output, 'required_value', 'requiredValue');
-    update_name(output, 'max_depth', 'maxDepth');
-    update_name(output, 'value_constraint', '_valueConstraints');
-    update_name(output, '_value_label', 'valueLabel');
-    update_name(output, 'template_id', 'templateId');
-    
+    insert_schema_version(output, "1.3.0")
 
-    move_order_and_pages_into_ui(output)
-   
-    # Move 'valueConstraints' outside of '_ui' field
-    move_value_constraints(output, None)
-
-    # Move 'requiredValue' from '_ui' to '_valueConstraints'
-    move_required_value(output, None)
+    move_title_and_description(output, None)
 
     output_file_path = (os.path.splitext(input_file_name))[0] + '_updated.json'
     with open(output_file_path, 'w') as output_file:

@@ -4,4 +4,4 @@ echo Starting Elasticsearch
 echo --------------------------------------------------------------------------------
 echo
 
-brew services start elasticsearch@2.4
+brew services start elasticsearch@5.6

@@ -406,7 +406,7 @@ release_all_documentation_repos()
     echo "Releasing documentation repos..."
     for r in "${CEDAR_DOCUMENTATION_REPOS[@]}"
     do
-        release_standalone_repo $r
+        release_mavenless_repo $r
     done
 }
 

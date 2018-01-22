@@ -1,4 +1,5 @@
 import argparse
+import json
 import requests
 from pymongo import MongoClient
 from cedar.utils import validator, get_server_address, to_json_string
@@ -7,6 +8,7 @@ from cedar.utils import validator, get_server_address, to_json_string
 server_address = None
 cedar_api_key = None
 report = {}
+error_messages = []
 
 
 def main():
@@ -78,7 +80,9 @@ def validate_template(template_ids, source_database):
             is_valid, validation_message = validator.validate_template(server_address, cedar_api_key, template)
             reporting(template_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
-            exit(error)
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def validate_element(element_ids, source_database):
@@ -90,7 +94,9 @@ def validate_element(element_ids, source_database):
             is_valid, validation_message = validator.validate_element(server_address, cedar_api_key, element)
             reporting(element_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
-            exit(error)
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def validate_instance(instance_ids, source_database):
@@ -102,7 +108,9 @@ def validate_instance(instance_ids, source_database):
             is_valid, validation_message = validator.validate_instance(server_address, cedar_api_key, instance)
             reporting(instance_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
-            exit(error)
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def get_template_ids(lookup_file, source_database, limit):
@@ -114,7 +122,8 @@ def get_template_ids(lookup_file, source_database, limit):
             template_ids = source_database['templates'].distinct("@id").limit(limit)
         else:
             template_ids = source_database['templates'].distinct("@id")
-    return template_ids
+    filtered_ids = filter(lambda x: x is not None, template_ids)
+    return list(filtered_ids)
 
 
 def get_element_ids(lookup_file, source_database, limit):
@@ -126,7 +135,8 @@ def get_element_ids(lookup_file, source_database, limit):
             element_ids = source_database['template-elements'].distinct("@id").limit(limit)
         else:
             element_ids = source_database['template-elements'].distinct("@id")
-    return element_ids
+    filtered_ids = filter(lambda x: x is not None, element_ids)
+    return list(filtered_ids)
 
 
 def get_instance_ids(lookup_file, source_database, limit):
@@ -138,7 +148,8 @@ def get_instance_ids(lookup_file, source_database, limit):
             instance_ids = source_database['template-instances'].distinct("@id").limit(limit)
         else:
             instance_ids = source_database['template-instances'].distinct("@id")
-    return instance_ids
+    filtered_ids = filter(lambda x: x is not None, instance_ids)
+    return list(filtered_ids)
 
 
 def get_ids_from_file(filename):
@@ -219,6 +230,13 @@ def show_report():
         message += "Details: " + to_json_string(dict(report))
     print("\n" + message)
     print()
+    error_size = len(error_messages)
+    if error_size > 0:
+        print()
+        print("Found errors:")
+        for msg in error_messages:
+            print("- " + msg)
+        print()
 
 
 if __name__ == "__main__":

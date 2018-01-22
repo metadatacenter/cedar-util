@@ -54,11 +54,11 @@ alias cedargcheckout='$CEDAR_HOME/cedar-util/bin/git-checkout-branch.sh'
 
 
 #Maven aliases
-alias mi='mvn install'
-alias mcl='mvn clean'
-alias mci='mvn clean install'
-alias mit='mvn install -DskipTests=true'
-alias mcit='mvn clean install -DskipTests=true'
+alias mi='mvn -T 2C install'
+alias mcl='mvn -T 2C clean'
+alias mci='mvn -T 2C clean install'
+alias mit='mvn -T 2C install -DskipTests=true'
+alias mcit='mvn -T 2C clean install -DskipTests=true'
 
 #Maven and shell aliases
 alias m2clean='rm -rf ~/.m2/repository/*'
