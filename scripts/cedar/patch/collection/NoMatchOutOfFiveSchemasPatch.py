@@ -393,10 +393,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
                     patch = {
                         "op": "add",
                         "value": {
-                            "type": [
-                                "string",
-                                "null"
-                            ],
+                            "type": "string",
                             "format": "uri"
                         },
                         "path": path + "/properties/@id"
