@@ -26,16 +26,18 @@ class RemoveOslcFromElementContextPropertiesPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
-        parent_object, parent_path = utils.get_parent_object(doc, path)
-        required_list = parent_object.get("required")
-
         patches = [{
             "op": "remove",
             "path": path + "/oslc"
-        },
-        {
-            "op": "replace",
-            "value": [item for item in required_list if item != "oslc"],
-            "path": parent_path + "/required"
         }]
+
+        # Remove pav from the required list, if presents
+        parent_object, parent_path = utils.get_parent_object(doc, path)
+        required_list = parent_object.get("required")
+        if required_list is not None:
+            patches.append({
+                "op": "replace",
+                "value": [item for item in required_list if item != "oslc"],
+                "path": parent_path + "/required"
+            })
         return jsonpatch.JsonPatch(patches)
