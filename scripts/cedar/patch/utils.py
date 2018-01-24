@@ -63,9 +63,11 @@ def get_json_object(doc, at):
     if at == '':
         json_object = doc
     else:
-        value = dpath.util.get(doc, at)
-        if isinstance(value, dict):
-            json_object = value
+        values = dpath.util.values(doc, at)
+        if not values:  # if some values present
+            value = values[0]  # get the first element
+            if isinstance(value, dict):
+                json_object = value
     return json_object
 
 

@@ -130,6 +130,10 @@ def main():
 
 
 def build_patch_engine():
+    return build_patch_engine_v130()
+
+
+def build_patch_engine_v130():
     patch_engine = Engine()
     patch_engine.add_patch(RenameValueLabelToRdfsLabelPatch())
     patch_engine.add_patch(AddMissingContextPatch())
@@ -152,6 +156,8 @@ def build_patch_engine():
     patch_engine.add_patch(NoMatchOutOfFiveSchemasPatch())
     patch_engine.add_patch(NoMatchOutOfTwoSchemasPatch())
     patch_engine.add_patch(MoveTitleAndDescriptionPatch())
+    patch_engine.add_patch(MoveTitlePatch())
+    patch_engine.add_patch(MoveDescriptionPatch())
     patch_engine.add_patch(MoveContentToUiPatch())
     patch_engine.add_patch(RemoveArrayDuplicatesPatch())
     patch_engine.add_patch(AddIdToPropertiesPatch())
