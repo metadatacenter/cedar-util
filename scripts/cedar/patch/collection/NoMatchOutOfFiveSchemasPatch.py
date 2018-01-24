@@ -373,7 +373,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
         if not schema_version:
             patch = {
                 "op": "add",
-                "value": "1.1.0",
+                "value": "1.3.0",
                 "path": path + "/schema:schemaVersion"
             }
             patches.append(patch)
