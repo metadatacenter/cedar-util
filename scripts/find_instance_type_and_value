@@ -1,0 +1,78 @@
+#!/usr/bin/python
+
+import json
+import sys
+from pymongo import MongoClient
+from pprint import pprint
+from jsonpath_rw import jsonpath, parse
+from os import environ
+
+
+### FUNCTION definitions ###
+def __getattr__(self, name):
+    return self[name]
+
+
+### end of FUNCTION definitions ###
+
+# Constants
+DB_NAME = 'cedar'
+TEMPLATES_COLLECTION = 'templates'
+ELEMENTS_COLLECTION = 'template-elements'
+FIELDS_COLLECTION = 'template-fields'
+INSTANCES_COLLECTION = 'template-instances'
+TEMPLATE_TYPE = 'Template'
+ELEMENT_TYPE = 'TemplateElement'
+FIELD_TYPE = 'TemplateField'
+STATIC_FIELD_TYPE = 'StaticTemplateField'
+INSTANCE_TYPE = 'TemplateInstance'
+RESOURCE_COLLECTIONS = [TEMPLATES_COLLECTION, ELEMENTS_COLLECTION, FIELDS_COLLECTION, INSTANCES_COLLECTION]
+BIOPORTAL_PREFIX = 'http://data.bioontology.org'
+
+
+# Values extracted from CEDAR environment variables
+MONGO_HOST=environ.get('CEDAR_MONGO_HOST')
+MONGO_PORT=environ.get('CEDAR_MONGO_PORT')
+MONGO_ROOT_USER_NAME=environ.get('CEDAR_MONGO_ROOT_USER_NAME')
+MONGO_ROOT_USER_PASSWORD=environ.get('CEDAR_MONGO_ROOT_USER_PASSWORD')
+
+def get_mongo_client():
+    connection_string='mongodb://%s:%s@%s:%s' % (MONGO_ROOT_USER_NAME, MONGO_ROOT_USER_PASSWORD, MONGO_HOST, MONGO_PORT)
+    return MongoClient(connection_string)
+
+### Main program ###
+print(' -----------------------------')
+print('| CEDAR Advanced Find         |')
+print(' -----------------------------')
+
+client = get_mongo_client()
+dbnames = client.database_names()
+
+if DB_NAME not in dbnames:
+    raise Exception('Database \'' + DB_NAME + '\' does not exist')
+
+db = client[DB_NAME]
+
+print('\nFinding...\n')
+
+resource_ids = []
+for collection in RESOURCE_COLLECTIONS:
+    for resource in db[collection].find():
+        # Get resource type
+        if '@type' in resource:
+            resource_type = resource['@type'].rsplit('/', 1)[-1]
+        else:
+            resource_type = INSTANCE_TYPE
+        if resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE:
+            resource_id = resource['@id']
+            for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
+                full_path = str(match.full_path)
+                field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
+                if len(parse(field_props_path + '.@value').find(resource)) > 0:
+                    print('Resource id:' + resource_id)
+                    print('Path: ' + field_props_path)
+                    print('-----------------')
+
+
+
+
