@@ -27,7 +27,6 @@ FIELD_TYPE = 'TemplateField'
 STATIC_FIELD_TYPE = 'StaticTemplateField'
 INSTANCE_TYPE = 'TemplateInstance'
 RESOURCE_COLLECTIONS = [TEMPLATES_COLLECTION, ELEMENTS_COLLECTION, FIELDS_COLLECTION, INSTANCES_COLLECTION]
-BIOPORTAL_PREFIX = 'http://data.bioontology.org'
 
 
 # Values extracted from CEDAR environment variables
@@ -86,9 +85,10 @@ for collection in RESOURCE_COLLECTIONS:
                                         if parse(field_props_path + "['@value']").find(resource):
                                             if not printed:
                                                 print('-----------------')
-                                                print('Resource id:' + resource_id)
+                                                print('Resource id: ' + resource_id)
                                                 count = count + 1
                                                 printed = True
+                                            print('Full path: ' + full_path)
                                             print('Path: ' + field_props_path)
                                     except:
                                         print('Error Path: ' + field_props_path)
