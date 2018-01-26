@@ -55,6 +55,8 @@ db = client[DB_NAME]
 
 print('\nFinding...\n')
 
+count = 0
+
 resource_ids = []
 for collection in RESOURCE_COLLECTIONS:
     for resource in db[collection].find():
@@ -64,7 +66,7 @@ for collection in RESOURCE_COLLECTIONS:
         else:
             resource_type = INSTANCE_TYPE
         if resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE:
-            if resource['@id']:
+            if '@id' in resource:
                 resource_id = resource['@id']
                 printed = False
                 for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
@@ -73,10 +75,15 @@ for collection in RESOURCE_COLLECTIONS:
                     field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
                     if parse(field_props_path + "['@value']").find(resource):
                         if not printed:
+                            print('-----------------')
                             print('Resource id:' + resource_id)
+                            count = count + 1
                             printed = True
                         print('Path: ' + field_props_path)
-                        print('-----------------')
+
+print('\nResources found: ' + str(count))
+
+
 
 
 
