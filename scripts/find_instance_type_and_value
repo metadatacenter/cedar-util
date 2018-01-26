@@ -74,8 +74,9 @@ for collection in RESOURCE_COLLECTIONS:
                     full_path = str(match.full_path)
                     root_field_path = full_path.replace('.properties.@type.oneOf.[0].enum.[0]', '')
                     root_field = parse(root_field_path).find(resource)[0].value
-                    root_field_type = root_field["@type"].rsplit('/', 1)[-1]
-                    if root_field_type == FIELD_TYPE:
+                    
+                    root_field_type = root_field["@type"]
+                    if FIELD_TYPE in root_field_type:
                         field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
                         field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
                         try:
