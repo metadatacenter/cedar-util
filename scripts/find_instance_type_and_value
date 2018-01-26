@@ -64,15 +64,19 @@ for collection in RESOURCE_COLLECTIONS:
         else:
             resource_type = INSTANCE_TYPE
         if resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE:
-            resource_id = resource['@id']
-            for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
-                full_path = str(match.full_path)
-                field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
-                field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
-                if parse(field_props_path + "['@value']").find(resource):
-                    print('Resource id:' + resource_id)
-                    print('Path: ' + field_props_path)
-                    print('-----------------')
+            if resource['@id']:
+                resource_id = resource['@id']
+                printed = False
+                for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
+                    full_path = str(match.full_path)
+                    field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
+                    field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
+                    if parse(field_props_path + "['@value']").find(resource):
+                        if not printed:
+                            print('Resource id:' + resource_id)
+                            printed = True
+                        print('Path: ' + field_props_path)
+                        print('-----------------')
 
 
 
