@@ -56,6 +56,7 @@ db = client[DB_NAME]
 print('\nFinding...\n')
 
 count = 0
+count_errors = 0
 
 resource_ids = []
 for collection in RESOURCE_COLLECTIONS:
@@ -73,15 +74,20 @@ for collection in RESOURCE_COLLECTIONS:
                     full_path = str(match.full_path)
                     field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
                     field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
-                    if parse(field_props_path + "['@value']").find(resource):
-                        if not printed:
-                            print('-----------------')
-                            print('Resource id:' + resource_id)
-                            count = count + 1
-                            printed = True
-                        print('Path: ' + field_props_path)
+                    try:
+                        if parse(field_props_path + "['@value']").find(resource):
+                            if not printed:
+                                print('-----------------')
+                                print('Resource id:' + resource_id)
+                                count = count + 1
+                                printed = True
+                            print('Path: ' + field_props_path)
+                    except:
+                        print('Error Path: ' + field_props_path)
+                        count_errors = count_errors + 1
 
 print('\nResources found: ' + str(count))
+print('\nNo. invalid paths: ' + str(count_errors))
 
 
 
