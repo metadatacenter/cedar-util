@@ -68,7 +68,8 @@ for collection in RESOURCE_COLLECTIONS:
             for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
                 full_path = str(match.full_path)
                 field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
-                if len(parse(field_props_path + '.@value').find(resource)) > 0:
+                field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
+                if parse(field_props_path + "['@value']").find(resource):
                     print('Resource id:' + resource_id)
                     print('Path: ' + field_props_path)
                     print('-----------------')
