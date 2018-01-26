@@ -56,8 +56,9 @@ print('\nFinding...\n')
 
 count = 0
 count_errors = 0
-
 resource_ids = []
+created_by_list = []
+last_updated_on_per_year = {}
 for collection in RESOURCE_COLLECTIONS:
     for resource in db[collection].find():
         # Get resource type
@@ -95,6 +96,14 @@ for collection in RESOURCE_COLLECTIONS:
                                                 print('Created by: ' + created_by)
                                                 print('Last updated on: ' + last_updated_on)
                                                 count = count + 1
+
+                                                if created_by not in created_by_list:
+                                                    created_by_list.append(created_by)
+
+                                                year = str(last_updated_on[0:4])
+                                                if year not in last_updated_on_per_year:
+                                                    last_updated_on_per_year[year] = 0
+                                                last_updated_on_per_year[year] = last_updated_on_per_year[year] + 1
                                                 printed = True
                                             print('  - Path: ' + field_props_path)
                                     except:
@@ -104,8 +113,17 @@ for collection in RESOURCE_COLLECTIONS:
                         print('Error Path: ' + field_props_path)
                         count_errors = count_errors + 1
 
-print('\nResources found: ' + str(count))
-print('\nNo. invalid paths: ' + str(count_errors))
+print('\nNo. resources found: ' + str(count))
+print('No. invalid paths: ' + str(count_errors))
+
+print('\nUsers: ')
+print('No. different users: ' + str(len(created_by_list)))
+for u in created_by_list:
+    print(u)
+
+print('\nLast updated on: ')
+for key, value in last_updated_on_per_year.items():
+    print(key + ": " + str(value))
 
 
 
