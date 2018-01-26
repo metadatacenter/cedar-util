@@ -73,6 +73,7 @@ for collection in RESOURCE_COLLECTIONS:
                 for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
                     full_path = str(match.full_path)
                     root_field_path = full_path.replace('.properties.@type.oneOf.[0].enum.[0]', '')
+                    root_field_path = "['" + root_field_path.replace(".", "']['") + "']"
                     root_field = parse(root_field_path).find(resource)[0].value
                     if '@type' in root_field:
                         root_field_type = root_field["@type"]
