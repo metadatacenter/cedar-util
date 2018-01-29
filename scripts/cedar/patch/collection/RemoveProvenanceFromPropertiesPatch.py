@@ -44,15 +44,15 @@ class RemoveProvenanceFromPropertiesPatch(object):
             "path": path + "/pav:lastUpdatedOn"
         }]
 
+        # Remove those provenance fields from the required list, if present
         parent_object, parent_path = utils.get_parent_object(doc, path)
-
-        remove_list = ["oslc:modifiedBy", "pav:createdBy", "pav:createdOn", "pav:lastUpdateOn"]
-        required_list = [item for item in parent_object.get("required") if item is not remove_list]
-
-        patches.append({
-            "op": "replace",
-            "value": required_list,
-            "path": parent_path + "/required"
-        })
+        required_list = parent_object.get("required")
+        if required_list is not None:
+            remove_list = ["oslc:modifiedBy", "pav:createdBy", "pav:createdOn", "pav:lastUpdateOn"]
+            patches.append({
+                "op": "replace",
+                "value": [item for item in required_list if item is not remove_list],
+                "path": parent_path + "/required"
+            })
 
         return jsonpatch.JsonPatch(patches)

@@ -26,6 +26,8 @@ from cedar.patch.collection.AddXsdToContextPropertiesPatch import AddXsdToContex
 from cedar.patch.collection.FillEmptyValuePatch import FillEmptyValuePatch
 from cedar.patch.collection.FillNullValuePatch import FillNullValuePatch
 from cedar.patch.collection.MoveTitleAndDescriptionPatch import MoveTitleAndDescriptionPatch
+from cedar.patch.collection.MoveTitlePatch import MoveTitlePatch
+from cedar.patch.collection.MoveDescriptionPatch import MoveDescriptionPatch
 from cedar.patch.collection.MoveContentToUiPatch import MoveContentToUiPatch
 from cedar.patch.collection.NoMatchOutOfFiveSchemasPatch import NoMatchOutOfFiveSchemasPatch
 from cedar.patch.collection.NoMatchOutOfTwoSchemasPatch import NoMatchOutOfTwoSchemasPatch
@@ -54,6 +56,7 @@ from cedar.patch.collection.RemoveUiFromPropertiesPatch import RemoveUiFromPrope
 from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueLabelToRdfsLabelPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
 from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureMultiValuedFieldPatch
+
 
 __all__ = [
     "AddContentToUiPatch",
@@ -84,6 +87,8 @@ __all__ = [
     "FillEmptyValuePatch",
     "FillNullValuePatch",
     "MoveTitleAndDescriptionPatch",
+    "MoveTitlePatch",
+    "MoveDescriptionPatch",
     "MoveContentToUiPatch",
     "NoMatchOutOfFiveSchemasPatch",
     "NoMatchOutOfTwoSchemasPatch",
