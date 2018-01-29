@@ -16,6 +16,7 @@ DB_NAME = 'cedar'
 TEMPLATES_COLLECTION = 'templates'
 ELEMENTS_COLLECTION = 'template-elements'
 INSTANCES_COLLECTION = 'template-instances'
+TEMPLATES_AND_ELEMENTS = 'templates-and-elements'
 TEMPLATE_TYPE = 'Template'
 ELEMENT_TYPE = 'TemplateElement'
 FIELD_TYPE = 'TemplateField'
@@ -59,7 +60,8 @@ print('\nNo. resources created per month:\n')
 created_on_summary = {
     TEMPLATES_COLLECTION: {},
     ELEMENTS_COLLECTION: {},
-    INSTANCES_COLLECTION: {}
+    INSTANCES_COLLECTION: {},
+    TEMPLATES_AND_ELEMENTS: {}
 }
 
 for collection in RESOURCE_COLLECTIONS:
@@ -67,9 +69,17 @@ for collection in RESOURCE_COLLECTIONS:
         if CREATED_ON_FIELD in resource:
             created_on = resource[CREATED_ON_FIELD]
             date = str(created_on[0:7])
+
             if date not in created_on_summary[collection]:
-                created_on_summary[collection][date] = 0
+                created_on_summary[collection][date] = 1
             else:
                 created_on_summary[collection][date] = created_on_summary[collection][date] + 1
+
+            if collection is not INSTANCES_COLLECTION:
+                if date not in created_on_summary[TEMPLATES_AND_ELEMENTS]:
+                    created_on_summary[TEMPLATES_AND_ELEMENTS][date] = 1
+                else:
+                    created_on_summary[TEMPLATES_AND_ELEMENTS][date] = created_on_summary[TEMPLATES_AND_ELEMENTS][date] + 1
+
 
 print(json.dumps(created_on_summary, sort_keys=True, indent=4, separators=(',', ': ')))
