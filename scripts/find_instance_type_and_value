@@ -11,10 +11,10 @@ from pprint import pprint
 from jsonpath_rw import jsonpath, parse
 from os import environ
 
-### FUNCTION definitions ###
+# FUNCTION definitions #
 def __getattr__(self, name):
     return self[name]
-### end of FUNCTION definitions ###
+# end of FUNCTION definitions #
 
 # Constants
 DB_NAME = 'cedar'
@@ -38,7 +38,7 @@ def get_mongo_client():
     connection_string='mongodb://%s:%s@%s:%s' % (MONGO_ROOT_USER_NAME, MONGO_ROOT_USER_PASSWORD, MONGO_HOST, MONGO_PORT)
     return MongoClient(connection_string)
 
-### Main program ###
+# Main program #
 
 print(' -----------------------------')
 print('| CEDAR Advanced Find         |')
@@ -122,9 +122,3 @@ for u in created_by_list:
 print('\nLast updated on: ')
 for key, value in last_updated_on_per_year.items():
     print(key + ": " + str(value))
-
-
-
-
-
-
