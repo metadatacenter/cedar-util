@@ -1,0 +1,132 @@
+#!/usr/bin/python
+
+import json
+import sys
+from pymongo import MongoClient
+from pprint import pprint
+from jsonpath_rw import jsonpath, parse
+from os import environ
+
+
+### FUNCTION definitions ###
+def __getattr__(self, name):
+    return self[name]
+
+
+### end of FUNCTION definitions ###
+
+# Constants
+DB_NAME = 'cedar'
+TEMPLATES_COLLECTION = 'templates'
+ELEMENTS_COLLECTION = 'template-elements'
+FIELDS_COLLECTION = 'template-fields'
+INSTANCES_COLLECTION = 'template-instances'
+TEMPLATE_TYPE = 'Template'
+ELEMENT_TYPE = 'TemplateElement'
+FIELD_TYPE = 'TemplateField'
+STATIC_FIELD_TYPE = 'StaticTemplateField'
+INSTANCE_TYPE = 'TemplateInstance'
+RESOURCE_COLLECTIONS = [TEMPLATES_COLLECTION, ELEMENTS_COLLECTION, FIELDS_COLLECTION, INSTANCES_COLLECTION]
+
+
+# Values extracted from CEDAR environment variables
+MONGO_HOST=environ.get('CEDAR_MONGO_HOST')
+MONGO_PORT=environ.get('CEDAR_MONGO_PORT')
+MONGO_ROOT_USER_NAME=environ.get('CEDAR_MONGO_ROOT_USER_NAME')
+MONGO_ROOT_USER_PASSWORD=environ.get('CEDAR_MONGO_ROOT_USER_PASSWORD')
+
+def get_mongo_client():
+    connection_string='mongodb://%s:%s@%s:%s' % (MONGO_ROOT_USER_NAME, MONGO_ROOT_USER_PASSWORD, MONGO_HOST, MONGO_PORT)
+    return MongoClient(connection_string)
+
+### Main program ###
+print(' -----------------------------')
+print('| CEDAR Advanced Find         |')
+print(' -----------------------------')
+
+client = get_mongo_client()
+dbnames = client.database_names()
+
+if DB_NAME not in dbnames:
+    raise Exception('Database \'' + DB_NAME + '\' does not exist')
+
+db = client[DB_NAME]
+
+print('\nFinding...\n')
+
+count = 0
+count_errors = 0
+resource_ids = []
+created_by_list = []
+last_updated_on_per_year = {}
+for collection in RESOURCE_COLLECTIONS:
+    for resource in db[collection].find():
+        # Get resource type
+        if ('@type' in resource) and (type(resource['@type']) is not list):
+            resource_type = resource['@type'].rsplit('/', 1)[-1]
+        else:
+            resource_type = INSTANCE_TYPE
+        if resource_type == TEMPLATE_TYPE or resource_type == ELEMENT_TYPE:
+            if '@id' in resource:
+                resource_id = resource['@id']
+                created_by = 'Field not found'
+                last_updated_on = 'Field not found'
+                if 'pav:createdBy' in resource:
+                    created_by = resource['pav:createdBy']
+                if 'pav:lastUpdatedOn' in resource:
+                    last_updated_on = resource['pav:lastUpdatedOn']
+                printed = False
+                for match in parse('$..properties.@type.oneOf[*].enum[*]').find(resource):
+                    full_path = str(match.full_path)
+                    root_field_path = full_path.replace('.properties.@type.oneOf.[0].enum.[0]', '')
+                    root_field_path = "['" + root_field_path.replace(".", "']['") + "']"
+                    try:
+                        if parse(root_field_path).find(resource):
+                            root_field = parse(root_field_path).find(resource)[0].value
+                            if '@type' in root_field:
+                                root_field_type = root_field["@type"]
+                                if FIELD_TYPE in root_field_type:
+                                    field_props_path = full_path.replace('.@type.oneOf.[0].enum.[0]', '')
+                                    field_props_path = "['" + field_props_path.replace(".", "']['") + "']"
+                                    try:
+                                        if parse(field_props_path + "['@value']").find(resource):
+                                            if not printed:
+                                                print('-----------------')
+                                                print('Resource id: ' + resource_id)
+                                                print('Created by: ' + created_by)
+                                                print('Last updated on: ' + last_updated_on)
+                                                count = count + 1
+
+                                                if created_by not in created_by_list:
+                                                    created_by_list.append(created_by)
+
+                                                year = str(last_updated_on[0:4])
+                                                if year not in last_updated_on_per_year:
+                                                    last_updated_on_per_year[year] = 0
+                                                last_updated_on_per_year[year] = last_updated_on_per_year[year] + 1
+                                                printed = True
+                                            print('  - Path: ' + field_props_path)
+                                    except:
+                                        print('Error Path: ' + field_props_path)
+                                        count_errors = count_errors + 1
+                    except:
+                        print('Error Path: ' + field_props_path)
+                        count_errors = count_errors + 1
+
+print('\nNo. resources found: ' + str(count))
+print('No. invalid paths: ' + str(count_errors))
+
+print('\nUsers: ')
+print('No. different users: ' + str(len(created_by_list)))
+for u in created_by_list:
+    print(u)
+
+print('\nLast updated on: ')
+for key, value in last_updated_on_per_year.items():
+    print(key + ": " + str(value))
+
+
+
+
+
+
