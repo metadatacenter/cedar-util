@@ -5,6 +5,7 @@
 from pymongo import MongoClient
 from os import environ
 import json
+from jsonpath_rw import jsonpath, parse
 
 # FUNCTION definitions #
 def __getattr__(self, name):
@@ -17,6 +18,7 @@ TEMPLATES_COLLECTION = 'templates'
 ELEMENTS_COLLECTION = 'template-elements'
 INSTANCES_COLLECTION = 'template-instances'
 TEMPLATES_AND_ELEMENTS = 'templates-and-elements'
+FIELDS = 'template-fields'
 TEMPLATE_TYPE = 'Template'
 ELEMENT_TYPE = 'TemplateElement'
 FIELD_TYPE = 'TemplateField'
@@ -57,11 +59,14 @@ for collection in RESOURCE_COLLECTIONS:
 
 print('\nNo. resources created per month:\n')
 
+created_on_id_hash = {}
+
 created_on_summary = {
     TEMPLATES_COLLECTION: {},
     ELEMENTS_COLLECTION: {},
     INSTANCES_COLLECTION: {},
-    TEMPLATES_AND_ELEMENTS: {}
+    TEMPLATES_AND_ELEMENTS: {},
+    FIELDS: {}
 }
 
 for collection in RESOURCE_COLLECTIONS:
@@ -81,5 +86,12 @@ for collection in RESOURCE_COLLECTIONS:
                 else:
                     created_on_summary[TEMPLATES_AND_ELEMENTS][date] = created_on_summary[TEMPLATES_AND_ELEMENTS][date] + 1
 
+                # Find field definitions
+                for match in parse('$..@type').find(resource):
+                    if FIELD_TYPE in str(match.value): # it is a field
+                        if date not in created_on_summary[FIELDS]:
+                            created_on_summary[FIELDS][date] = 1
+                        else:
+                            created_on_summary[FIELDS][date] = created_on_summary[FIELDS][date] + 1
 
 print(json.dumps(created_on_summary, sort_keys=True, indent=4, separators=(',', ': ')))
