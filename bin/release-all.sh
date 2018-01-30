@@ -213,9 +213,6 @@ release_project_repo()
 
 release_frontend_repo()
 {
-    # See https://github.com/metadatacenter/cedar-docs/wiki/Configuring-NPM-to-use-the-CEDAR-Nexus-Server
-    npm login --registry=https://nexus.bmir.stanford.edu/repository/npm-cedar/
-    
     pushd $CEDAR_HOME/$1
 
     git checkout develop
