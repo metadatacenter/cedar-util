@@ -47,78 +47,85 @@ class NoMatchOutOfFiveSchemasPatch(object):
         user_property_paths.append(user_property_path)
 
         properties_object = utils.get_json_object(doc, properties_path)
-        for propname in list(properties_object.keys()):
-            property_path = properties_path + "/" + propname
-            property_object = utils.get_json_object(doc, property_path)
-            if "items" in property_object:
-                property_path = property_path + "/items"
+        if properties_object is not None:
+            for propname in list(properties_object.keys()):
+                property_path = properties_path + "/" + propname
                 property_object = utils.get_json_object(doc, property_path)
-
-            if utils.is_template_element(property_object):
-                self.collect_user_property_paths(user_property_paths, doc, property_path)
-            elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
-                user_property_paths.append(property_path)
+                if property_object is not None:
+                    if "items" in property_object:
+                        property_path = property_path + "/items"
+                        property_object = utils.get_json_object(doc, property_path)
+                    if utils.is_template_element(property_object):
+                        self.collect_user_property_paths(user_property_paths, doc, property_path)
+                    elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
+                        user_property_paths.append(property_path)
 
     def collect_patches(self, patches, doc, path):
         # Fix @context
-        patch = {
-            "op": "replace",
-            "value": {
-                "xsd": "http://www.w3.org/2001/XMLSchema#",
-                "pav": "http://purl.org/pav/",
-                "oslc": "http://open-services.net/ns/core#",
-                "schema": "http://schema.org/",
-                "schema:name": {
-                    "@type": "xsd:string"
+        context_path = path + "/@context"
+        context_object = utils.get_json_object(doc, context_path)
+        if context_object is not None:
+            patch = {
+                "op": "replace",
+                "value": {
+                    "xsd": "http://www.w3.org/2001/XMLSchema#",
+                    "pav": "http://purl.org/pav/",
+                    "oslc": "http://open-services.net/ns/core#",
+                    "schema": "http://schema.org/",
+                    "schema:name": {
+                        "@type": "xsd:string"
+                    },
+                    "schema:description": {
+                        "@type": "xsd:string"
+                    },
+                    "pav:createdOn": {
+                        "@type": "xsd:dateTime"
+                    },
+                    "pav:createdBy": {
+                        "@type": "@id"
+                    },
+                    "pav:lastUpdatedOn": {
+                        "@type": "xsd:dateTime"
+                    },
+                    "oslc:modifiedBy": {
+                        "@type": "@id"
+                    }
                 },
-                "schema:description": {
-                    "@type": "xsd:string"
-                },
-                "pav:createdOn": {
-                    "@type": "xsd:dateTime"
-                },
-                "pav:createdBy": {
-                    "@type": "@id"
-                },
-                "pav:lastUpdatedOn": {
-                    "@type": "xsd:dateTime"
-                },
-                "oslc:modifiedBy": {
-                    "@type": "@id"
-                }
-            },
-            "path": path + "/@context"
-        }
-        patches.append(patch)
+                "path": context_path
+            }
+            patches.append(patch)
 
         user_property_object = utils.get_json_object(doc, path)
         properties_object = user_property_object.get("properties")
 
         # Recreate the required array for template element or template field
-        if utils.is_template_element(user_property_object):
-            patch = {
-                "op": "remove",
-                "path": path + "/required"
-            }
-            patches.append(patch)
-            patch = {
-                "op": "add",
-                "value": self.get_required_properties_for_template_element(user_property_object),
-                "path": path + "/required"
-            }
-            patches.append(patch)
-        elif utils.is_template_field(user_property_object):
-            patch = {
-                "op": "remove",
-                "path": path + "/required"
-            }
-            patches.append(patch)
-            patch = {
-                "op": "add",
-                "value": self.get_required_properties_for_template_field(user_property_object),
-                "path": path + "/required"
-            }
-            patches.append(patch)
+        required_path = path + "/required"
+        required_object = utils.get_json_object(doc, required_path)
+        if required_object is not None:
+            if utils.is_template_element(user_property_object):
+                patch = {
+                    "op": "remove",
+                    "path": path + "/required"
+                }
+                patches.append(patch)
+                patch = {
+                    "op": "add",
+                    "value": self.get_required_properties_for_template_element(user_property_object),
+                    "path": path + "/required"
+                }
+                patches.append(patch)
+            elif utils.is_template_field(user_property_object):
+                patch = {
+                    "op": "remove",
+                    "path": path + "/required"
+                }
+                patches.append(patch)
+                patch = {
+                    "op": "add",
+                    "value": self.get_required_properties_for_template_field(user_property_object),
+                    "path": path + "/required"
+                }
+                patches.append(patch)
 
         # Remove pav and oslc prefixes from properties/@context/properties for template element
         if utils.is_template_element(user_property_object):

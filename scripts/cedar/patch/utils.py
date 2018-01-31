@@ -59,12 +59,12 @@ def is_multivalued_field(resource, at=None):
 
 
 def get_json_object(doc, at):
-    json_object = {}
+    json_object = None
     if at == '':
         json_object = doc
     else:
         values = dpath.util.values(doc, at)
-        if not values:  # if some values present
+        if values:  # if some values are present
             value = values[0]  # get the first element
             if isinstance(value, dict):
                 json_object = value
