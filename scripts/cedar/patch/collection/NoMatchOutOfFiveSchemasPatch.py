@@ -95,30 +95,35 @@ class NoMatchOutOfFiveSchemasPatch(object):
         properties_object = user_property_object.get("properties")
 
         # Recreate the required array for template element or template field
+        required_path = path + "/required"
         if utils.is_template_element(user_property_object):
-            patch = {
-                "op": "remove",
-                "path": path + "/required"
-            }
-            patches.append(patch)
-            patch = {
-                "op": "add",
-                "value": self.get_required_properties_for_template_element(user_property_object),
-                "path": path + "/required"
-            }
-            patches.append(patch)
+            required_object = utils.get_json_object(doc, required_path)
+            if required_object is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/required"
+                }
+                patches.append(patch)
+                patch = {
+                    "op": "add",
+                    "value": self.get_required_properties_for_template_element(user_property_object),
+                    "path": path + "/required"
+                }
+                patches.append(patch)
         elif utils.is_template_field(user_property_object):
-            patch = {
-                "op": "remove",
-                "path": path + "/required"
-            }
-            patches.append(patch)
-            patch = {
-                "op": "add",
-                "value": self.get_required_properties_for_template_field(user_property_object),
-                "path": path + "/required"
-            }
-            patches.append(patch)
+            required_object = utils.get_json_object(doc, required_path)
+            if required_object is not None:
+                patch = {
+                    "op": "remove",
+                    "path": path + "/required"
+                }
+                patches.append(patch)
+                patch = {
+                    "op": "add",
+                    "value": self.get_required_properties_for_template_field(user_property_object),
+                    "path": path + "/required"
+                }
+                patches.append(patch)
 
         # Remove pav and oslc prefixes from properties/@context/properties for template element
         if utils.is_template_element(user_property_object):
