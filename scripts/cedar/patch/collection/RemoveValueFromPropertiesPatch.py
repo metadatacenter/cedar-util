@@ -28,16 +28,17 @@ class RemoveValueFromPropertiesPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
-        parent_object, parent_path = utils.get_parent_object(doc, path)
-        required_list = parent_object.get("required")
-
         patches = [{
             "op": "remove",
             "path": path + "/@value"
-        },
-        {
-            "op": "replace",
-            "value": [item for item in required_list if item != "@value"],
-            "path": parent_path + "/required"
         }]
+        # Remove @value from required list, if possible
+        parent_object, parent_path = utils.get_parent_object(doc, path)
+        required_list = parent_object.get("required")
+        if required_list:
+            patches.append({
+                "op": "replace",
+                "value": [item for item in required_list if item != "@value"],
+                "path": parent_path + "/required"
+            })
         return jsonpatch.JsonPatch(patches)
