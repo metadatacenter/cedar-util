@@ -59,7 +59,7 @@ def is_multivalued_field(resource, at=None):
 
 
 def get_json_object(doc, at):
-    json_object = {}
+    json_object = None
     if at == '':
         json_object = doc
     else:
