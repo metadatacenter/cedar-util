@@ -47,17 +47,18 @@ class NoMatchOutOfFiveSchemasPatch(object):
         user_property_paths.append(user_property_path)
 
         properties_object = utils.get_json_object(doc, properties_path)
-        for propname in list(properties_object.keys()):
-            property_path = properties_path + "/" + propname
-            property_object = utils.get_json_object(doc, property_path)
-            if "items" in property_object:
-                property_path = property_path + "/items"
+        if properties_object is not None:
+            for propname in list(properties_object.keys()):
+                property_path = properties_path + "/" + propname
                 property_object = utils.get_json_object(doc, property_path)
+                if "items" in property_object:
+                    property_path = property_path + "/items"
+                    property_object = utils.get_json_object(doc, property_path)
 
-            if utils.is_template_element(property_object):
-                self.collect_user_property_paths(user_property_paths, doc, property_path)
-            elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
-                user_property_paths.append(property_path)
+                if utils.is_template_element(property_object):
+                    self.collect_user_property_paths(user_property_paths, doc, property_path)
+                elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
+                    user_property_paths.append(property_path)
 
     def collect_patches(self, patches, doc, path):
         # Fix @context
