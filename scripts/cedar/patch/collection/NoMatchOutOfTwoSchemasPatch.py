@@ -61,35 +61,38 @@ class NoMatchOutOfTwoSchemasPatch(object):
 
     def collect_patches(self, patches, doc, path):
         # Fix @context
-        patch = {
-            "op": "replace",
-            "value": {
-                "xsd": "http://www.w3.org/2001/XMLSchema#",
-                "pav": "http://purl.org/pav/",
-                "oslc": "http://open-services.net/ns/core#",
-                "schema": "http://schema.org/",
-                "schema:name": {
-                    "@type": "xsd:string"
+        context_path = path + "/@context"
+        context_object = utils.get_json_object(doc, context_path)
+        if context_object is not None:
+            patch = {
+                "op": "replace",
+                "value": {
+                    "xsd": "http://www.w3.org/2001/XMLSchema#",
+                    "pav": "http://purl.org/pav/",
+                    "oslc": "http://open-services.net/ns/core#",
+                    "schema": "http://schema.org/",
+                    "schema:name": {
+                        "@type": "xsd:string"
+                    },
+                    "schema:description": {
+                        "@type": "xsd:string"
+                    },
+                    "pav:createdOn": {
+                        "@type": "xsd:dateTime"
+                    },
+                    "pav:createdBy": {
+                        "@type": "@id"
+                    },
+                    "pav:lastUpdatedOn": {
+                        "@type": "xsd:dateTime"
+                    },
+                    "oslc:modifiedBy": {
+                        "@type": "@id"
+                    }
                 },
-                "schema:description": {
-                    "@type": "xsd:string"
-                },
-                "pav:createdOn": {
-                    "@type": "xsd:dateTime"
-                },
-                "pav:createdBy": {
-                    "@type": "@id"
-                },
-                "pav:lastUpdatedOn": {
-                    "@type": "xsd:dateTime"
-                },
-                "oslc:modifiedBy": {
-                    "@type": "@id"
-                }
-            },
-            "path": path + "/@context"
-        }
-        patches.append(patch)
+                "path": context_path
+            }
+            patches.append(patch)
 
         user_property_object = utils.get_json_object(doc, path)
         properties_object = user_property_object.get("properties")
