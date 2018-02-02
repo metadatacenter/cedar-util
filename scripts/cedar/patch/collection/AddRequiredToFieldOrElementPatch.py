@@ -31,7 +31,7 @@ class AddRequiredToFieldOrElementPatch(object):
 
     def get_patch(self, error_message, doc=None):
         path = utils.get_error_location(error_message)
-        property_object = utils.get_json_object(doc, path)
+        property_object = utils.get_json_node(doc, path)
         patches = [{
             "op": "add",
             "value": self.get_required_properties(property_object),

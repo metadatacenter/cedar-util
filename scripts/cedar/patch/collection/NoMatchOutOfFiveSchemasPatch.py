@@ -37,7 +37,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
         return jsonpatch.JsonPatch(patches)
 
     def collect_user_property_paths(self, user_property_paths, doc, property_path):
-        property_object = utils.get_json_object(doc, property_path)
+        property_object = utils.get_json_node(doc, property_path)
         if property_object is not None:
             properties_path = property_path + "/properties"
             user_property_path = property_path
@@ -47,15 +47,15 @@ class NoMatchOutOfFiveSchemasPatch(object):
 
             user_property_paths.append(user_property_path)
 
-            properties_object = utils.get_json_object(doc, properties_path)
+            properties_object = utils.get_json_node(doc, properties_path)
             if properties_object is not None:
                 for propname in list(properties_object.keys()):
                     property_path = properties_path + "/" + propname
-                    property_object = utils.get_json_object(doc, property_path)
+                    property_object = utils.get_json_node(doc, property_path)
                     if property_object is not None:
                         if "items" in property_object:
                             property_path = property_path + "/items"
-                            property_object = utils.get_json_object(doc, property_path)
+                            property_object = utils.get_json_node(doc, property_path)
                         if utils.is_template_element(property_object):
                             self.collect_user_property_paths(user_property_paths, doc, property_path)
                         elif utils.is_template_field(property_object) or utils.is_static_template_field(property_object):
@@ -64,7 +64,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
     def collect_patches(self, patches, doc, path):
         # Fix @context
         context_path = path + "/@context"
-        context_object = utils.get_json_object(doc, context_path)
+        context_object = utils.get_json_node(doc, context_path)
         if context_object is not None:
             patch = {
                 "op": "replace",
@@ -96,13 +96,13 @@ class NoMatchOutOfFiveSchemasPatch(object):
             }
             patches.append(patch)
 
-        user_property_object = utils.get_json_object(doc, path)
+        user_property_object = utils.get_json_node(doc, path)
         properties_object = user_property_object.get("properties")
 
         # Recreate the required array for template element or template field
         required_path = path + "/required"
-        required_object = utils.get_json_object(doc, required_path)
-        if required_object is not None:
+        required_object = utils.get_json_node(doc, required_path)
+        if required_object is not None or required_object:
             if utils.is_template_element(user_property_object):
                 patch = {
                     "op": "remove",
@@ -132,7 +132,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
         if utils.is_template_element(user_property_object):
             if properties_object is not None:
                 pav_path = path + "/properties/@context/properties/pav"
-                pav_object = utils.get_json_object(doc, pav_path)
+                pav_object = utils.get_json_node(doc, pav_path)
                 if pav_object is not None:
                     patch = {
                         "op": "remove",
@@ -140,7 +140,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
                     }
                     patches.append(patch)
                 oslc_path = path + "/properties/@context/properties/oslc"
-                oslc_object = utils.get_json_object(doc, oslc_path)
+                oslc_object = utils.get_json_node(doc, oslc_path)
                 if oslc_object is not None:
                     patch = {
                         "op": "remove",
@@ -152,7 +152,7 @@ class NoMatchOutOfFiveSchemasPatch(object):
         if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
             if properties_object is not None:
                 pattern_properties_path = path + "/properties/@context/patternProperties"
-                pattern_properties_object = utils.get_json_object(doc, pattern_properties_path)
+                pattern_properties_object = utils.get_json_node(doc, pattern_properties_path)
                 if pattern_properties_object is not None:
                     patch = {
                         "op": "remove",

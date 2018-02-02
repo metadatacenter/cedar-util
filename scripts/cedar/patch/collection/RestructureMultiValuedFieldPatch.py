@@ -31,7 +31,7 @@ class RestructureMultiValuedFieldPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
-        property_object = utils.get_json_object(doc, path)
+        property_object = utils.get_json_node(doc, path)
 
         patches = [{
             "op": "remove",
