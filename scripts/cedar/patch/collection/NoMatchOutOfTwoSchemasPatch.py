@@ -147,7 +147,7 @@ class NoMatchOutOfTwoSchemasPatch(object):
                     patches.append(patch)
 
         # Remove patternProperties from properties/@context for template element and field
-        if utils.is_template_element(user_property_object):
+        if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
             if properties_object is not None:
                 pattern_properties_path = path + "/properties/@context/patternProperties"
                 pattern_properties_object = utils.get_json_object(doc, pattern_properties_path)
@@ -159,8 +159,8 @@ class NoMatchOutOfTwoSchemasPatch(object):
                     patches.append(patch)
 
         # Remove properties object from static template field
-        if properties_object is not None:
-            if utils.is_static_template_field(user_property_object):
+        if utils.is_static_template_field(user_property_object):
+            if properties_object is not None:
                 patch = {
                     "op": "remove",
                     "path": path + "/properties"
@@ -168,86 +168,89 @@ class NoMatchOutOfTwoSchemasPatch(object):
                 patches.append(patch)
 
         # Fix the oneOf object
-        if properties_object is not None:
-            at_type = properties_object.get("@type")
-            if at_type is not None:
-                patch = {
-                    "op": "replace",
-                    "value": {
-                        "oneOf": [
-                            {
-                                "type": "string",
-                                "format": "uri"
-                            },
-                            {
-                                "type": "array",
-                                "minItems": 1,
-                                "items": {
+        if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
+            if properties_object is not None:
+                at_type = properties_object.get("@type")
+                if at_type is not None:
+                    patch = {
+                        "op": "replace",
+                        "value": {
+                            "oneOf": [
+                                {
                                     "type": "string",
                                     "format": "uri"
                                 },
-                                "uniqueItems": True
-                            }
-                        ]
-                    },
-                    "path": path + "/properties/@type"
-                }
-                patches.append(patch)
+                                {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string",
+                                        "format": "uri"
+                                    },
+                                    "uniqueItems": True
+                                }
+                            ]
+                        },
+                        "path": path + "/properties/@type"
+                    }
+                    patches.append(patch)
 
         # Rename _valueLabel to rdfs:label
-        if properties_object is not None:
-            value_label = properties_object.get("_valueLabel")
-            if value_label is not None:
-                patch = {
-                    "op": "remove",
-                    "path": path + "/properties/_valueLabel"
-                }
-                patches.append(patch)
-                patch = {
-                    "op": "add",
-                    "value": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "path": path + "/properties/rdfs:label"
-                }
-                patches.append(patch)
+        if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
+            if properties_object is not None:
+                value_label = properties_object.get("_valueLabel")
+                if value_label is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/_valueLabel"
+                    }
+                    patches.append(patch)
+                    patch = {
+                        "op": "add",
+                        "value": {
+                            "type": [
+                                "string",
+                                "null"
+                            ]
+                        },
+                        "path": path + "/properties/rdfs:label"
+                    }
+                    patches.append(patch)
 
         # Remove provenance from properties
-        if properties_object is not None:
-            modified_by = properties_object.get("oslc:modifiedBy")
-            if modified_by is not None:
-                patch = {
-                    "op": "remove",
-                    "path": path + "/properties/oslc:modifiedBy"
-                }
-                patches.append(patch)
+        if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
+            if properties_object is not None:
+                modified_by = properties_object.get("oslc:modifiedBy")
+                if modified_by is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/oslc:modifiedBy"
+                    }
+                    patches.append(patch)
 
-            created_by = properties_object.get("pav:createdBy")
-            if created_by is not None:
-                patch = {
-                    "op": "remove",
-                    "path": path + "/properties/pav:createdBy"
-                }
-                patches.append(patch)
+                created_by = properties_object.get("pav:createdBy")
+                if created_by is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/pav:createdBy"
+                    }
+                    patches.append(patch)
 
-            created_on = properties_object.get("pav:createdOn")
-            if created_on is not None:
-                patch = {
-                    "op": "remove",
-                    "path": path + "/properties/pav:createdOn"
-                }
-                patches.append(patch)
+                created_on = properties_object.get("pav:createdOn")
+                if created_on is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/pav:createdOn"
+                    }
+                    patches.append(patch)
 
-            last_updated_on = properties_object.get("pav:lastUpdatedOn")
-            if last_updated_on is not None:
-                patch = {
-                    "op": "remove",
-                    "path": path + "/properties/pav:lastUpdatedOn"
-                }
-                patches.append(patch)
+                last_updated_on = properties_object.get("pav:lastUpdatedOn")
+                if last_updated_on is not None:
+                    patch = {
+                        "op": "remove",
+                        "path": path + "/properties/pav:lastUpdatedOn"
+                    }
+                    patches.append(patch)
 
         # Move title out from _ui, if exists, and rename it to schema:name
         ui_object = user_property_object.get("_ui")
@@ -428,16 +431,17 @@ class NoMatchOutOfTwoSchemasPatch(object):
                     patches.append(patch)
 
         # Rearrange the required list for @context of the properties field
-        if properties_object is not None:
-            context_object = properties_object.get("@context")
-            if context_object is not None:
-                context_properties_object = context_object.get("properties")
-                patch = {
-                    "op": "replace",
-                    "value": self.get_user_properties(context_properties_object),
-                    "path": path + "/properties/@context/required"
-                }
-                patches.append(patch)
+        if utils.is_template_element(user_property_object) or utils.is_template_field(user_property_object):
+            if properties_object is not None:
+                context_object = properties_object.get("@context")
+                if context_object is not None:
+                    context_properties_object = context_object.get("properties")
+                    patch = {
+                        "op": "replace",
+                        "value": self.get_user_properties(context_properties_object),
+                        "path": path + "/properties/@context/required"
+                    }
+                    patches.append(patch)
 
         # Add rdfs:label in the template field properties, if missing
         if utils.is_template_field(user_property_object):
