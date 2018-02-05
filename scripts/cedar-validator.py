@@ -42,6 +42,10 @@ def main():
                         default="cedar",
                         metavar="DBNAME",
                         help="set the MongoDB database name to get the resources to validate")
+    parser.add_argument("--input-file",
+                        required=False,
+                        metavar="FILENAME",
+                        help="an input file containing the resource to patch")
     args = parser.parse_args()
     resource_type = args.type
     lookup_file = args.lookup
@@ -52,23 +56,44 @@ def main():
     cedar_api_key = args.validation_apikey
     mongodb_conn = args.mongodb_connection
     source_db_name = args.input_mongodb
+    source_file_name = args.input_file
 
-    mongodb_client = setup_mongodb_client(mongodb_conn)
-    source_database = setup_source_database(mongodb_client, source_db_name)
-
-    if resource_type == 'template':
-        template_ids = get_template_ids(lookup_file, source_database, limit)
-        validate_template(template_ids, source_database)
-    elif resource_type == 'element':
-        element_ids = get_element_ids(lookup_file, source_database, limit)
-        validate_element(element_ids, source_database)
-    elif resource_type == 'field':
-        pass
-    elif resource_type == 'instance':
-        instance_ids = get_instance_ids(lookup_file, source_database, limit)
-        validate_instance(instance_ids, source_database)
+    if source_file_name is not None:
+        if resource_type == 'template':
+            validate_template_file(source_file_name)
+        elif resource_type == 'element':
+            validate_element_file(source_file_name)
+        elif resource_type == 'field':
+            pass
+        elif resource_type == 'instance':
+            validate_instance_file(source_file_name)
+    elif mongodb_conn is not None and source_db_name is not None:
+        mongodb_client = setup_mongodb_client(mongodb_conn)
+        source_database = setup_source_database(mongodb_client, source_db_name)
+        if resource_type == 'template':
+            template_ids = get_template_ids(lookup_file, source_database, limit)
+            validate_template(template_ids, source_database)
+        elif resource_type == 'element':
+            element_ids = get_element_ids(lookup_file, source_database, limit)
+            validate_element(element_ids, source_database)
+        elif resource_type == 'field':
+            pass
+        elif resource_type == 'instance':
+            instance_ids = get_instance_ids(lookup_file, source_database, limit)
+            validate_instance(instance_ids, source_database)
 
     show_report()
+
+
+def validate_template_file(source_file_name):
+    try:
+        template = get_template_from_file(source_file_name)
+        template_id = template["@id"]
+        is_valid, validation_message = validator.validate_template(server_address, cedar_api_key, template)
+        reporting(template_id, is_valid, validation_message)
+    except requests.exceptions.HTTPError as error:
+        error_obj = json.loads(error.response.text)
+        error_messages.append(error_obj["message"])
 
 
 def validate_template(template_ids, source_database):
@@ -85,6 +110,17 @@ def validate_template(template_ids, source_database):
             pass
 
 
+def validate_element_file(source_file_name):
+    try:
+        element = get_element_from_file(source_file_name)
+        element_id = element["@id"]
+        is_valid, validation_message = validator.validate_element(server_address, cedar_api_key, element)
+        reporting(element_id, is_valid, validation_message)
+    except requests.exceptions.HTTPError as error:
+        error_obj = json.loads(error.response.text)
+        error_messages.append(error_obj["message"])
+
+
 def validate_element(element_ids, source_database):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
@@ -97,6 +133,17 @@ def validate_element(element_ids, source_database):
             error_obj = json.loads(error.response.text)
             error_messages.append(error_obj["message"])
             pass
+
+
+def validate_instance_file(source_file_name):
+    try:
+        instance = get_instance_from_file(source_file_name)
+        instance_id = instance["@id"]
+        is_valid, validation_message = validator.validate_instance(server_address, cedar_api_key, instance)
+        reporting(instance_id, is_valid, validation_message)
+    except requests.exceptions.HTTPError as error:
+        error_obj = json.loads(error.response.text)
+        error_messages.append(error_obj["message"])
 
 
 def validate_instance(instance_ids, source_database):
@@ -156,6 +203,24 @@ def get_ids_from_file(filename):
     with open(filename) as infile:
         resource_ids = infile.readlines()
         return [id.strip() for id in resource_ids]
+
+
+def get_template_from_file(filename):
+    return read_file(filename)
+
+
+def get_element_from_file(filename):
+    return read_file(filename)
+
+
+def get_instance_from_file(filename):
+    return read_file(filename)
+
+
+def read_file(filename):
+    with open(filename) as infile:
+        content = json.load(infile)
+        return content
 
 
 def get_template_from_mongodb(source_database, template_id):
