@@ -29,10 +29,7 @@ class AddIdToPropertiesPatch(object):
         patches = [{
             "op": "add",
             "value": {
-                "type": [
-                    "string",
-                    "null"
-                ],
+                "type": "string",
                 "format": "uri"
             },
             "path": path + "/@id"
