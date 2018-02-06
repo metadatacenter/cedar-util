@@ -450,7 +450,6 @@ def set_model_version(resource, model_version):
         elif isinstance(v, str):
             if k == "schema:schemaVersion":
                 resource[k] = model_version
-                return
 
 
 def setup_mongodb_client(mongodb_conn):
