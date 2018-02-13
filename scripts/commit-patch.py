@@ -68,6 +68,7 @@ def commit_element_patch(patch_list, patch_dir, source_database):
             mongodb_index_id = get_mongodb_index_id(source_database, "template-elements", element_id)
             patched_element["_id"] = mongodb_index_id
             write_to_mongodb(source_database, "template-elements", patched_element)
+            print("Commit the patch: " + patch_file + " - Success")
         except ValueError as error:
             print("Commit the patch: " + patch_file + " - Failed")
             print(str(error))
