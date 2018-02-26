@@ -26,10 +26,15 @@ def main():
                         default="cedar",
                         metavar="DBNAME",
                         help="set the MongoDB database name to get the resources to validate")
+    parser.add_argument("--patch-prefix",
+                        required=False,
+                        default="",
+                        help="set the prefix for the patch files")
     args = parser.parse_args()
     resource_type = args.type
     patch_dir = args.patch_dir
     patch_list = get_ids_from_file(args.lookup)
+    patch_prefix = args.patch_prefix
 
     mongodb_conn = args.mongodb_connection
     source_db_name = args.input_mongodb
@@ -38,14 +43,14 @@ def main():
     source_database = setup_source_database(mongodb_client, source_db_name)
 
     if resource_type == 'template':
-        commit_template_patch(patch_list, patch_dir, source_database)
+        commit_template_patch(patch_list, patch_prefix, patch_dir, source_database)
     elif resource_type == 'element':
-        commit_element_patch(patch_list, patch_dir, source_database)
+        commit_element_patch(patch_list, patch_prefix, patch_dir, source_database)
 
 
-def commit_template_patch(patch_list, patch_dir, source_database):
+def commit_template_patch(patch_list, patch_prefix, patch_dir, source_database):
     for template_id in patch_list:
-        patch_file = get_patch_file(patch_dir, template_id)
+        patch_file = get_patch_file(patch_prefix, patch_dir, template_id)
         print("Commit the patch: " + patch_file + "\r", end="")
         patched_template = read_file(patch_file)
         try:
@@ -59,9 +64,9 @@ def commit_template_patch(patch_list, patch_dir, source_database):
     print("Done.")
 
 
-def commit_element_patch(patch_list, patch_dir, source_database):
+def commit_element_patch(patch_list, patch_prefix, patch_dir, source_database):
     for element_id in patch_list:
-        patch_file = get_patch_file(patch_dir, element_id)
+        patch_file = get_patch_file(patch_prefix, patch_dir, element_id)
         print("Commit the patch: " + patch_file + "\r", end="")
         patched_element = read_file(patch_file)
         try:
@@ -125,8 +130,8 @@ def read_file(filename):
         return content
 
 
-def get_patch_file(patch_dir, resource_id):
-    return patch_dir + "/" + extract_resource_hash(resource_id) + ".json"
+def get_patch_file(patch_prefix, patch_dir, resource_id):
+    return patch_dir + "/" + patch_prefix + extract_resource_hash(resource_id) + ".json"
 
 
 def extract_resource_hash(resource_id):
