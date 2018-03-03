@@ -150,3 +150,4 @@ def delete_instances_from_template(server, template_id, max_count, limit_per_cal
 #                 count += 1
 #             except ValueError:
 #                 print('Decoding JSON has failed for this instance')
+

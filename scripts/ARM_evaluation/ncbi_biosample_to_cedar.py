@@ -2,17 +2,15 @@
 
 # ncbi_biosample_to_cedar.py: Utility to transform NCBI BioSample metadata to CEDAR template instances.
 
-import xml.etree.ElementTree as ET
-from pprint import pprint
+import argparse
 import json
+import sys
+import xml.etree.ElementTree as ET
+from random import shuffle
 import cedar_util
-
 
 # Class that represents a biological sample for the NCBI's BioSample Human Package 1.0
 # https://submit.ncbi.nlm.nih.gov/biosample/template/?package=Human.1.0&action=definition
-import sys
-
-
 class NcbiBiosample:
     def __init__(self, sample_name=None, sample_title=None, bioproject_accession=None, organism=None, isolate=None,
                  age=None, biomaterial_provider=None, sex=None, tissue=None, cell_line=None, cell_subtype=None,
@@ -49,18 +47,17 @@ class NcbiBiosample:
 # Execution settings
 SAVE_TO_FOLDER = False
 POST_TO_CEDAR = True
-BIOSAMPLES_LIMIT = 2
+BIOSAMPLES_LIMIT = 5
 
 # Local folders
-OUTPUT_PATH = 'data/ncbi_biosample/cedar_instances'  # Path where the CEDAR instances will be saved
+OUTPUT_PATH = 'resources/ncbi_biosample/cedar_instances'  # Path where the CEDAR instances will be saved
 OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
-BIOSAMPLE_FILE_PATH = "data/ncbi_biosample/biosample_result.xml"  # Source NCBI Biosample instances
-BIOSAMPLE_EXAMPLE_FILE_PATH = "data/ncbi_biosample/biosample_example.xml"  # Empty CEDAR BioSample instance
+BIOSAMPLE_FILE_PATH = "resources/ncbi_biosample/biosample_result.xml"  # Source NCBI Biosample instances
+EMPTY_BIOSAMPLE_INSTANCE_PATH = 'resources/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
 
 # CEDAR connection settings
 RESOURCE_SERVER = "https://resource.metadatacenter.orgx/"
 TEMPLATE_ID = "https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91"
-API_KEY = ""
 TARGET_CEDAR_FOLDER_ID = "https://repo.metadatacenter.orgx/folders/2bd1c561-d899-4c91-bdf1-4be7c0687b96"
 
 # Other constants
@@ -81,7 +78,9 @@ def get_attribute_value(attribute_node, attribute_name):
     :param attribute_name: 
     :return: The attribute value
     """
-    if attribute_node.get('attribute_name') == attribute_name:
+    if attribute_node.get('attribute_name') == attribute_name \
+            or attribute_node.get('harmonized_name') == attribute_name \
+            or attribute_node.get('display_name') == attribute_name:
         return attribute_node.text
     else:
         return None
@@ -93,17 +92,14 @@ def read_ncbi_biosamples(file_path):
     :param file_path: 
     :return: A list of NcbiBiosample objects
     """
-    biosamples_list = []
+    all_biosamples_list = []
+    print('Reading file: ' + file_path)
     tree = ET.parse(file_path)
     root = tree.getroot()
     num_biosamples = len(root.getchildren())
-    limit = min(num_biosamples, BIOSAMPLES_LIMIT) # Limit of biosamples that will be read
-    print('Reading biosamples (limit = ' + str(limit) + ')')
-    i = 0
+    limit = min(num_biosamples, BIOSAMPLES_LIMIT)  # Limit of biosamples that will be read
+    print('Extracting all samples from file (no. samples: ' + str(num_biosamples) + ')')
     for child in root:
-        if i == limit:
-            break
-        i = i + 1
         biosample = NcbiBiosample()
         description_node = child.find('Description')
         attributes_node = child.find('Attributes')
@@ -141,18 +137,25 @@ def read_ncbi_biosamples(file_path):
                 if comment_node.find('Paragraph') is not None:
                     biosample.description = comment_node.find('Paragraph').text
 
-        biosamples_list.append(biosample)
-    return biosamples_list
+        all_biosamples_list.append(biosample)
+
+    if limit < num_biosamples:
+        print('Randomly picking ' + str(limit) + ' samples')
+        shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
+        selected_biosamples_list = all_biosamples_list[:limit]
+    else:
+        selected_biosamples_list = all_biosamples_list
+
+    return selected_biosamples_list
 
 
 def ncbi_biosample_to_cedar_instance(ncbi_biosample):
     """
     Translates an NcbiBiosample object to a NCBI Biosample CEDAR instance
     :param ncbi_biosample: NcbiBiosample object
-    :return: A BioSample CEDAR instance, which is also saved to disk
+    :return: A BioSample CEDAR instance
     """
-    INSTANCE_PATH = 'data/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
-    json_file = open(INSTANCE_PATH, "r")  # Open the JSON file for writing
+    json_file = open(EMPTY_BIOSAMPLE_INSTANCE_PATH, "r")  # Open the JSON file for writing
     instance = json.load(json_file)  # Read the JSON into the buffer
     json_file.close()  # Close the JSON file
 
@@ -178,13 +181,17 @@ def save_to_folder(instance, instance_number):
         json.dump(instance, output_file, indent=4)
 
 
-
 def main():
+    # Read api key from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument("apiKey", help="Your CEDAR apiKey")
+    args = parser.parse_args()
+    api_key= args.apiKey
 
     # Remove all existing instances for the template
     if POST_TO_CEDAR:
-        print('Removing all instances of the template from CEDAR ')
-        cedar_util.delete_instances_from_template(RESOURCE_SERVER, TEMPLATE_ID, sys.maxsize, 500, API_KEY)
+        print('Removing all instances of the template from CEDAR (templateId: ' + TEMPLATE_ID + ')')
+        cedar_util.delete_instances_from_template(RESOURCE_SERVER, TEMPLATE_ID, sys.maxsize, 500, api_key)
 
     # Read biosamples from XML file
     biosamples_list = read_ncbi_biosamples(BIOSAMPLE_FILE_PATH)
@@ -198,7 +205,7 @@ def main():
             save_to_folder(instance, instance_number)
         if POST_TO_CEDAR:
             print('Posting instance #' + str(instance_number))
-            cedar_util.post_instance(instance, TEMPLATE_ID, RESOURCE_SERVER, TARGET_CEDAR_FOLDER_ID, API_KEY)
+            cedar_util.post_instance(instance, TEMPLATE_ID, RESOURCE_SERVER, TARGET_CEDAR_FOLDER_ID, api_key)
 
 
 if __name__ == "__main__": main()
