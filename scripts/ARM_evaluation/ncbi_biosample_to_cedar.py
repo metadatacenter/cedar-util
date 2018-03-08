@@ -50,10 +50,10 @@ POST_TO_CEDAR = True
 BIOSAMPLES_LIMIT = 5
 
 # Local folders
-OUTPUT_PATH = 'resources/ncbi_biosample/cedar_instances'  # Path where the CEDAR instances will be saved
+OUTPUT_PATH = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ncbi_biosample/cedar_instances'  # Path where the CEDAR instances will be saved
 OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
-BIOSAMPLE_FILE_PATH = "resources/ncbi_biosample/biosample_result.xml"  # Source NCBI Biosample instances
-EMPTY_BIOSAMPLE_INSTANCE_PATH = 'resources/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
+BIOSAMPLE_FILE_PATH = "/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ncbi_biosample/biosample_result.xml"  # Source NCBI Biosample instances
+EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
 
 # CEDAR connection settings
 RESOURCE_SERVER = "https://resource.metadatacenter.orgx/"
@@ -61,7 +61,7 @@ TEMPLATE_ID = "https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab0
 TARGET_CEDAR_FOLDER_ID = "https://repo.metadatacenter.orgx/folders/2bd1c561-d899-4c91-bdf1-4be7c0687b96"
 
 # Other constants
-BIOSAMPLE_BASIC_FIELDS = ['sample_name', 'sample_title', 'bioproject_accession', 'organism']
+BIOSAMPLE_BASIC_FIELDS = ['biosample_accession', 'sample_name', 'sample_title', 'bioproject_accession', 'organism']
 BIOSAMPLE_ATTRIBUTES = ['isolate', 'age', 'biomaterial_provider', 'sex', 'tissue', 'cell_line', 'cell_type',
                         'cell_subtype', 'culture_collection', 'dev_stage', 'disease', 'disease_stage',
                         'ethnicity', 'health_state', 'karyotype', 'phenotype', 'population', 'race',
@@ -100,6 +100,10 @@ def read_ncbi_biosamples(file_path):
     limit = min(num_biosamples, BIOSAMPLES_LIMIT)  # Limit of biosamples that will be read
     print('Extracting all samples from file (no. samples: ' + str(num_biosamples) + ')')
     for child in root:
+        # biosample accession
+
+
+
         biosample = NcbiBiosample()
         description_node = child.find('Description')
         attributes_node = child.find('Attributes')
