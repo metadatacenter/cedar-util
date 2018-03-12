@@ -100,10 +100,6 @@ def read_ncbi_biosamples(file_path):
     limit = min(num_biosamples, BIOSAMPLES_LIMIT)  # Limit of biosamples that will be read
     print('Extracting all samples from file (no. samples: ' + str(num_biosamples) + ')')
     for child in root:
-        # biosample accession
-
-
-
         biosample = NcbiBiosample()
         description_node = child.find('Description')
         attributes_node = child.find('Attributes')

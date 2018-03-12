@@ -5,8 +5,15 @@
 import json
 import os
 
-INPUT_FOLDER = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_original_mini'
+INPUT_FOLDER = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_original'
 OUTPUT_FOLDER = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_filtered'
+
+# Enabled filters (note that the filter_is_homo_sapiens is always enabled)
+ENABLED_FILTER_NOT_NCBI_SAMPLE = False
+ENABLED_FILTER_NOT_GEO_SAMPLE = True
+ENABLED_FILTER_IS_ARRAYEXPRESS_SAMPLE = True
+ENABLED_FILTER_NOT_ARRAYEXPRESS_SAMPLE = False
+ENABLED_FILTER_NOT_ENA_SAMPLE = False
 
 
 def filter_is_homo_sapiens(samples):
@@ -52,6 +59,23 @@ def filter_not_geo_sample(samples):
         if 'accession' in sample:
             if not sample['name'].startswith('source GSM') and not sample['name'].startswith('source GSE'):
                 selected_samples.append(sample)
+    return selected_samples
+
+
+def filter_is_arrayexpress_sample(samples):
+    """
+      Selects all samples that are from the ArrayExpress database
+      :param samples: An array of samples 
+      :return: An array of selected samples
+      """
+    selected_samples = []
+    for sample in samples:
+        if 'externalReferences' in sample:
+            include = True
+            for ext in sample['externalReferences']:
+                if 'name' in ext:
+                    if ext['name'] == 'ArrayExpress':
+                        selected_samples.append(sample)
     return selected_samples
 
 
@@ -125,11 +149,12 @@ def get_percentage_str(count, total):
     return "%.0f%%" % (100 * count / total)
 
 
-def main():
+def apply_remove_filters():
     total_processed = 0
     removed_filter_is_homo_sapiens = 0
     removed_filter_not_ncbi_sample = 0
     removed_filter_not_geo_sample = 0
+    removed_filter_is_arrayexpress_sample = 0
     removed_filter_not_arrayexpress_sample = 0
     removed_filter_not_ena_sample = 0
     selected_samples = []
@@ -146,29 +171,40 @@ def main():
             removed_count = before_filtering_count - len(selected_samples_partial)
             removed_filter_is_homo_sapiens = removed_filter_is_homo_sapiens + removed_count
 
-            # Apply filter_not_geo_sample
-            before_filtering_count = len(selected_samples_partial)
-            selected_samples_partial = filter_not_geo_sample(selected_samples_partial)
-            removed_count = before_filtering_count - len(selected_samples_partial)
-            removed_filter_not_geo_sample = removed_filter_not_geo_sample + removed_count
+            if ENABLED_FILTER_NOT_GEO_SAMPLE:
+                # Apply filter_not_geo_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_not_geo_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_not_geo_sample = removed_filter_not_geo_sample + removed_count
 
-            # Apply filter_not_arrayexpress_sample
-            before_filtering_count = len(selected_samples_partial)
-            selected_samples_partial = filter_not_arrayexpress_sample(selected_samples_partial)
-            removed_count = before_filtering_count - len(selected_samples_partial)
-            removed_filter_not_arrayexpress_sample = removed_filter_not_arrayexpress_sample + removed_count
+            if ENABLED_FILTER_IS_ARRAYEXPRESS_SAMPLE:
+                # Apply filter_is_arrayexpress_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_is_arrayexpress_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_is_arrayexpress_sample = removed_filter_is_arrayexpress_sample + removed_count
 
-            # Apply filter_not_ncbi_sample
-            before_filtering_count = len(selected_samples_partial)
-            selected_samples_partial = filter_not_ncbi_sample(selected_samples_partial)
-            removed_count = before_filtering_count - len(selected_samples_partial)
-            removed_filter_not_ncbi_sample = removed_filter_not_ncbi_sample + removed_count
+            if ENABLED_FILTER_NOT_ARRAYEXPRESS_SAMPLE:
+                # Apply filter_not_arrayexpress_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_not_arrayexpress_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_not_arrayexpress_sample = removed_filter_not_arrayexpress_sample + removed_count
 
-            # Apply filter_not_ena_sample
-            before_filtering_count = len(selected_samples_partial)
-            selected_samples_partial = filter_not_ena_sample(selected_samples_partial)
-            removed_count = before_filtering_count - len(selected_samples_partial)
-            removed_filter_not_ena_sample = removed_filter_not_ena_sample + removed_count
+            if ENABLED_FILTER_NOT_NCBI_SAMPLE:
+                # Apply filter_not_ncbi_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_not_ncbi_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_not_ncbi_sample = removed_filter_not_ncbi_sample + removed_count
+
+            if ENABLED_FILTER_NOT_ENA_SAMPLE:
+                # Apply filter_not_ena_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_not_ena_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_not_ena_sample = removed_filter_not_ena_sample + removed_count
 
             # Add to list of samples
             selected_samples = selected_samples + selected_samples_partial
@@ -181,6 +217,9 @@ def main():
         removed_filter_is_homo_sapiens, total_processed) + ')')
     print('- Removed by filter_not_geo_sample: ' + str(removed_filter_not_geo_sample) + '(' + get_percentage_str(
         removed_filter_not_geo_sample, total_processed) + ')')
+    print('- Removed by filter_is_arrayexpress_sample: ' + str(
+        removed_filter_is_arrayexpress_sample) + '(' + get_percentage_str(
+        removed_filter_is_arrayexpress_sample, total_processed) + ')')
     print('- Removed by filter_not_arrayexpress_sample: ' + str(
         removed_filter_not_arrayexpress_sample) + '(' + get_percentage_str(
         removed_filter_not_arrayexpress_sample, total_processed) + ')')
@@ -190,7 +229,11 @@ def main():
         removed_filter_not_ena_sample) + '(' + get_percentage_str(
         removed_filter_not_ena_sample, total_processed) + ')')
     print('- Filtered samples: ' + str(len(selected_samples)))
+    return selected_samples
 
+
+def main():
+    selected_samples = apply_remove_filters()
     # export to files
     print('Exporting selected samples')
     save_to_files(selected_samples, OUTPUT_FOLDER, 10000, 'ebi_biosamples_filtered')
