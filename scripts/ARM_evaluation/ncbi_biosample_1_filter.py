@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Utility to filter NCBI biosamples based on different criteria. It generates an output XML file with all the
-# biosamples selected 
+# biosamples selected
 
 import codecs
 import xml.dom.pulldom as pulldom
