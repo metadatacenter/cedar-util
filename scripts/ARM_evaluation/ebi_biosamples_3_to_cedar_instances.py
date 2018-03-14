@@ -1,6 +1,10 @@
+
+# TODO
+
 #!/usr/bin/python3
 
-# ebi_biosamples_to_cedar.py: Utility to transform EBI BioSample metadata to CEDAR template instances.
+# ebi_biosamples_to_cedar.py: Utility to transform EBI BioSample metadata to CEDAR template instances. The resulting
+# instances are saved to a local folder
 
 import xml.etree.ElementTree as ET
 from pprint import pprint
@@ -8,9 +12,6 @@ import json
 from random import shuffle
 import cedar_util
 
-# Class that represents a biological sample for the NCBI's BioSample Human Package 1.0
-# https://submit.ncbi.nlm.nih.gov/biosample/template/?package=Human.1.0&action=definition
-import sys
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
 class EbiBiosample:
@@ -26,22 +27,22 @@ class EbiBiosample:
         self.ethnicity = ethnicity,
         self.sample_source_name = sample_source_name
 
+
 # Execution settings
 SAVE_TO_FOLDER = False
-POST_TO_CEDAR = True
-BIOSAMPLES_LIMIT = 2000
+BIOSAMPLES_LIMIT = 2000 # Number of biosamples to be transformed into instances
 
 # Local folders
-OUTPUT_PATH = 'resources/ebi_biosamples/cedar_instances'  # Path where the CEDAR instances will be saved
+OUTPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
 OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
 BIOSAMPLE_FILE_PATH = "resources/ebi_biosamples/ebi_biosamples.json"  # Source EBI Biosamples instances
-
 
 # CEDAR connection settings
 RESOURCE_SERVER = "https://resource.metadatacenter.orgx/"
 TEMPLATE_ID = "https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91"
 API_KEY = ""
 TARGET_CEDAR_FOLDER_ID = "https://repo.metadatacenter.orgx/folders/2bd1c561-d899-4c91-bdf1-4be7c0687b96"
+
 
 # Other constants
 # BIOSAMPLE_BASIC_FIELDS = ['sample_name', 'sample_title', 'bioproject_accession', 'organism']

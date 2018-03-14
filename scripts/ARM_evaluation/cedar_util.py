@@ -73,21 +73,21 @@ def get_template_instances_ids(server, template_id, max_count, limit_per_call, a
 #     return json.loads(response.text)
 #
 #
-# def get_value_recommendation(server, template_id, target_field_path, populated_fields, api_key):
-#     url = server + "recommend"
-#     if populated_fields is not None:
-#         payload = {'templateId': template_id, 'targetField': {'path': target_field_path}, 'populatedFields': populated_fields}
-#     else:
-#         payload = {'templateId': template_id, 'targetField': {'path': target_field_path}}
-#     headers = {
-#         'content-type': "application/json",
-#         'authorization': "apiKey " + api_key
-#     }
-#     recommendation_response = requests.post(url, json=payload, headers=headers, verify=False)
-#     # print(payload)
-#     # print(recommendation_response.url)
-#     # print(recommendation_response.text)
-#     return json.loads(recommendation_response.text)
+def get_value_recommendation(server, template_id, target_field_path, populated_fields, api_key):
+    url = server + "recommend-arm"
+    if populated_fields is not None:
+        payload = {'templateId': template_id, 'targetField': {'path': target_field_path}, 'populatedFields': populated_fields}
+    else:
+        payload = {'templateId': template_id, 'targetField': {'path': target_field_path}}
+    headers = {
+        'content-type': "application/json",
+        'authorization': "apiKey " + api_key
+    }
+    recommendation_response = requests.post(url, json=payload, headers=headers, verify=False)
+    # print(payload)
+    # print(recommendation_response.url)
+    # print(recommendation_response.text)
+    return json.loads(recommendation_response.text)
 
 
 def post_instance(instance, template_id, server, folder_id, api_key):
