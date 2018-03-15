@@ -3,6 +3,8 @@
 import cedar_util
 from jsonpath_rw import jsonpath, parse
 
+MISSING_VALUE = 'NA'
+
 
 # Returns the instance fields (with their values) that are used for the evaluation as a Panda data frame
 def get_instance_fields_values(instance, field_details):
@@ -47,28 +49,45 @@ def all_filled_out(field_values):
 
 
 def get_recommended_values(recommendation_results, max_size):
+    if max_size <= 0:
+        raise ValueError("max_size must be > 0")
     recommended_values = []
-    if len(recommendation_results['recommendedValues']) > 0:
-        for rv in recommendation_results['recommendedValues']:
-            recommended_values.append(rv['value'])
+    for rv in recommendation_results['recommendedValues']:
+        recommended_values.append(rv['value'])
     result = recommended_values[:max_size]
-    # result_string = "|".join(result)
-    # return result_string
     return result
 
 
-def get_correct_score(expected_value, actual_value):
-    if expected_value == actual_value:
-        return 1
+def get_recommended_values_as_string(recommended_values):
+    if len(recommended_values) == 0:
+        return MISSING_VALUE
+    elif len(recommended_values) == 1:
+        return recommended_values[0]
     else:
-        return 0
+        return "|".join(recommended_values)
+
+
+def get_matching_score(expected_value, actual_value, ignore_case=True):
+    if actual_value == MISSING_VALUE:
+        return MISSING_VALUE
+    else:
+        if ignore_case:
+            expected_value = expected_value.lower()
+            actual_value = actual_value.lower()
+        if expected_value == actual_value:
+            return 1
+        else:
+            return 0
 
 
 # Calculates the Reciprocal Rank (https://en.wikipedia.org/wiki/Mean_reciprocal_rank). The MRR will be computed later
-def reciprocal_rank(expected_value, actual_values):
-    position = 1
-    for value in actual_values:
-        if value == expected_value:
-            return 1 / float(position)
-        position += 1
-    return 0
+def reciprocal_rank(expected_value, actual_values, use_na=True):
+    if use_na and (actual_values == MISSING_VALUE or actual_values is None or len(actual_values) == 0):
+        return MISSING_VALUE
+    else:
+        position = 1
+        for value in actual_values:
+            if value == expected_value:
+                return 1 / float(position)
+            position += 1
+        return 0
