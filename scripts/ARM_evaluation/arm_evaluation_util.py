@@ -80,6 +80,13 @@ def get_matching_score(expected_value, actual_value, ignore_case=True):
             return 0
 
 
+def populated_fields_to_string(populated_fields):
+    field_value_pairs = []
+    for pf in populated_fields:
+        field_value_pairs.append(pf['path'] + '=' + pf['value'])
+    return "|".join(field_value_pairs)
+
+
 # Calculates the Reciprocal Rank (https://en.wikipedia.org/wiki/Mean_reciprocal_rank). The MRR will be computed later
 def reciprocal_rank(expected_value, actual_values, use_na=True):
     if use_na and (actual_values == MISSING_VALUE or actual_values is None or len(actual_values) == 0):

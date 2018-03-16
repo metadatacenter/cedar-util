@@ -64,7 +64,7 @@ BIOSAMPLE_ATTRIBUTES = ['isolate', 'age', 'biomaterial_provider', 'sex', 'tissue
 BIOSAMPLE_ALL_FIELDS = BIOSAMPLE_BASIC_FIELDS + BIOSAMPLE_ATTRIBUTES
 
 
-# Functions definition
+# Function definitions
 
 def get_attribute_value(attribute_node, attribute_name):
     """
@@ -175,7 +175,7 @@ def save_to_folder(instance, instance_number, output_path):
     :param instance_number: Number used to name the output files
     :param output_path: 
     """
-    output_file_path = output_path + "/" + OUTPUT_BASE_FILE_NAME + "_" + str(instance_number)
+    output_file_path = output_path + "/" + OUTPUT_BASE_FILE_NAME + "_" + str(instance_number) + '.json'
 
     with open(output_file_path, 'w') as output_file:
         json.dump(instance, output_file, indent=4)
@@ -192,7 +192,7 @@ def main():
         # Save to files
         start_index = ((instance_number - 1) // MAX_FILES_PER_FOLDER) * MAX_FILES_PER_FOLDER
         end_index = start_index + MAX_FILES_PER_FOLDER - 1
-        output_path = OUTPUT_BASE_PATH + '/' + 'instances_' + str(start_index + 1) + 'to' + str(end_index + 1) + '.json'
+        output_path = OUTPUT_BASE_PATH + '/' + 'instances_' + str(start_index + 1) + 'to' + str(end_index + 1)
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)

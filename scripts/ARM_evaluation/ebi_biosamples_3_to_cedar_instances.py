@@ -1,7 +1,6 @@
-
 # TODO
 
-#!/usr/bin/python3
+# !/usr/bin/python3
 
 # ebi_biosamples_to_cedar.py: Utility to transform EBI BioSample metadata to CEDAR template instances. The resulting
 # instances are saved to a local folder
@@ -11,126 +10,102 @@ from pprint import pprint
 import json
 from random import shuffle
 import cedar_util
+import os
 
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
 class EbiBiosample:
-    def __init__(self, organism=None, age=None, sex=None, organism_part=None, cell_line=None,
-                 cell_type=None, disease_state=None, ethnicity=None, sample_source_name=None):
-        self.organism = organism,
-        self.age = age,
-        self.sex = sex,
-        self.organism_part = organism_part,
-        self.cell_line = cell_line,
-        self.cell_type = cell_type,
-        self.disease_state = disease_state,
-        self.ethnicity = ethnicity,
-        self.sample_source_name = sample_source_name
+    def __init__(self, accession=None, name=None, releaseDate=None, updateDate=None, organization=None, contact=None,
+                 organism=None, age=None, sex=None, organismPart=None, cellLine=None, cellType=None,
+                 diseaseState=None, ethnicity=None):
+        self.accession = accession
+        self.name = name
+        self.releaseDate = releaseDate
+        self.updateDate = updateDate
+        self.organization = organization
+        self.contact = contact
+        self.organism = organism
+        self.age = age
+        self.sex = sex
+        self.organismPart = organismPart
+        self.cellLine = cellLine
+        self.cellType = cellType
+        self.diseaseState = diseaseState
+        self.ethnicity = ethnicity
 
 
 # Execution settings
-SAVE_TO_FOLDER = False
-BIOSAMPLES_LIMIT = 2000 # Number of biosamples to be transformed into instances
+EBI_BIOSAMPLES_LIMIT = 50000  # Number of biosamples to be transformed into instances
 
 # Local folders
-OUTPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
-OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
-BIOSAMPLE_FILE_PATH = "resources/ebi_biosamples/ebi_biosamples.json"  # Source EBI Biosamples instances
-
-# CEDAR connection settings
-RESOURCE_SERVER = "https://resource.metadatacenter.orgx/"
-TEMPLATE_ID = "https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91"
-API_KEY = ""
-TARGET_CEDAR_FOLDER_ID = "https://repo.metadatacenter.orgx/folders/2bd1c561-d899-4c91-bdf1-4be7c0687b96"
-
+MAX_FILES_PER_FOLDER = 10000
+OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
+OUTPUT_BASE_FILE_NAME = 'ebi_biosample_instance'
+EBI_BIOSAMPLES_PATH = "/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered"  # Source EBI biosamples
+EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/ebi_biosample_instance_empty.json'  # Empty CEDAR instance
 
 # Other constants
-# BIOSAMPLE_BASIC_FIELDS = ['sample_name', 'sample_title', 'bioproject_accession', 'organism']
-# BIOSAMPLE_ATTRIBUTES = ['isolate', 'age', 'biomaterial_provider', 'sex', 'tissue', 'cell_line', 'cell_type',
-#                         'cell_subtype', 'culture_collection', 'dev_stage', 'disease', 'disease_stage',
-#                         'ethnicity', 'health_state', 'karyotype', 'phenotype', 'population', 'race',
-#                         'sample_type', 'treatment']
-#
-# BIOSAMPLE_ALL_FIELDS = BIOSAMPLE_BASIC_FIELDS + BIOSAMPLE_ATTRIBUTES
+EBI_BIOSAMPLE_BASIC_FIELDS = ['accession', 'name', 'releaseDate', 'updateDate', 'organization', 'contact']
+EBI_BIOSAMPLE_ATTRIBUTES = ['organism', 'age', 'sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState',
+                            'ethnicity']
+
+EBI_BIOSAMPLE_ALL_FIELDS = EBI_BIOSAMPLE_BASIC_FIELDS + EBI_BIOSAMPLE_ATTRIBUTES
 
 
-# Functions definition
+# Function definitions
+def extract_value(sample, field_name):
+    value = None
+    if field_name in sample:
+        field_type = type(sample[field_name])
+        if field_type == str:
+            value = sample[field_name]
+        elif field_type == list:
+            value_obj = sample[field_name][0]
+            if 'text' in value_obj:
+                value = value_obj['text']
+            elif 'name' in value_obj:
+                value = value_obj['name']
+            elif 'Name' in value_obj:
+                value = value_obj['Name']
+    return value
 
-def get_attribute_value(attribute_node, attribute_name):
+
+def read_ebi_biosamples(folder_path):
     """
-    It extracts the attribute value from a BioSample attribute XML node
-    :param attribute_node: 
-    :param attribute_name: 
-    :return: The attribute value
-    """
-    if attribute_node.get('attribute_name') == attribute_name \
-            or attribute_node.get('harmonized_name') == attribute_name \
-            or attribute_node.get('display_name') == attribute_name:
-        return attribute_node.text
-    else:
-        return None
-
-
-def read_ebi_biosamples(file_path):
-    """
-    Parses an JSON file with multiple EBI biosamples
-    :param file_path: 
+    Parses all files in a folder and subfolders that contain EBI biosamples
+    :param folder_path: 
     :return: A list of EbiBiosample objects
     """
     all_biosamples_list = []
-    print('Reading file: ' + file_path)
-    with open(file_path, 'r') as f:
-        biosamples = json.load(f)
-    num_biosamples = len(biosamples)
-    limit = min(num_biosamples, BIOSAMPLES_LIMIT)  # Limit of biosamples that will be read
-    print('Extracting all samples from file (no. samples: ' + str(num_biosamples) + ')')
-    i = 0
-    for bs in biosamples:
-        # if i == limit:
-        #     break
-        # i = i + 1
-        biosample = NcbiBiosample()
-        description_node = child.find('Description')
-        attributes_node = child.find('Attributes')
-        # print(ET.tostring(child))
+    print('Reading EBI biosamples from folder: ' + folder_path)
+    for f in sorted(os.listdir(folder_path)):
+        if 'ebi_biosamples' in f and '.json' in f:  # basic check to be sure that we are processing the right files
+            file_path = os.path.join(folder_path, f)
+            samples_json = json.load(open(file_path, "r"))
+            for sample in samples_json:
+                biosample = EbiBiosample()
+                # Basic fields
+                for field_name in EBI_BIOSAMPLE_BASIC_FIELDS:
+                    if field_name in sample and sample[field_name] is not None:
+                        value = extract_value(sample, field_name)
+                        setattr(biosample, field_name, value)
 
-        # sample name
-        sample_ids = child.find('Ids')
-        for sample_id in sample_ids:
-            if sample_id.get('db_label') == 'Sample name':
-                biosample.sample_name = sample_id.text
-        # sample title
-        if description_node is not None and description_node.find('Title') is not None:
-            biosample.sample_title = description_node.find('Title').text
-        # bioproject accession
-        links = child.find('Links')
-        if links is not None:
-            for link in links:
-                if link.get('target') == 'bioproject':
-                    biosample.bioproject_accession = link.text
-        # organism
-        if description_node is not None:
-            organism_node = description_node.find('Organism')
-            if organism_node is not None and organism_node.find('OrganismName') is not None:
-                biosample.organism = organism_node.find('OrganismName').text
-        # attributes
-        for att in attributes_node:
-            for att_name in BIOSAMPLE_ATTRIBUTES:
-                value = get_attribute_value(att, att_name)
-                if value is not None:
-                    setattr(biosample, att_name, value)
-        # description
-        if description_node is not None:
-            comment_node = description_node.find('Comment')
-            if comment_node is not None:
-                if comment_node.find('Paragraph') is not None:
-                    biosample.description = comment_node.find('Paragraph').text
+                # Other characteristics
+                characteristics = sample['characteristics']
+                if characteristics is not None:
+                    for field_name in EBI_BIOSAMPLE_ATTRIBUTES:
+                        if field_name in characteristics and len(characteristics[field_name]) > 0:
+                            value = extract_value(characteristics, field_name)
+                        else:
+                            value = None
+                        setattr(biosample, field_name, value)
+                all_biosamples_list.append(biosample)
 
-        all_biosamples_list.append(biosample)
+    limit = min(EBI_BIOSAMPLES_LIMIT, len(all_biosamples_list))
 
-    if limit < num_biosamples:
-        print('Randomly picking ' + str(limit) + ' samples')
-        shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
+    print('Randomly picking ' + str(limit) + ' samples')
+    shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
+    if limit < len(all_biosamples_list):
         selected_biosamples_list = all_biosamples_list[:limit]
     else:
         selected_biosamples_list = all_biosamples_list
@@ -138,58 +113,57 @@ def read_ebi_biosamples(file_path):
     return selected_biosamples_list
 
 
-# def ncbi_biosample_to_cedar_instance(ncbi_biosample):
-#     """
-#     Translates an NcbiBiosample object to a NCBI Biosample CEDAR instance
-#     :param ncbi_biosample: NcbiBiosample object
-#     :return: A BioSample CEDAR instance
-#     """
-#     INSTANCE_PATH = 'data/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
-#     json_file = open(INSTANCE_PATH, "r")  # Open the JSON file for writing
-#     instance = json.load(json_file)  # Read the JSON into the buffer
-#     json_file.close()  # Close the JSON file
-#
-#     # set field values
-#     for field_name in BIOSAMPLE_ALL_FIELDS:
-#         if field_name in instance:
-#             instance[field_name]['@value'] = getattr(ncbi_biosample, field_name)
-#         else:
-#             raise KeyError('Field name not found in instance: ' + field_name)
-#
-#     return instance
+def ebi_biosample_to_cedar_instance(ebi_biosample):
+    """
+    Translates an EbiBioSample object to a EBI Biosample CEDAR instance
+    :param ebi_biosample: EbiBioSample object
+    :return: A BioSample CEDAR instance
+    """
+    json_file = open(EMPTY_BIOSAMPLE_INSTANCE_PATH, "r")  # Open the JSON file for writing
+    instance = json.load(json_file)  # Read the JSON into the buffer
+    json_file.close()  # Close the JSON file
+
+    # set field values
+    for field_name in EBI_BIOSAMPLE_ALL_FIELDS:
+        if field_name in instance:
+            instance[field_name]['@value'] = getattr(ebi_biosample, field_name)
+        else:
+            raise KeyError('Field name not found in instance: ' + field_name)
+
+    return instance
 
 
-def save_to_folder(instance, instance_number):
+def save_to_folder(instance, instance_number, output_path):
     """
     Saves an instance to a local folder
     :param instance: 
     :param instance_number: Number used to name the output files
-    :param folder_path: 
+    :param output_path: 
     """
-    output_file_path = OUTPUT_PATH + "/" + OUTPUT_BASE_FILE_NAME + "_" + str(instance_number)
+    output_file_path = output_path + "/" + OUTPUT_BASE_FILE_NAME + "_" + str(instance_number) + '.json'
+
     with open(output_file_path, 'w') as output_file:
         json.dump(instance, output_file, indent=4)
 
 
 def main():
-    # Remove all existing instances for the template
-    # if POST_TO_CEDAR:
-    #     print('Removing all instances of the template from CEDAR (templateId: ' + TEMPLATE_ID + ')')
-    #     cedar_util.delete_instances_from_template(RESOURCE_SERVER, TEMPLATE_ID, sys.maxsize, 500, API_KEY)
+    biosamples_list = read_ebi_biosamples(EBI_BIOSAMPLES_PATH)
+    instance_number = 0
+    for biosample in biosamples_list:
+        #pprint(vars(biosample))  # Print the biosample fields
+        instance_number = instance_number + 1
 
-    # Read EBI biosamples from JSON file
-    biosamples_list = read_ebi_biosamples(BIOSAMPLE_FILE_PATH)
-    # instance_number = 0
-    # for biosample in biosamples_list:
-    #     # pprint(vars(biosample)) # Print the biosample fields
-    #     instance_number = instance_number + 1
-    #     instance = ncbi_biosample_to_cedar_instance(biosample)
-    #     if SAVE_TO_FOLDER:
-    #         print('Saving instance #' + str(instance_number))
-    #         save_to_folder(instance, instance_number)
-    #     if POST_TO_CEDAR:
-    #         print('Posting instance #' + str(instance_number))
-    #         cedar_util.post_instance(instance, TEMPLATE_ID, RESOURCE_SERVER, TARGET_CEDAR_FOLDER_ID, API_KEY)
+        # Save to files
+        start_index = ((instance_number - 1) // MAX_FILES_PER_FOLDER) * MAX_FILES_PER_FOLDER
+        end_index = start_index + MAX_FILES_PER_FOLDER - 1
+        output_path = OUTPUT_BASE_PATH + '/' + 'instances_' + str(start_index + 1) + 'to' + str(end_index + 1)
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        instance = ebi_biosample_to_cedar_instance(biosample)
+        print('Saving instance #' + str(instance_number) + ' to ' + output_path)
+        save_to_folder(instance, instance_number, output_path)
 
 
 if __name__ == "__main__": main()

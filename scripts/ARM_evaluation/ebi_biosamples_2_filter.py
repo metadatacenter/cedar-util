@@ -5,8 +5,9 @@
 import json
 import os
 
-INPUT_FOLDER = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_original'
-OUTPUT_FOLDER = '/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_filtered'
+#INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_original'
+INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered_old'
+OUTPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered'
 
 # Enabled filters (note that the filter_is_homo_sapiens is always enabled)
 ENABLED_FILTER_NOT_NCBI_SAMPLE = False
@@ -14,6 +15,7 @@ ENABLED_FILTER_NOT_GEO_SAMPLE = True
 ENABLED_FILTER_IS_ARRAYEXPRESS_SAMPLE = True
 ENABLED_FILTER_NOT_ARRAYEXPRESS_SAMPLE = False
 ENABLED_FILTER_NOT_ENA_SAMPLE = False
+ENABLED_FILTER_HAS_MINIMUM_RELEVANT_ATTRIBUTES_COUNT = True
 
 
 def filter_is_homo_sapiens(samples):
@@ -117,6 +119,26 @@ def filter_not_ena_sample(samples):
     return selected_samples
 
 
+def filter_has_minimum_relevant_attributes_count(samples, min_count=2):
+    """
+    Selects all samples that have a minimum number of relevant attributes
+    :param samples: An array of samples 
+    :param min_count: Minimum number of attributes
+    :return: An array of filtered samples
+    """
+    relevant_att_names = ['sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState', 'ethnicity']
+    selected_samples = []
+    for sample in samples:
+        matches = 0
+        if 'characteristics' in sample:
+            for ch_name in sample['characteristics'].keys():
+                if ch_name in relevant_att_names:
+                    matches = matches + 1
+            if matches >= min_count:
+                selected_samples.append(sample)
+    return(selected_samples)
+
+
 def save_to_files(json_array, output_folder_path, items_per_file, file_base_name):
     """
     Exports an array of json objects to multiple files
@@ -134,7 +156,7 @@ def save_to_files(json_array, output_folder_path, items_per_file, file_base_name
         total_items_saved = total_items_saved + 1
         if len(file_items) == items_per_file or total_items_saved == len(json_array):  # Limit reached. Save results
             output_file_path = output_folder_path + '/' + file_base_name \
-                               + '_' + str(file_count) + '_' + str(start_index) + 'to' + str(total_items_saved - 1)
+                               + '_' + str(file_count) + '_' + str(start_index) + 'to' + str(total_items_saved - 1) + '.json'
             # save to file
             with open(output_file_path, 'w') as outfile:
                 json.dump(file_items, outfile)
@@ -157,6 +179,7 @@ def apply_remove_filters():
     removed_filter_is_arrayexpress_sample = 0
     removed_filter_not_arrayexpress_sample = 0
     removed_filter_not_ena_sample = 0
+    removed_filter_has_minimum_relevant_attributes_count = 0
     selected_samples = []
     for f in sorted(os.listdir(INPUT_FOLDER)):
         if ".json" in f:  # basic check to be sure that we are processing the right files
@@ -206,6 +229,13 @@ def apply_remove_filters():
                 removed_count = before_filtering_count - len(selected_samples_partial)
                 removed_filter_not_ena_sample = removed_filter_not_ena_sample + removed_count
 
+            if ENABLED_FILTER_HAS_MINIMUM_RELEVANT_ATTRIBUTES_COUNT:
+                # Apply filter_has_minimum_relevant_attributes_count
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_has_minimum_relevant_attributes_count(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_has_minimum_relevant_attributes_count = removed_filter_has_minimum_relevant_attributes_count + removed_count
+
             # Add to list of samples
             selected_samples = selected_samples + selected_samples_partial
             print('Accumulated selected samples: ' + str(len(selected_samples)))
@@ -228,6 +258,9 @@ def apply_remove_filters():
     print('- Removed by filter_not_ena_sample: ' + str(
         removed_filter_not_ena_sample) + '(' + get_percentage_str(
         removed_filter_not_ena_sample, total_processed) + ')')
+    print('- Removed by filter_has_minimum_relevant_attributes_count: ' + str(
+        removed_filter_has_minimum_relevant_attributes_count) + '(' + get_percentage_str(
+        removed_filter_has_minimum_relevant_attributes_count, total_processed) + ')')
     print('- Filtered samples: ' + str(len(selected_samples)))
     return selected_samples
 

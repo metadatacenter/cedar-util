@@ -75,14 +75,26 @@ def get_template_instances_ids(server, template_id, max_count, limit_per_call, a
 #
 def get_value_recommendation(server, template_id, target_field_path, populated_fields, api_key):
     url = server + "recommend-arm"
-    if populated_fields is not None:
-        payload = {'templateId': template_id, 'targetField': {'path': target_field_path}, 'populatedFields': populated_fields}
-    else:
-        payload = {'templateId': template_id, 'targetField': {'path': target_field_path}}
+
+    if template_id is not None:
+        if populated_fields is not None:
+            payload = {'templateId': template_id, 'targetField': {'path': target_field_path},
+                       'populatedFields': populated_fields}
+        else:
+            payload = {'templateId': template_id, 'targetField': {'path': target_field_path}}
+
+    else: # template_id is None
+        if populated_fields is not None:
+            payload = {'targetField': {'path': target_field_path},
+                       'populatedFields': populated_fields}
+        else:
+            payload = {'targetField': {'path': target_field_path}}
+
     headers = {
         'content-type': "application/json",
         'authorization': "apiKey " + api_key
     }
+
     recommendation_response = requests.post(url, json=payload, headers=headers, verify=False)
     # print(payload)
     # print(recommendation_response.url)
