@@ -22,7 +22,7 @@ class RecreateElementRequiredPatch(object):
         if pattern.match(error_message):
             path = utils.get_error_location(error_message)
             property_path = path[:path.rfind("/required")]
-            property_object = utils.get_json_object(doc, property_path)
+            property_object = utils.get_json_node(doc, property_path)
             if utils.is_template_element(property_object):
                 is_applied = True
         return is_applied
@@ -36,7 +36,7 @@ class RecreateElementRequiredPatch(object):
         path = utils.get_error_location(error_message)
 
         property_path = path[:path.rfind("/required")]
-        property_object = utils.get_json_object(doc, property_path)
+        property_object = utils.get_json_node(doc, property_path)
 
         patches = [{
             "op": "remove",
