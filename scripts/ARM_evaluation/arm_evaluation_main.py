@@ -20,7 +20,7 @@ class BIOSAMPLES_DB(Enum):
 
 
 # Execution Settings
-MAX_NUMBER_INSTANCES = 1000  # Max number of instances that will be part of the test set
+MAX_NUMBER_INSTANCES = 2000  # Max number of instances that will be part of the test set
 
 TRAINING_DB = BIOSAMPLES_DB.NCBI
 TESTING_DB = BIOSAMPLES_DB.EBI
@@ -31,8 +31,8 @@ NCBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-498
 EBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/6b6c76e6-1d9b-4096-9702-133e25ecd140'
 EXPORT_RESULTS_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results'
 
-NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/cedar_instances/testing'
-EBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances/testing'
+NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/cedar_instances/homo_sapiens-min_3_attribs_valid/testing'
+EBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances/homo_sapiens-min_3_attribs_valid/testing'
 
 # Relevant fields, with their paths and json path expressions
 NCBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},

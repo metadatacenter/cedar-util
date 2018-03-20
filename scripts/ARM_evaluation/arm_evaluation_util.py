@@ -1,6 +1,7 @@
 # Evaluation utils
 
 import cedar_util
+import string
 from jsonpath_rw import jsonpath, parse
 
 MISSING_VALUE = 'NA'
@@ -67,14 +68,19 @@ def get_recommended_values_as_string(recommended_values):
         return "|".join(recommended_values)
 
 
-def get_matching_score(expected_value, actual_value, ignore_case=True):
-    if actual_value == MISSING_VALUE:
+def get_matching_score(expected_value, value, normalization=True):
+    if value == MISSING_VALUE:
         return MISSING_VALUE
     else:
-        if ignore_case:
+        if normalization:
+            value = value.lower()
             expected_value = expected_value.lower()
-            actual_value = actual_value.lower()
-        if expected_value == actual_value:
+
+            # Remove punctuation
+            value = value.translate(str.maketrans('', '', string.punctuation))
+            expected_value = expected_value.translate(str.maketrans('', '', string.punctuation))
+
+        if expected_value == value:
             return 1
         else:
             return 0

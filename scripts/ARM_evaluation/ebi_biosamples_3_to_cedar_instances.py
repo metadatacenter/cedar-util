@@ -35,13 +35,15 @@ class EbiBiosample:
 
 
 # Execution settings
-EBI_BIOSAMPLES_LIMIT = 50000  # Number of biosamples to be transformed into instances
+EBI_BIOSAMPLES_LIMIT = 10000  # Number of biosamples to be transformed into instances
 
 # Local folders
 MAX_FILES_PER_FOLDER = 10000
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
+EBI_BIOSAMPLES_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'  # Source EBI biosamples
+#OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
+OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances/homo_sapiens-min_3_attribs_valid'
 OUTPUT_BASE_FILE_NAME = 'ebi_biosample_instance'
-EBI_BIOSAMPLES_PATH = "/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered"  # Source EBI biosamples
+
 EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/ebi_biosample_instance_empty.json'  # Empty CEDAR instance
 
 # Other constants
@@ -53,23 +55,8 @@ EBI_BIOSAMPLE_ALL_FIELDS = EBI_BIOSAMPLE_BASIC_FIELDS + EBI_BIOSAMPLE_ATTRIBUTES
 
 
 # Function definitions
-def extract_value(sample, field_name):
-    value = None
-    if field_name in sample:
-        field_type = type(sample[field_name])
-        if field_type == str:
-            value = sample[field_name]
-        elif field_type == list:
-            value_obj = sample[field_name][0]
-            if 'text' in value_obj:
-                value = value_obj['text']
-            elif 'name' in value_obj:
-                value = value_obj['name']
-            elif 'Name' in value_obj:
-                value = value_obj['Name']
-    return value
 
-
+# TODO:check if value is valid
 def read_ebi_biosamples(folder_path):
     """
     Parses all files in a folder and subfolders that contain EBI biosamples
@@ -87,7 +74,7 @@ def read_ebi_biosamples(folder_path):
                 # Basic fields
                 for field_name in EBI_BIOSAMPLE_BASIC_FIELDS:
                     if field_name in sample and sample[field_name] is not None:
-                        value = extract_value(sample, field_name)
+                        value = cedar_util.extract_ebi_value(sample, field_name)
                         setattr(biosample, field_name, value)
 
                 # Other characteristics
@@ -95,10 +82,10 @@ def read_ebi_biosamples(folder_path):
                 if characteristics is not None:
                     for field_name in EBI_BIOSAMPLE_ATTRIBUTES:
                         if field_name in characteristics and len(characteristics[field_name]) > 0:
-                            value = extract_value(characteristics, field_name)
-                        else:
-                            value = None
-                        setattr(biosample, field_name, value)
+                            value = cedar_util.extract_ebi_value(characteristics, field_name)
+                            if cedar_util.is_valid_value(value):
+                                setattr(biosample, field_name, value)
+
                 all_biosamples_list.append(biosample)
 
     limit = min(EBI_BIOSAMPLES_LIMIT, len(all_biosamples_list))
@@ -162,7 +149,8 @@ def main():
             os.makedirs(output_path)
 
         instance = ebi_biosample_to_cedar_instance(biosample)
-        print('Saving instance #' + str(instance_number) + ' to ' + output_path)
+        if instance_number % 1000 == 0:
+            print('Saving instance #' + str(instance_number) + ' to ' + output_path)
         save_to_folder(instance, instance_number, output_path)
 
 

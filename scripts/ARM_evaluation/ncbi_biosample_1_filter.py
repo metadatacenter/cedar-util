@@ -3,13 +3,16 @@
 # Utility to filter NCBI biosamples based on different criteria. It generates an output XML file with all the
 # biosamples selected
 
+import cedar_util
 import codecs
 import xml.dom.pulldom as pulldom
 import xml.etree.ElementTree as ET
 
 # INPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_original/2013-03-09-biosample_set.xml'
-INPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/biosample_result_filtered_min3attributes.xml'
-OUTPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/biosample_result_filtered.xml'
+# OUTPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/biosample_result_filtered.xml'
+
+INPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs/biosample_result_filtered.xml'
+OUTPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs_valid/biosample_result_filtered.xml'
 
 
 def is_homo_sapiens_sample(sample):
@@ -78,8 +81,18 @@ def has_minimum_relevant_attributes_count(sample, min_count=2):
                 attribute_name = att.get('attribute_name')
                 display_name = att.get('display_name')
                 harmonized_name = att.get('harmonized_name')
-                if attribute_name in relevant_att_names or display_name in relevant_att_names or harmonized_name in relevant_att_names:
+                value = None
+                if attribute_name in relevant_att_names:
+                    value = cedar_util.extract_ncbi_attribute_value(att, attribute_name)
+                elif display_name in relevant_att_names:
+                    value = cedar_util.extract_ncbi_attribute_value(att, display_name)
+                elif harmonized_name in relevant_att_names:
+                    value = cedar_util.extract_ncbi_attribute_value(att, harmonized_name)
+
+                # Check if the value is valid
+                if value is not None and cedar_util.is_valid_value(value):
                     matches = matches + 1
+
             if matches >= min_count:
                 return True
             else:
@@ -102,14 +115,17 @@ def main():
             if event == 'START_ELEMENT' and node.tagName == 'BioSample':
                 content.expandNode(node)
                 node_xml = node.toxml()
-                # Filter: is homo sapiens
-                if is_homo_sapiens_sample(node_xml):
+
+                # if is_homo_sapiens_sample(node_xml):
+                if has_minimum_relevant_attributes_count(node_xml, 3):
+                    f.write('\n' + node.toxml())
+                    selected_samples_count = selected_samples_count + 1
                     # Filter: is from GEO
-                    if is_geo_sample(node_xml):
-                        # Filter: has a minimum number of attributes
-                        if has_minimum_relevant_attributes_count(node_xml):
-                            f.write('\n' + node.toxml())
-                            selected_samples_count = selected_samples_count + 1
+                    # if is_geo_sample(node_xml):
+                    #     # Filter: has a minimum number of attributes
+                    #     if has_minimum_relevant_attributes_count(node_xml):
+                    #         f.write('\n' + node.toxml())
+                    #         selected_samples_count = selected_samples_count + 1
                 processed_samples_count = processed_samples_count + 1
                 if processed_samples_count % 1000 == 0:
                     print('Processed samples: ' + str(processed_samples_count))

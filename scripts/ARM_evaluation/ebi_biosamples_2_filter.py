@@ -4,15 +4,17 @@
 
 import json
 import os
+import cedar_util
 
 #INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_original'
-INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered_old'
-OUTPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered'
+INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens'
+OUTPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'
 
 # Enabled filters (note that the filter_is_homo_sapiens is always enabled)
 ENABLED_FILTER_NOT_NCBI_SAMPLE = False
-ENABLED_FILTER_NOT_GEO_SAMPLE = True
-ENABLED_FILTER_IS_ARRAYEXPRESS_SAMPLE = True
+ENABLED_FILTER_IS_GEO_SAMPLE = False
+ENABLED_FILTER_NOT_GEO_SAMPLE = False
+ENABLED_FILTER_IS_ARRAYEXPRESS_SAMPLE = False
 ENABLED_FILTER_NOT_ARRAYEXPRESS_SAMPLE = False
 ENABLED_FILTER_NOT_ENA_SAMPLE = False
 ENABLED_FILTER_HAS_MINIMUM_RELEVANT_ATTRIBUTES_COUNT = True
@@ -46,6 +48,20 @@ def filter_not_ncbi_sample(samples):
     for sample in samples:
         if 'accession' in sample:
             if not sample['accession'].startswith('SAMN'):
+                selected_samples.append(sample)
+    return selected_samples
+
+
+def filter_is_geo_sample(samples):
+    """
+    Selects all samples that are from the GEO database
+    :param samples: An array of samples 
+    :return: An array of filtered samples
+    """
+    selected_samples = []
+    for sample in samples:
+        if 'accession' in sample:
+            if sample['name'].startswith('source GSM') or sample['name'].startswith('source GSE'):
                 selected_samples.append(sample)
     return selected_samples
 
@@ -133,10 +149,15 @@ def filter_has_minimum_relevant_attributes_count(samples, min_count=2):
         if 'characteristics' in sample:
             for ch_name in sample['characteristics'].keys():
                 if ch_name in relevant_att_names:
-                    matches = matches + 1
+                    value = cedar_util.extract_ebi_value(sample['characteristics'], ch_name)
+                    # Check if the value is valid
+                    if value is not None and cedar_util.is_valid_value(value):
+                        matches = matches + 1
+                    # else:
+                    #     print('Invalid value: ' + value)
             if matches >= min_count:
                 selected_samples.append(sample)
-    return(selected_samples)
+    return (selected_samples)
 
 
 def save_to_files(json_array, output_folder_path, items_per_file, file_base_name):
@@ -156,7 +177,8 @@ def save_to_files(json_array, output_folder_path, items_per_file, file_base_name
         total_items_saved = total_items_saved + 1
         if len(file_items) == items_per_file or total_items_saved == len(json_array):  # Limit reached. Save results
             output_file_path = output_folder_path + '/' + file_base_name \
-                               + '_' + str(file_count) + '_' + str(start_index) + 'to' + str(total_items_saved - 1) + '.json'
+                               + '_' + str(file_count) + '_' + str(start_index) + 'to' + str(
+                total_items_saved - 1) + '.json'
             # save to file
             with open(output_file_path, 'w') as outfile:
                 json.dump(file_items, outfile)
@@ -175,6 +197,7 @@ def apply_remove_filters():
     total_processed = 0
     removed_filter_is_homo_sapiens = 0
     removed_filter_not_ncbi_sample = 0
+    removed_filter_is_geo_sample = 0
     removed_filter_not_geo_sample = 0
     removed_filter_is_arrayexpress_sample = 0
     removed_filter_not_arrayexpress_sample = 0
@@ -188,11 +211,18 @@ def apply_remove_filters():
             total_processed = total_processed + len(samples_json)
             print('Processing file: ' + f)
 
-            # Apply filter_is_homo_sapiens
+            # Apply filter_is_homo_sapiens (enabled by default)
             before_filtering_count = len(samples_json)
             selected_samples_partial = filter_is_homo_sapiens(samples_json)
             removed_count = before_filtering_count - len(selected_samples_partial)
             removed_filter_is_homo_sapiens = removed_filter_is_homo_sapiens + removed_count
+
+            if ENABLED_FILTER_IS_GEO_SAMPLE:
+                # Apply filter_is_geo_sample
+                before_filtering_count = len(selected_samples_partial)
+                selected_samples_partial = filter_is_geo_sample(selected_samples_partial)
+                removed_count = before_filtering_count - len(selected_samples_partial)
+                removed_filter_is_geo_sample = removed_filter_is_geo_sample + removed_count
 
             if ENABLED_FILTER_NOT_GEO_SAMPLE:
                 # Apply filter_not_geo_sample
@@ -245,6 +275,8 @@ def apply_remove_filters():
     print('- Initial samples: ' + str(total_processed))
     print('- Removed by filter_is_homo_sapiens: ' + str(removed_filter_is_homo_sapiens) + '(' + get_percentage_str(
         removed_filter_is_homo_sapiens, total_processed) + ')')
+    print('- Removed by filter_is_geo_sample: ' + str(removed_filter_is_geo_sample) + '(' + get_percentage_str(
+        removed_filter_is_geo_sample, total_processed) + ')')
     print('- Removed by filter_not_geo_sample: ' + str(removed_filter_not_geo_sample) + '(' + get_percentage_str(
         removed_filter_not_geo_sample, total_processed) + ')')
     print('- Removed by filter_is_arrayexpress_sample: ' + str(

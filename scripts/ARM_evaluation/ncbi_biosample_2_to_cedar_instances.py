@@ -6,12 +6,14 @@ import json
 import xml.etree.ElementTree as ET
 from random import shuffle
 import os
+import cedar_util
 
 
 # Class that represents a biological sample for the NCBI's BioSample Human Package 1.0
 # https://submit.ncbi.nlm.nih.gov/biosample/template/?package=Human.1.0&action=definition
 class NcbiBiosample:
-    def __init__(self, biosample_accession=None, sample_name=None, sample_title=None, bioproject_accession=None, organism=None, isolate=None,
+    def __init__(self, biosample_accession=None, sample_name=None, sample_title=None, bioproject_accession=None,
+                 organism=None, isolate=None,
                  age=None, biomaterial_provider=None, sex=None, tissue=None, cell_line=None, cell_subtype=None,
                  cell_type=None, culture_collection=None, dev_stage=None, disease=None, disease_stage=None,
                  ethnicity=None, health_state=None, karyotype=None, phenotype=None, population=None, race=None,
@@ -45,13 +47,15 @@ class NcbiBiosample:
 
 
 # Execution settings
-BIOSAMPLES_LIMIT = 50000
+BIOSAMPLES_LIMIT = 2000000
 
 # Local folders
 MAX_FILES_PER_FOLDER = 10000
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/cedar_instances'
+
+BIOSAMPLE_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs_valid/biosample_result_filtered.xml'  # Source NCBI biosamples
+OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/cedar_instances/homo_sapiens-min_3_attribs_valid'
+
 OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
-BIOSAMPLE_FILE_PATH = "/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/biosample_result_filtered.xml"  # Source NCBI biosamples
 EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty CEDAR instance
 
 # Other constants
@@ -65,21 +69,6 @@ BIOSAMPLE_ALL_FIELDS = BIOSAMPLE_BASIC_FIELDS + BIOSAMPLE_ATTRIBUTES
 
 
 # Function definitions
-
-def get_attribute_value(attribute_node, attribute_name):
-    """
-    It extracts the attribute value from a BioSample attribute XML node
-    :param attribute_node: 
-    :param attribute_name: 
-    :return: The attribute value
-    """
-    if attribute_node.get('attribute_name') == attribute_name \
-            or attribute_node.get('harmonized_name') == attribute_name \
-            or attribute_node.get('display_name') == attribute_name:
-        return attribute_node.text
-    else:
-        return None
-
 
 def read_ncbi_biosamples(file_path):
     """
@@ -104,48 +93,62 @@ def read_ncbi_biosamples(file_path):
         # sample identifier
         for sample_id in sample_ids:
             if sample_id.get('db') == 'BioSample':
-                biosample.biosample_accession = sample_id.text
+                value = sample_id.text
+                if cedar_util.is_valid_value(value):
+                    biosample.biosample_accession = value
         # sample name
         for sample_id in sample_ids:
             if sample_id.get('db_label') == 'Sample name':
-                biosample.sample_name = sample_id.text
+                value = sample_id.text
+                if cedar_util.is_valid_value(value):
+                    biosample.sample_name = value
         # sample title
         if description_node is not None and description_node.find('Title') is not None:
-            biosample.sample_title = description_node.find('Title').text
+            value = description_node.find('Title').text
+            if cedar_util.is_valid_value(value):
+                biosample.sample_title = value
         # bioproject accession
         links = child.find('Links')
         if links is not None:
             for link in links:
                 if link.get('target') == 'bioproject':
-                    biosample.bioproject_accession = link.text
+                    value = link.text
+                    if cedar_util.is_valid_value(value):
+                        biosample.bioproject_accession = value
         # organism
         if description_node is not None:
             organism_node = description_node.find('Organism')
             if organism_node is not None and organism_node.find('OrganismName') is not None:
-                biosample.organism = organism_node.find('OrganismName').text
+                value = organism_node.find('OrganismName').text
+                if cedar_util.is_valid_value(value):
+                    biosample.organism = value
         # attributes
         for att in attributes_node:
             for att_name in BIOSAMPLE_ATTRIBUTES:
-                value = get_attribute_value(att, att_name)
-                if value is not None:
+                value = cedar_util.extract_ncbi_attribute_value(att, att_name)
+                if value is not None and cedar_util.is_valid_value(value):
                     setattr(biosample, att_name, value)
         # description
         if description_node is not None:
             comment_node = description_node.find('Comment')
             if comment_node is not None:
                 if comment_node.find('Paragraph') is not None:
-                    biosample.description = comment_node.find('Paragraph').text
+                    value = comment_node.find('Paragraph').text
+                    if cedar_util.is_valid_value(value):
+                        biosample.description = value
 
         all_biosamples_list.append(biosample)
 
-    if limit < num_biosamples:
-        print('Randomly picking ' + str(limit) + ' samples')
-        shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
-        selected_biosamples_list = all_biosamples_list[:limit]
-    else:
-        selected_biosamples_list = all_biosamples_list
+        if len(all_biosamples_list) >= limit:
+            break
 
-    return selected_biosamples_list
+    # Randomly pick biosamples
+    #print(vars(all_biosamples_list[0]))
+    print('Randomly picking ' + str(limit) + ' samples')
+    shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
+    #print(vars(all_biosamples_list[0]))
+
+    return all_biosamples_list
 
 
 def ncbi_biosample_to_cedar_instance(ncbi_biosample):
@@ -198,7 +201,8 @@ def main():
             os.makedirs(output_path)
 
         instance = ncbi_biosample_to_cedar_instance(biosample)
-        print('Saving instance #' + str(instance_number) + ' to ' + output_path)
+        if (instance_number % 1000) == 0:
+            print('Saving instance #' + str(instance_number) + ' to ' + output_path)
         save_to_folder(instance, instance_number, output_path)
 
 
