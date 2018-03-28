@@ -42,6 +42,7 @@ def is_geo_sample(sample):
     ids = biosample_node.find('Ids')
     if ids is not None:
         for id in ids:
+
             db = id.get('db')
             if db == 'GEO':
                 return True

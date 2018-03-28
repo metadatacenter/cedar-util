@@ -5,19 +5,22 @@
 # ebi_biosamples_to_cedar.py: Utility to transform EBI BioSample metadata to CEDAR template instances. The resulting
 # instances are saved to a local folder
 
-import xml.etree.ElementTree as ET
-from pprint import pprint
 import json
-from random import shuffle
-import cedar_util
 import os
+from random import shuffle
+
+import arm_evaluation_util
+import datasources_util
 
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
 class EbiBiosample:
-    def __init__(self, accession=None, name=None, releaseDate=None, updateDate=None, organization=None, contact=None,
-                 organism=None, age=None, sex=None, organismPart=None, cellLine=None, cellType=None,
+    def __init__(self, ids=None, accession=None, name=None, releaseDate=None, updateDate=None, organization=None,
+                 contact=None, organism=None, age=None, sex=None, organismPart=None, cellLine=None, cellType=None,
                  diseaseState=None, ethnicity=None):
+        # This set of ids will be used to store the ids of the samples used for testing, in order to exclude those
+        # samples when creating the training dataset when doing an evaluation across EBI and NCBI dbs
+        self.ids = ids
         self.accession = accession
         self.name = name
         self.releaseDate = releaseDate
@@ -34,19 +37,29 @@ class EbiBiosample:
         self.ethnicity = ethnicity
 
 
-# Execution settings
-EBI_BIOSAMPLES_LIMIT = 10000  # Number of biosamples to be transformed into instances
-
-# Local folders
+"""
+MAIN EXECUTION SETTINGS
+"""
+TRAINING_SET_SIZE = 0
+TESTING_SET_SIZE = 18000
 MAX_FILES_PER_FOLDER = 10000
-EBI_BIOSAMPLES_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'  # Source EBI biosamples
-#OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances'  # Path to save the CEDAR instances
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/cedar_instances/homo_sapiens-min_3_attribs_valid'
+
+# Input
+INPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'
+
+# Output
+OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/cedar_instances_tmp/'
+
+TRAINING_BASE_PATH = OUTPUT_BASE_PATH + '/1_training'
+TESTING_BASE_PATH = OUTPUT_BASE_PATH + '/2_testing'
+EXCLUDE_TESTING_IDS = True
+EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT/training_ids.txt'
+
+"""
+CONSTANTS
+"""
 OUTPUT_BASE_FILE_NAME = 'ebi_biosample_instance'
-
 EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/ebi_biosample_instance_empty.json'  # Empty CEDAR instance
-
-# Other constants
 EBI_BIOSAMPLE_BASIC_FIELDS = ['accession', 'name', 'releaseDate', 'updateDate', 'organization', 'contact']
 EBI_BIOSAMPLE_ATTRIBUTES = ['organism', 'age', 'sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState',
                             'ethnicity']
@@ -56,8 +69,30 @@ EBI_BIOSAMPLE_ALL_FIELDS = EBI_BIOSAMPLE_BASIC_FIELDS + EBI_BIOSAMPLE_ATTRIBUTES
 
 # Function definitions
 
-# TODO:check if value is valid
-def read_ebi_biosamples(folder_path):
+def extract_ebi_ids(sample):
+    """
+    It extracts all the ids from the sample
+    :param sample: 
+    """
+    ids = set()
+
+    accession_field = 'accession'
+    value = datasources_util.extract_ebi_value(sample, accession_field)
+    if datasources_util.is_valid_value(value):
+        ids.add(value)
+
+    external_references_field = 'external_references'
+    if external_references_field in sample and sample[external_references_field] is not None:
+        refs = sample[external_references_field]
+        for ref in refs:
+            if 'acc' in ref and ref['acc'] is not None:
+                value = ref['acc']
+                if datasources_util.is_valid_value(value):
+                    ids.add(value)
+    return ids
+
+
+def read_ebi_biosamples(folder_path, max=TRAINING_SET_SIZE + TESTING_SET_SIZE):
     """
     Parses all files in a folder and subfolders that contain EBI biosamples
     :param folder_path: 
@@ -71,33 +106,34 @@ def read_ebi_biosamples(folder_path):
             samples_json = json.load(open(file_path, "r"))
             for sample in samples_json:
                 biosample = EbiBiosample()
+                biosample.ids = set()
+
+                # Save ids
+                biosample.ids.update(extract_ebi_ids(sample))
+
                 # Basic fields
                 for field_name in EBI_BIOSAMPLE_BASIC_FIELDS:
                     if field_name in sample and sample[field_name] is not None:
-                        value = cedar_util.extract_ebi_value(sample, field_name)
-                        setattr(biosample, field_name, value)
+                        value = datasources_util.extract_ebi_value(sample, field_name)
+                        if datasources_util.is_valid_value(value):
+                            setattr(biosample, field_name, value)
 
                 # Other characteristics
                 characteristics = sample['characteristics']
                 if characteristics is not None:
                     for field_name in EBI_BIOSAMPLE_ATTRIBUTES:
                         if field_name in characteristics and len(characteristics[field_name]) > 0:
-                            value = cedar_util.extract_ebi_value(characteristics, field_name)
-                            if cedar_util.is_valid_value(value):
+                            value = datasources_util.extract_ebi_value(characteristics, field_name)
+                            if datasources_util.is_valid_value(value):
                                 setattr(biosample, field_name, value)
 
                 all_biosamples_list.append(biosample)
 
-    limit = min(EBI_BIOSAMPLES_LIMIT, len(all_biosamples_list))
-
+    limit = min(max, len(all_biosamples_list))
+    print('Total no. samples: ' + str(len(all_biosamples_list)))
     print('Randomly picking ' + str(limit) + ' samples')
     shuffle(all_biosamples_list)  # Shuffle the list to ensure that we will return a sublist of random samples
-    if limit < len(all_biosamples_list):
-        selected_biosamples_list = all_biosamples_list[:limit]
-    else:
-        selected_biosamples_list = all_biosamples_list
-
-    return selected_biosamples_list
+    return all_biosamples_list[:limit]
 
 
 def ebi_biosample_to_cedar_instance(ebi_biosample):
@@ -120,38 +156,62 @@ def ebi_biosample_to_cedar_instance(ebi_biosample):
     return instance
 
 
-def save_to_folder(instance, instance_number, output_path):
-    """
-    Saves an instance to a local folder
-    :param instance: 
-    :param instance_number: Number used to name the output files
-    :param output_path: 
-    """
-    output_file_path = output_path + "/" + OUTPUT_BASE_FILE_NAME + "_" + str(instance_number) + '.json'
-
-    with open(output_file_path, 'w') as output_file:
-        json.dump(instance, output_file, indent=4)
-
-
 def main():
-    biosamples_list = read_ebi_biosamples(EBI_BIOSAMPLES_PATH)
-    instance_number = 0
+    if EXCLUDE_TESTING_IDS:
+        excluded_ids = set(line.strip() for line in open(EXCLUDED_IDS_FILE_PATH))
+    excluded_samples_count = 0
+    # Read biosamples
+    biosamples_list = read_ebi_biosamples(INPUT_PATH)
+    testing_ids = set()
+    training_ids = set()
+    instance_number = 1
     for biosample in biosamples_list:
-        #pprint(vars(biosample))  # Print the biosample fields
-        instance_number = instance_number + 1
 
-        # Save to files
-        start_index = ((instance_number - 1) // MAX_FILES_PER_FOLDER) * MAX_FILES_PER_FOLDER
+        # pprint(vars(biosample)) # Print the biosample fields
+        if instance_number <= TRAINING_SET_SIZE:  # Training set
+            output_folder = TRAINING_BASE_PATH
+            training_ids.update(biosample.ids)
+
+        elif instance_number <= (TRAINING_SET_SIZE + TESTING_SET_SIZE):  # Testing set
+            output_folder = TESTING_BASE_PATH
+            testing_ids.update(biosample.ids)
+        else:  # Done, finish execution
+            break
+
+        instance = ebi_biosample_to_cedar_instance(biosample)
+
+        # Generate output path
+        start_index = (instance_number // MAX_FILES_PER_FOLDER) * MAX_FILES_PER_FOLDER
         end_index = start_index + MAX_FILES_PER_FOLDER - 1
-        output_path = OUTPUT_BASE_PATH + '/' + 'instances_' + str(start_index + 1) + 'to' + str(end_index + 1)
+        output_path = output_folder + '/' + 'instances_' + str(start_index + 1) + 'to' + str(end_index + 1)
 
+        # Save instances
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        instance = ebi_biosample_to_cedar_instance(biosample)
-        if instance_number % 1000 == 0:
-            print('Saving instance #' + str(instance_number) + ' to ' + output_path)
-        save_to_folder(instance, instance_number, output_path)
+        if not EXCLUDE_TESTING_IDS or (EXCLUDE_TESTING_IDS and (len(biosample.ids.intersection(excluded_ids))) == 0):
+            if (instance_number % 1000) == 0:
+                print('Saving instance #' + str(instance_number) + ' to ' + output_path)
+            arm_evaluation_util.save_to_folder(instance, instance_number, output_path, OUTPUT_BASE_FILE_NAME)
+            instance_number = instance_number + 1
+        elif EXCLUDE_TESTING_IDS and (len(biosample.ids.intersection(excluded_ids))) > 0:
+            print('Excluding: ' + str(biosample.ids.intersection(excluded_ids)))
+            excluded_samples_count = excluded_samples_count + 1
+
+    # Save training ids
+    with open(OUTPUT_BASE_PATH + '/training_ids.txt', 'w') as output_file:
+        for training_id in training_ids:
+            output_file.write("%s\n" % training_id)
+
+    # Save testing ids
+    with open(OUTPUT_BASE_PATH + '/testing_ids.txt', 'w') as output_file:
+        for testing_id in testing_ids:
+            output_file.write("%s\n" % testing_id)
+
+    print('No. of excluded samples: ' + str(excluded_samples_count))
+    print('Finished')
 
 
 if __name__ == "__main__": main()
+
+

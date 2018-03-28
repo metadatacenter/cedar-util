@@ -3,8 +3,15 @@
 import cedar_util
 import string
 from jsonpath_rw import jsonpath, parse
+import json
+from enum import Enum
 
 MISSING_VALUE = 'NA'
+
+
+class BIOSAMPLES_DB(Enum):
+    NCBI = 1
+    EBI = 2
 
 
 # Returns the instance fields (with their values) that are used for the evaluation as a Panda data frame
@@ -104,3 +111,17 @@ def reciprocal_rank(expected_value, actual_values, use_na=True):
                 return 1 / float(position)
             position += 1
         return 0
+
+
+def save_to_folder(instance, instance_number, output_path, output_base_file_name):
+    """
+    Saves an instance to a local folder
+    :param instance: 
+    :param instance_number: Number used to name the output files
+    :param output_path: 
+    :param output_base_file_name:
+    """
+    output_file_path = output_path + "/" + output_base_file_name + "_" + str(instance_number) + '.json'
+
+    with open(output_file_path, 'w') as output_file:
+        json.dump(instance, output_file, indent=4)
