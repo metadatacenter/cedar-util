@@ -41,7 +41,7 @@ class EbiBiosample:
 MAIN EXECUTION SETTINGS
 """
 TRAINING_SET_SIZE = 0
-TESTING_SET_SIZE = 18000
+TESTING_SET_SIZE = 20000
 MAX_FILES_PER_FOLDER = 10000
 
 # Input
@@ -53,7 +53,7 @@ OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/cedar_instances_tmp/'
 TRAINING_BASE_PATH = OUTPUT_BASE_PATH + '/1_training'
 TESTING_BASE_PATH = OUTPUT_BASE_PATH + '/2_testing'
 EXCLUDE_TESTING_IDS = True
-EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT/training_ids.txt'
+EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE/training_ids.txt'
 
 """
 CONSTANTS

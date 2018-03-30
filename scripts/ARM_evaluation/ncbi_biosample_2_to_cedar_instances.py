@@ -55,7 +55,7 @@ class NcbiBiosample:
 MAIN EXECUTION SETTINGS
 """
 TRAINING_SET_SIZE = 0
-TESTING_SET_SIZE = 150000
+TESTING_SET_SIZE = 19000
 MAX_FILES_PER_FOLDER = 10000
 # Input
 INPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs_valid/biosample_result_filtered.xml'  # Source NCBI biosamples
@@ -64,7 +64,7 @@ OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/cedar_instances_tmp/'
 TRAINING_BASE_PATH = OUTPUT_BASE_PATH + '/1_training'
 TESTING_BASE_PATH = OUTPUT_BASE_PATH + '/2_testing'
 EXCLUDE_IDS = True
-EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT/training_ids.txt'
+EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE/training_ids.txt'
 
 """
 CONSTANTS

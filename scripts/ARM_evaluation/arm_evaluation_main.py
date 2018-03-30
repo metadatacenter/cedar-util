@@ -20,7 +20,8 @@ class BIOSAMPLES_DB(Enum):
 
 
 # Execution Settings
-MAX_NUMBER_INSTANCES = 10  # Max number of instances that will be part of the test set
+VR_STRICT_MATCH = False
+MAX_NUMBER_INSTANCES = 20000  # Max number of instances that will be part of the test set
 TRAINING_DB = BIOSAMPLES_DB.NCBI
 TESTING_DB = BIOSAMPLES_DB.NCBI
 
@@ -30,8 +31,9 @@ NCBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-498
 EBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/6b6c76e6-1d9b-4096-9702-133e25ecd140'
 EXPORT_RESULTS_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results'
 
-NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT/testing_samples'
-EBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT/testing_samples'
+NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE/testing_samples'
+EBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE/testing_samples'
+
 
 # Relevant fields, with their paths and json path expressions
 NCBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
@@ -221,17 +223,24 @@ def main():
                                 recommendation_vr = cedar_util.get_value_recommendation(VR_SERVER, template_id,
                                                                                         field_path,
                                                                                         populated_fields,
-                                                                                        api_key)
+                                                                                        api_key, VR_STRICT_MATCH)
                                 execution_time_vr = int(round((time.time() - start_time_vr) * 1000))
 
                                 recommended_top1_value_vr = arm_evaluation_util.get_recommended_values(
                                     recommendation_vr, 1)
                                 recommended_top1_value_baseline = get_baseline_top3_recommendation(field_name)[0]
-                            
+
 
                                 is_correct_vr = arm_evaluation_util.get_matching_score(field_values[field_name],
                                                                                        arm_evaluation_util.get_recommended_values_as_string(
                                                                                            recommended_top1_value_vr))
+
+                                # This block was used to explore if it was possible to identify mistakes in the metadata using existing rules
+                                # if is_correct_vr == 0 and len(populated_fields) > 2:
+                                #     print('---')
+                                #     print(populated_fields)
+                                #     print('Target: ' + field_name)
+                                #     print("Expected: " + field_values[field_name] + "; Got: " + arm_evaluation_util.get_recommended_values_as_string(recommended_top1_value_vr))
 
                                 is_correct_baseline = arm_evaluation_util.get_matching_score(field_values[field_name], recommended_top1_value_baseline)
 
@@ -280,7 +289,8 @@ def main():
                                 print('Not doing anything for field: ' + field_name)
 
                     instances_count = instances_count + 1
-                    print('No. instances processed: ' + str(instances_count))
+                    if (instances_count % 100 == 0):
+                        print('No. instances processed: ' + str(instances_count))
 
         # Stack the 1-D arrays generated as columns into a 2-D array
         results = np.column_stack(

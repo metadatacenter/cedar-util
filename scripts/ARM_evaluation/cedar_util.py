@@ -73,7 +73,7 @@ def get_template_instances_ids(server, template_id, max_count, limit_per_call, a
 #     return json.loads(response.text)
 #
 #
-def get_value_recommendation(server, template_id, target_field_path, populated_fields, api_key):
+def get_value_recommendation(server, template_id, target_field_path, populated_fields, api_key, strict_match=False):
     url = server + "recommend-arm"
 
     if template_id is not None:
@@ -89,6 +89,8 @@ def get_value_recommendation(server, template_id, target_field_path, populated_f
                        'populatedFields': populated_fields}
         else:
             payload = {'targetField': {'path': target_field_path}}
+
+    payload['strictMatch'] = strict_match
 
     headers = {
         'content-type': "application/json",
