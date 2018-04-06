@@ -1,28 +1,34 @@
 #!/usr/bin/python3
 
-# Utility to annotate CEDAR instances using the NCBO Annotator. It takes a CEDAR instances and returns them annotated
+# Utility to annotate keywords using the NCBO Annotator
 
-import argparse
 import json
-import sys
-import xml.etree.ElementTree as ET
-from random import shuffle
-import bioportal_util
-import os
 import time
+import os
+import sys
+import term_normalizer
 
-INSTANCES_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_20_1-training_130K_ncbi-testing-5000_ebi/training_samples'
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_20_1-training_130K_ncbi-testing-5000_ebi'
+import bioportal_util
 
+# Input
 UNIQUE_VALUES_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase.txt'
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.txt'
-VALUES_PER_ITERATION = 500
+
+# Output
+UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated_bla.txt'
+
+# Settings
+BIOPORTAL_API_KEY = '<your apikey>'
+VALUES_PER_ITERATION = 2000
 
 # List of relevant ontologies. The algorithm will try to pick pref_class_label and pref_class_uri from one of these
 # ontologies. If that's not possible, it will pick values from any other ontologies
 PREFERRED_ONTOLOGIES = ['DOID', 'PATO', 'EFO', 'OBI', 'CL', 'CLO', 'CHEBI', 'BFO', 'PR', 'CPT', 'MEDDRA', 'UBERON',
                         'RXNORM', 'SNOMEDCT', 'FMA', 'LOINC', 'NDFRT', 'EDAM', 'RCD', 'ICD10CM', 'SNMI', 'BTO',
                         'MESH', 'NCIT', 'OMIM']
+
+NORMALIZED_VALUES_FILE_NAME = 'normalized_values.json'  # We assume that the file is stored in the current path
+
+LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES = False
 
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
@@ -124,43 +130,68 @@ def extract_keyword_annotations(keywords, annotations):
 
 
 def main():
-    
-
     # Read unique values
     with open(UNIQUE_VALUES_FILE_PATH) as f:
         all_values = f.read().splitlines()
 
+    # Test data
+    #all_values = ['m', 'male']
+
+    # Load file with normalized values
+    norm_values = json.loads(open(os.path.join(sys.path[0], NORMALIZED_VALUES_FILE_NAME)).read())
+
+    # Translates some specific values that the NCBO Annotator is not able to annotate to a value that the Annotator will annotate
+    all_values_normalized = []
+
+    for value in all_values:
+        normalized_value = term_normalizer.normalize_value(value, norm_values)
+        if normalized_value not in all_values_normalized:
+            all_values_normalized.append(normalized_value)
+
     # Create lists of input keywords to avoid making big queries to the Annotator
     input_keywords_lists = []
     keywords = set()
-    for value in all_values:
+    for value in all_values_normalized:
         if len(keywords) < VALUES_PER_ITERATION:
             keywords.add(value)
         elif len(keywords) == VALUES_PER_ITERATION:
             input_keywords_lists.append(keywords)
             keywords = set()
+    # Add remaining keywords to the list
+    if len(keywords) > 0:
+        input_keywords_lists.append(keywords)
 
     unique_values_annotated = {}
 
     total_count = 0
+    print('Annotation process started...')
+
     for keywords_list in input_keywords_lists:
+
         time.sleep(.150)  # wait between calls to the Annotator
-        annotations = bioportal_util.annotate(bioportal_api_key, ",".join(keywords_list), longest_only=True,
+
+        ontologies = []
+        if LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES:
+            ontologies = PREFERRED_ONTOLOGIES
+
+        annotations = bioportal_util.annotate(BIOPORTAL_API_KEY, ",".join(keywords_list), ontologies, longest_only=True,
                                               expand_mappings=True, include=['prefLabel'])
         keyword_annotations = extract_keyword_annotations(keywords_list, annotations)
 
         for ann in keyword_annotations:
-            if ann.keyword not in unique_values_annotated:
-                unique_values_annotated[ann.keyword] = KeywordAnnotation.obj_dict(ann)
+            annotation_key = ann.keyword
+
+            if annotation_key not in unique_values_annotated:
+                unique_values_annotated[annotation_key] = KeywordAnnotation.obj_dict(ann)
             else:
-                print('Keyword already there: ' + ann.keyword)
+                print('Keyword already there: ' + annotation_key)
 
         total_count = total_count + 1
         print('Total lists of keywords processed: ' + str(total_count) + '/' + str(len(input_keywords_lists)))
 
-
     # Write to file
     with open(UNIQUE_VALUES_ANNOTATED_FILE_PATH, 'w') as outfile:
         json.dump(unique_values_annotated, outfile)
+
 
 if __name__ == "__main__": main()

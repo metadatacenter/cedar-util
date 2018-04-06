@@ -38,16 +38,22 @@ def annotate(api_key, text, ontologies=[], longest_only=False, expand_mappings=F
                    'expand_mappings': expand_mappings}
 
         if len(ontologies) > 0:
-            payload['ontologies'] = ontologies
+            payload['ontologies'] = ','.join(ontologies)
 
         if len(include) > 0:
             payload['include'] = ','.join(include)
 
         response = requests.post(url, json=payload, headers=headers, verify=False)
+
+        if response.status_code != 200:
+            raise Exception('Problem when calling the Annotator: ' + response.text)
+
+
+
         # print(payload)
         # print(response.url)
         # print(response.status_code)
-        #print(response.text)
+        # print(response.text)
         annotations = json.loads(response.text)
 
     return annotations
