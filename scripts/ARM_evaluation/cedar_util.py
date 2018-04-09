@@ -99,6 +99,7 @@ def get_value_recommendation(server, template_id, target_field_path, populated_f
 
     recommendation_response = requests.post(url, json=payload, headers=headers, verify=False)
     # print(payload)
+    # print('------------')
     # print(recommendation_response.url)
     # print(recommendation_response.text)
     return json.loads(recommendation_response.text)

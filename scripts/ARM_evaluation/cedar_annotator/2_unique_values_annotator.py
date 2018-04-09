@@ -14,15 +14,15 @@ import bioportal_util
 UNIQUE_VALUES_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase.txt'
 
 # Output
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated_bla.txt'
+UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.txt'
 
 # Settings
-BIOPORTAL_API_KEY = '<your apikey>'
+BIOPORTAL_API_KEY = ''
 VALUES_PER_ITERATION = 2000
 
 # List of relevant ontologies. The algorithm will try to pick pref_class_label and pref_class_uri from one of these
 # ontologies. If that's not possible, it will pick values from any other ontologies
-PREFERRED_ONTOLOGIES = ['DOID', 'PATO', 'EFO', 'OBI', 'CL', 'CLO', 'CHEBI', 'BFO', 'PR', 'CPT', 'MEDDRA', 'UBERON',
+PREFERRED_ONTOLOGIES = ['EFO', 'DOID', 'PATO', 'OBI', 'CL', 'CLO', 'CHEBI', 'BFO', 'PR', 'CPT', 'MEDDRA', 'UBERON',
                         'RXNORM', 'SNOMEDCT', 'FMA', 'LOINC', 'NDFRT', 'EDAM', 'RCD', 'ICD10CM', 'SNMI', 'BTO',
                         'MESH', 'NCIT', 'OMIM']
 

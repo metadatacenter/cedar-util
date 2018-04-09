@@ -4,6 +4,7 @@ import cedar_util
 import string
 from jsonpath_rw import jsonpath, parse
 import json
+import urllib.parse
 from enum import Enum
 
 MISSING_VALUE = 'NA'
@@ -14,18 +15,37 @@ class BIOSAMPLES_DB(Enum):
     EBI = 2
 
 
-# Returns the instance fields (with their values) that are used for the evaluation as a Panda data frame
-def get_instance_fields_values(instance, field_details):
+# Returns the instance fields (with their types and values) that are used for the evaluation as a Panda data frame
+def get_instance_fields_types_and_values(instance, field_details):
     field_values = {}
 
     for field in field_details:
         jsonpath_expr = parse(field_details[field]['json_path'])
         matches = jsonpath_expr.find(instance)
-        field_values[field] = None
-        if matches[0] is not None and matches[0].value['@value'] is not None:
-            field_values[field] = matches[0].value['@value']
+        field_values[field] = {}
+        field_values[field]['value'] = None
+        field_values[field]['type'] = None
+        if matches[0] is not None and matches[0].value is not None:
+            if '@value' in matches[0].value and  matches[0].value['@value'] is not None:
+                field_values[field]['value'] = matches[0].value['@value']
+            elif '@id' in matches[0].value and matches[0].value['@id'] is not None:
+                field_values[field]['value'] = matches[0].value['@id']
+            if '@type' in matches[0].value and matches[0].value['@type'] is not None:
+                field_type = matches[0].value['@type']
+                field_values[field]['type'] = get_original_term_uri(field_type)
 
     return field_values
+
+
+# Get the original term uris from BioPortal URIs
+def get_original_term_uri(field_type):
+    substr = '/classes/'
+    if substr in field_type:
+        index = field_type.find(substr)
+        encoded_term_uri = field_type[index + len(substr):]
+        return urllib.parse.unquote(encoded_term_uri) # return the decoded uri
+    else:
+        return field_type
 
 
 def get_populated_fields(field_details, field_values, target_field):

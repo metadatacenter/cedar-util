@@ -19,21 +19,24 @@ class BIOSAMPLES_DB(Enum):
     EBI = 2
 
 
-# Execution Settings
+# Input
 VR_STRICT_MATCH = False
 MAX_NUMBER_INSTANCES = 20000  # Max number of instances that will be part of the test set
 TRAINING_DB = BIOSAMPLES_DB.NCBI
 TESTING_DB = BIOSAMPLES_DB.NCBI
+ANNOTATED_VALUES = True
 
 READ_TEST_INSTANCES_FROM_CEDAR = False  # If false, the instances are read from a local folder
 VR_SERVER = 'https://valuerecommender.metadatacenter.orgx/'
 NCBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91'
 EBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/6b6c76e6-1d9b-4096-9702-133e25ecd140'
-EXPORT_RESULTS_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results'
 
-NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE/testing_samples'
+NCBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = \
+    '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT/testing_samples_annotated'
 EBI_TEST_INSTANCES_LOCAL_BASE_FOLDER = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE/testing_samples'
 
+# Output
+EXPORT_RESULTS_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results'
 
 # Relevant fields, with their paths and json path expressions
 NCBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
@@ -71,22 +74,69 @@ NCBI_TO_EBI_MAPPINGS = {
 }
 
 EBI_MOST_FREQUENT_VALUES = {
-    'sex': ['male','female','unknown_sex'],
-    'organismPart': ['blood','bone marrow','mammary gland'],
-    'cellLine': ['HepG2','MCF-7','HEK293'],
-    'cellType': ['B-Lymphocyte','mononuclear cell','peripheral blood mononuclear cell'],
-    'diseaseState': ['normal','breast cancer','multiple myeloma'],
-    'ethnicity': ['Caucasian','European','White']
+    'sex': ['male', 'female', 'unknown_sex'],
+    'organismPart': ['blood', 'bone marrow', 'mammary gland'],
+    'cellLine': ['HepG2', 'MCF-7', 'HEK293'],
+    'cellType': ['B-Lymphocyte', 'mononuclear cell', 'peripheral blood mononuclear cell'],
+    'diseaseState': ['normal', 'breast cancer', 'multiple myeloma'],
+    'ethnicity': ['Caucasian', 'European', 'White']
+}
+
+EBI_MOST_FREQUENT_VALUES_ANNOTATED = {
+    # 'sex': ['male','female','unknown_sex'],
+    # 'organismPart': ['blood','bone marrow','mammary gland'],
+    # 'cellLine': ['HepG2','MCF-7','HEK293'],
+    # 'cellType': ['B-Lymphocyte','mononuclear cell','peripheral blood mononuclear cell'],
+    # 'diseaseState': ['normal','breast cancer','multiple myeloma'],
+    # 'ethnicity': ['Caucasian','European','White']
 }
 
 NCBI_MOST_FREQUENT_VALUES = {
-    'sex': ['male','female','unknown_sex'],
-    'tissue': ['blood','bone marrow','mammary gland'],
-    'cell_line': ['A549','THP-1','HeLa'],
-    'cell_type': ['mononuclear cell','lymphocyte','induced pluripotent stem cell'],
-    'disease': ['normal','acute myeloid leukemia','multiple myeloma'],
-    'ethnicity': ['Mexican American','caucasian','Caucasian'],
-    'treatment': ['WT','Surgery and Radiation','Bisulfite-converted Padlock']
+    'sex': ['male', 'female', 'unknown_sex'],
+    'tissue': ['blood', 'bone marrow', 'mammary gland'],
+    'cell_line': ['A549', 'THP-1', 'HeLa'],
+    'cell_type': ['mononuclear cell', 'lymphocyte', 'induced pluripotent stem cell'],
+    'disease': ['normal', 'acute myeloid leukemia', 'multiple myeloma'],
+    'ethnicity': ['Mexican American', 'caucasian', 'Caucasian'],
+    'treatment': ['WT', 'Surgery and Radiation', 'Bisulfite-converted Padlock']
+}
+
+NCBI_MOST_FREQUENT_VALUES_ANNOTATED = {
+    "sex": [
+        "http://purl.obolibrary.org/obo/PATO_0000384",
+        "http://purl.obolibrary.org/obo/PATO_0000383",
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C123772"
+    ],
+    "tissue": [
+        "http://purl.obolibrary.org/obo/UBERON_0000178",
+        "http://purl.obolibrary.org/obo/UBERON_0002371",
+        "http://purl.obolibrary.org/obo/UBERON_0001911"
+    ],
+    "cell_line": [
+        "http://www.ebi.ac.uk/efo/EFO_0001086",
+        "http://www.ebi.ac.uk/efo/EFO_0001253",
+        "http://www.ebi.ac.uk/efo/EFO_0001185"
+    ],
+    "cell_type": [
+        "http://purl.obolibrary.org/obo/CL_0000842",
+        "http://purl.obolibrary.org/obo/CL_0000542",
+        "http://purl.obolibrary.org/obo/CL_0000066"
+    ],
+    "disease": [
+        "http://purl.obolibrary.org/obo/PATO_0000461",
+        "http://www.ebi.ac.uk/efo/EFO_0000222",
+        "http://www.ebi.ac.uk/efo/EFO_0001378"
+    ],
+    "ethnicity": [
+        "http://www.semanticweb.org/ontologies/2010/10/BPO.owl#caucasian",
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C67114",
+        "http://purl.bioontology.org/ontology/RCTV2/9S10.00"
+    ],
+    "treatment": [
+        "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C17050",
+        "http://purl.obolibrary.org/obo/DOID_0060859",
+        "http://www.ebi.ac.uk/efo/EFO_0003024"
+    ]
 }
 
 
@@ -95,7 +145,6 @@ def get_mapped_field_path(field_name, training_db=TRAINING_DB, testing_db=TESTIN
                           ncbi_to_ebi_mappings=NCBI_TO_EBI_MAPPINGS,
                           ncbi_field_details=NCBI_FIELD_DETAILS,
                           ebi_field_details=EBI_FIELD_DETAILS):
-    field_path = None
     if training_db == BIOSAMPLES_DB.NCBI:
         if testing_db == BIOSAMPLES_DB.NCBI:
             return ncbi_field_details[field_name]['path']
@@ -114,7 +163,7 @@ def get_mapped_field_path(field_name, training_db=TRAINING_DB, testing_db=TESTIN
                 return None
 
 
-def get_mapped_populated_fields(field_details, field_values, target_field):
+def get_mapped_populated_fields(field_details, fields_types_and_values, target_field):
     """
     Returns the populated fields body, given the target field
     :param field_details: 
@@ -123,19 +172,31 @@ def get_mapped_populated_fields(field_details, field_values, target_field):
     :return: 
     """
     populated_fields = []
-    for f in field_values:
+    for f in fields_types_and_values:
         if f != target_field:
-            if field_values[f] is not None:
-                mapped_field_path = get_mapped_field_path(field_details[f]['path'])
-                if mapped_field_path is None:
-                    return None
-                populated_fields.append({'path': mapped_field_path, 'value': field_values[f]})
+            if fields_types_and_values[f]['value'] is not None:
+                if fields_types_and_values[f]['type'] is not None:  # ontology term
+                    path = fields_types_and_values[f]['type']
+                    populated_fields.append({'path': path, 'value': fields_types_and_values[f]['value']})
+                else:
+                    mapped_field_path = get_mapped_field_path(field_details[f]['path'])
+                    if mapped_field_path is None:
+                        return None
+                    populated_fields.append({'path': mapped_field_path, 'value': fields_types_and_values[f]['value']})
     return populated_fields
 
 
 def get_baseline_top3_recommendation(field_name, training_db=TRAINING_DB, testing_db=TESTING_DB,
-                                     ncbi_frequent_values = NCBI_MOST_FREQUENT_VALUES,
-                                     ebi_frequent_values = EBI_MOST_FREQUENT_VALUES):
+                                     ncbi_frequent_values=NCBI_MOST_FREQUENT_VALUES,
+                                     ebi_frequent_values=EBI_MOST_FREQUENT_VALUES,
+                                     ncbi_frequent_values_annotated=NCBI_MOST_FREQUENT_VALUES_ANNOTATED,
+                                     ebi_frequent_values_annotated=EBI_MOST_FREQUENT_VALUES_ANNOTATED,
+                                     annotated_values=ANNOTATED_VALUES):
+
+    if annotated_values:
+        ncbi_frequent_values = ncbi_frequent_values_annotated
+        ebi_frequent_values = ebi_frequent_values_annotated
+
     if training_db == BIOSAMPLES_DB.NCBI:
         if testing_db == BIOSAMPLES_DB.NCBI:
             return ncbi_frequent_values[field_name]
@@ -205,15 +266,21 @@ def main():
                     # Read instance
                     instance_json = json.load(open(file_path))
                     # Read instance field values
-                    field_values = arm_evaluation_util.get_instance_fields_values(instance_json, field_details)
-                    for field_name in field_values:
-                        if field_values[field_name] is not None:  # if the field is not empty
+                    fields_types_and_values = arm_evaluation_util.get_instance_fields_types_and_values(instance_json,
+                                                                                                       field_details)
+                    for field_name in fields_types_and_values:
+                        if fields_types_and_values[field_name]['value'] is not None:  # if the field is not empty
                             # Extract populated fields considering that fv is the target field
                             populated_fields = get_mapped_populated_fields(field_details,
-                                                                           field_values,
+                                                                           fields_types_and_values,
                                                                            field_name)
 
-                            field_path = get_mapped_field_path(field_name)
+                            field_name_full = field_name
+                            if fields_types_and_values[field_name]['type'] is not None:  # ontology term
+                                field_path = fields_types_and_values[field_name]['type']
+                                field_name_full = "[" + field_path + "](" + field_name + ")"
+                            else:
+                                field_path = get_mapped_field_path(field_name)
 
                             if field_path is not None and populated_fields is not None:
 
@@ -230,10 +297,10 @@ def main():
                                     recommendation_vr, 1)
                                 recommended_top1_value_baseline = get_baseline_top3_recommendation(field_name)[0]
 
-
-                                is_correct_vr = arm_evaluation_util.get_matching_score(field_values[field_name],
-                                                                                       arm_evaluation_util.get_recommended_values_as_string(
-                                                                                           recommended_top1_value_vr))
+                                is_correct_vr = arm_evaluation_util.get_matching_score(
+                                    fields_types_and_values[field_name]['value'],
+                                    arm_evaluation_util.get_recommended_values_as_string(
+                                        recommended_top1_value_vr))
 
                                 # This block was used to explore if it was possible to identify mistakes in the metadata using existing rules
                                 # if is_correct_vr == 0 and len(populated_fields) > 2:
@@ -242,25 +309,30 @@ def main():
                                 #     print('Target: ' + field_name)
                                 #     print("Expected: " + field_values[field_name] + "; Got: " + arm_evaluation_util.get_recommended_values_as_string(recommended_top1_value_vr))
 
-                                is_correct_baseline = arm_evaluation_util.get_matching_score(field_values[field_name], recommended_top1_value_baseline)
+                                is_correct_baseline = arm_evaluation_util.get_matching_score(
+                                    fields_types_and_values[field_name]['value'], recommended_top1_value_baseline)
 
                                 # if is_correct_vr == 1:
                                 #     print('got it right!')
 
-                                recommended_top3_values_vr = arm_evaluation_util.get_recommended_values(recommendation_vr, 3)
+                                recommended_top3_values_vr = arm_evaluation_util.get_recommended_values(
+                                    recommendation_vr, 3)
 
                                 recommended_top3_values_baseline = get_baseline_top3_recommendation(field_name)
 
-                                reciprocal_rank_vr = arm_evaluation_util.reciprocal_rank(field_values[field_name],
-                                                                                         recommended_top3_values_vr)
+                                reciprocal_rank_vr = arm_evaluation_util.reciprocal_rank(
+                                    fields_types_and_values[field_name]['value'],
+                                    recommended_top3_values_vr)
 
-                                reciprocal_rank_baseline = arm_evaluation_util.reciprocal_rank(field_values[field_name],
-                                                                                               recommended_top3_values_baseline)
+                                reciprocal_rank_baseline = arm_evaluation_util.reciprocal_rank(
+                                    fields_types_and_values[field_name]['value'],
+                                    recommended_top3_values_baseline)
 
                                 # this is the reciprocal rank with 0s instead of NAs
-                                reciprocal_rank_vr_no_na = arm_evaluation_util.reciprocal_rank(field_values[field_name],
-                                                                                               recommended_top3_values_vr,
-                                                                                               False)
+                                reciprocal_rank_vr_no_na = arm_evaluation_util.reciprocal_rank(
+                                    fields_types_and_values[field_name]['value'],
+                                    recommended_top3_values_vr,
+                                    False)
 
                                 # Store results in arrays
                                 instance_id = instances_count  # There is no id for instances read from a local folder so we just store the count
@@ -269,8 +341,8 @@ def main():
                                 results_populated_fields.append(
                                     arm_evaluation_util.populated_fields_to_string(populated_fields))
                                 results_populated_fields_size.append(str(len(populated_fields)))
-                                results_field_names.append(field_name)
-                                results_expected_values.append(field_values[field_name])
+                                results_field_names.append(field_name_full)
+                                results_expected_values.append(fields_types_and_values[field_name]['value'])
                                 results_top1_values_vr.append(
                                     arm_evaluation_util.get_recommended_values_as_string(recommended_top1_value_vr))
                                 results_top1_values_baseline.append(recommended_top1_value_baseline)
@@ -279,7 +351,8 @@ def main():
                                 results_top3_values_vr.append(
                                     arm_evaluation_util.get_recommended_values_as_string(recommended_top3_values_vr))
                                 results_top3_values_baseline.append(
-                                    arm_evaluation_util.get_recommended_values_as_string(recommended_top3_values_baseline))
+                                    arm_evaluation_util.get_recommended_values_as_string(
+                                        recommended_top3_values_baseline))
                                 results_reciprocal_rank_vr.append(reciprocal_rank_vr)
                                 results_reciprocal_rank_vr_no_na.append(reciprocal_rank_vr_no_na)
                                 results_reciprocal_rank_baseline.append(reciprocal_rank_baseline)
@@ -305,7 +378,8 @@ def main():
                                   columns=['database', 'instance_id', 'populated_fields', 'populated_fields_size',
                                            'target_field', 'expected_value', 'top1_value_vr', 'top1_value_baseline',
                                            'is_correct_vr', 'is_correct_baseline', 'top3_values_vr',
-                                           'top3_values_baseline', 'RR_vr', 'RR_vr_no_NA', 'RR_baseline', 'exec_time_vr'])
+                                           'top3_values_baseline', 'RR_vr', 'RR_vr_no_NA', 'RR_baseline',
+                                           'exec_time_vr'])
 
         print("\nExecution time:  %s seconds " % (time.time() - start_time))
 

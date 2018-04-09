@@ -61,5 +61,9 @@
   "total b cells": "b cell",
   "cd8+ t cells from peripheral blood": "cd8",
   "cd138-positive plasma cells": "cd138",
-  "hepatitis b primary vaccination": "hepatitis b vaccine"
+  "hepatitis b primary vaccination": "hepatitis b vaccine",
+  "neurologically and neuropathologically normal":"normal",
+  "blood/brain":"brain",
+  "primary medulloblastoma":"medulloblastoma",
+  "african-american":"african american"
 }
