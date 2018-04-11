@@ -14,7 +14,7 @@ def normalize_value(term, norm_values):
     term = term.replace('_', ' ')
     term = term.replace('uberon:', '')
 
-    if term in norm_values and len(norm_values[term]) > 0:
+    if norm_values is not None and term in norm_values and len(norm_values[term]) > 0:
         return norm_values[term]
     else:
         return term

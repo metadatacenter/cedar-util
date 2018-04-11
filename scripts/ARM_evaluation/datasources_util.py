@@ -14,7 +14,8 @@ def is_valid_value(value):
     if value is None:
         return False
     else:
-        invalid_values = ['na', 'n/a', 'not applicable', '?', '-', '--', 'unknown', 'missing', 'not collected', 'none']
+        invalid_values = ['na', 'n/a', 'not applicable', '?', '-', '--', 'unknown', 'missing', 'not collected',
+                          'none', 'normal']
         value = value.lower().strip()
         if value not in invalid_values:
             return True

@@ -7,14 +7,14 @@ import time
 import os
 import sys
 import term_normalizer
-
 import bioportal_util
 
 # Input
-UNIQUE_VALUES_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase.txt'
+UNIQUE_VALUES_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase_without_normal.txt'
 
 # Output
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.txt'
+UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.json'
+MAPPINGS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/mappings.json'
 
 # Settings
 BIOPORTAL_API_KEY = ''
@@ -26,6 +26,7 @@ PREFERRED_ONTOLOGIES = ['EFO', 'DOID', 'PATO', 'OBI', 'CL', 'CLO', 'CHEBI', 'BFO
                         'RXNORM', 'SNOMEDCT', 'FMA', 'LOINC', 'NDFRT', 'EDAM', 'RCD', 'ICD10CM', 'SNMI', 'BTO',
                         'MESH', 'NCIT', 'OMIM']
 
+USE_NORMALIZED_VALUES = False
 NORMALIZED_VALUES_FILE_NAME = 'normalized_values.json'  # We assume that the file is stored in the current path
 
 LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES = False
@@ -129,16 +130,86 @@ def extract_keyword_annotations(keywords, annotations):
     return keyword_annotations
 
 
+def to_uris_annotated(unique_values_annotated):
+    uris_annotated = {}
+    for value in unique_values_annotated:
+        uri = unique_values_annotated[value]['pref_class_uri']
+        uris_annotated[uri] = unique_values_annotated[value]
+
+    return uris_annotated
+
+
+def have_same_meaning(term_uri1, term_uri2, uris_annotated):
+    """
+    Checks if two term uris have the same meaning. It makes use of a file with mappings
+    :param term_uri1: 
+    :param term_uri2: 
+    """
+    if term_uri1 == term_uri2:
+        return True
+    else:
+        if term_uri1 not in uris_annotated:
+            raise Exception('Could not find URI in annotations file: ' + term_uri1)
+        elif term_uri2 not in uris_annotated:
+            raise Exception('Could not find URI in annotations file: ' + term_uri2)
+        else:
+            term_uri1_annotations = uris_annotated[term_uri1]
+            term_uri2_annotations = uris_annotated[term_uri2]
+
+            if term_uri2 in term_uri1_annotations['class_uris']:
+                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+                return True
+            elif term_uri1 in term_uri2_annotations['class_uris']:
+                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+                return True
+            elif term_uri1_annotations['pref_class_label'] == term_uri2_annotations['pref_class_label']:
+                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+                return True
+            elif term_uri2_annotations['pref_class_label'] in term_uri1_annotations['class_labels']:
+                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+                return True
+            elif term_uri1_annotations['pref_class_label'] in term_uri2_annotations['class_labels']:
+                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+                return True
+            else:  # Try to find the correspondence using labels
+                return False
+
+
+def generate_mappings(unique_values_annotated):
+    """
+    Using the generated annotations it generates a file with mappings from all preferred URIS found in the annotations to any other equivalent URIS
+    """
+    uris_annotated = to_uris_annotated(unique_values_annotated)
+
+    mappings = {}
+
+    count = 0
+    for uri1 in uris_annotated:
+        mappings[uri1] = []
+        for uri2 in uris_annotated:
+            if uri1 != uri2 and have_same_meaning(uri1, uri2, uris_annotated):
+                if uri2 not in mappings[uri1]:
+                    mappings[uri1].append(uri2)
+        count = count + 1
+        print('No. uris processed: ' + str(count) + "/" + str(len(uris_annotated)))
+
+    return mappings
+
+
 def main():
     # Read unique values
     with open(UNIQUE_VALUES_FILE_PATH) as f:
         all_values = f.read().splitlines()
 
     # Test data
-    #all_values = ['m', 'male']
+    # all_values = ['m', 'male']
+    # all_values = ['peripheral blood']
 
     # Load file with normalized values
-    norm_values = json.loads(open(os.path.join(sys.path[0], NORMALIZED_VALUES_FILE_NAME)).read())
+    if USE_NORMALIZED_VALUES:
+        norm_values = json.loads(open(os.path.join(sys.path[0], NORMALIZED_VALUES_FILE_NAME)).read())
+    else:
+        norm_values = None
 
     # Translates some specific values that the NCBO Annotator is not able to annotate to a value that the Annotator will annotate
     all_values_normalized = []
@@ -192,6 +263,20 @@ def main():
     # Write to file
     with open(UNIQUE_VALUES_ANNOTATED_FILE_PATH, 'w') as outfile:
         json.dump(unique_values_annotated, outfile)
+
+    # Generate mappings and write them to file
+    mappings = generate_mappings(unique_values_annotated)
+    with open(MAPPINGS_FILE_PATH, 'w') as outfile:
+        json.dump(mappings, outfile)
+
+# used to generate the mappings from the annotations file without regenerating the annotations file
+# def main2():
+#     unique_values_annotated = json.load(open(UNIQUE_VALUES_ANNOTATED_FILE_PATH))
+#     # Generate mappings and write them to file
+#     mappings = generate_mappings(unique_values_annotated)
+#     with open(MAPPINGS_FILE_PATH, 'w') as outfile:
+#         json.dump(mappings, outfile)
+
 
 
 if __name__ == "__main__": main()

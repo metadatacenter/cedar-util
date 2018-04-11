@@ -9,12 +9,13 @@ import term_normalizer
 import sys
 
 # Input
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_26_1-training_124200_ebi-testing-12800_ebi'
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_25_1-training_124200_ncbi-testing-12800_ncbi'
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE'
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT'
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT'
-BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE'
+#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_25_1-training_124200_ncbi-testing-12800_ncbi' # NCBI training
+#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT' # NCBI-NCBI testing
+BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE' # EBI-NCBI testing
+
+#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_26_1-training_124200_ebi-testing-12800_ebi' # EBI training
+#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE' # EBI-EBI testing
+#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT' # NCBI-EBI testing
 
 #INSTANCES_FOLDER = 'training_samples'
 INSTANCES_FOLDER = 'testing_samples'
@@ -86,7 +87,6 @@ def annotate_instance(instance_json, unique_values_annotated, normalized_values,
 
     #print(instance_json)
     return instance_json
-
 
 def main():
     annotations = json.load(open(UNIQUE_VALUES_ANNOTATED_FILE_PATH))

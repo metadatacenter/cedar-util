@@ -1,6 +1,7 @@
 # Evaluation utils
 
 import cedar_util
+import arm_constants
 import string
 from jsonpath_rw import jsonpath, parse
 import json
@@ -9,10 +10,42 @@ from enum import Enum
 
 MISSING_VALUE = 'NA'
 
+def get_training_instances_folder(database, annotated_instances=False):
+    if database == arm_constants.BIOSAMPLES_DB.NCBI:
+        base = arm_constants.TRAINING_BASE_FOLDERS['NCBI']
+    elif database == arm_constants.BIOSAMPLES_DB.EBI:
+        base = arm_constants.TRAINING_BASE_FOLDERS['EBI']
+    else:
+        raise Exception('Invalid database')
 
-class BIOSAMPLES_DB(Enum):
-    NCBI = 1
-    EBI = 2
+    if annotated_instances:
+        return base + "/" + arm_constants.TRAINING_INSTANCES_ANNOTATED_FOLDER_NAME
+    else:
+        return base + "/" + arm_constants.TRAINING_INSTANCES_FOLDER_NAME
+
+
+def get_testing_instances_folder(training_database, testing_database, annotated_instances=False):
+    if training_database == arm_constants.BIOSAMPLES_DB.NCBI:
+        if testing_database == arm_constants.BIOSAMPLES_DB.NCBI:
+            base = arm_constants.TESTING_BASE_FOLDERS['NCBI_NCBI']
+        elif testing_database == arm_constants.BIOSAMPLES_DB.EBI:
+            base = arm_constants.TESTING_BASE_FOLDERS['NCBI_EBI']
+        else:
+            raise Exception('Invalid database')
+    elif training_database == arm_constants.BIOSAMPLES_DB.EBI:
+        if testing_database == arm_constants.BIOSAMPLES_DB.NCBI:
+            base = arm_constants.TESTING_BASE_FOLDERS['EBI_NCBI']
+        elif testing_database == arm_constants.BIOSAMPLES_DB.EBI:
+            base = arm_constants.TESTING_BASE_FOLDERS['EBI_EBI']
+        else:
+            raise Exception('Invalid database')
+    else:
+        raise Exception('Invalid database')
+
+    if annotated_instances:
+        return base + "/" + arm_constants.TESTING_INSTANCES_ANNOTATED_FOLDER_NAME
+    else:
+        return base + "/" + arm_constants.TESTING_INSTANCES_FOLDER_NAME
 
 
 # Returns the instance fields (with their types and values) that are used for the evaluation as a Panda data frame
@@ -26,7 +59,7 @@ def get_instance_fields_types_and_values(instance, field_details):
         field_values[field]['value'] = None
         field_values[field]['type'] = None
         if matches[0] is not None and matches[0].value is not None:
-            if '@value' in matches[0].value and  matches[0].value['@value'] is not None:
+            if '@value' in matches[0].value and matches[0].value['@value'] is not None:
                 field_values[field]['value'] = matches[0].value['@value']
             elif '@id' in matches[0].value and matches[0].value['@id'] is not None:
                 field_values[field]['value'] = matches[0].value['@id']
@@ -43,7 +76,7 @@ def get_original_term_uri(field_type):
     if substr in field_type:
         index = field_type.find(substr)
         encoded_term_uri = field_type[index + len(substr):]
-        return urllib.parse.unquote(encoded_term_uri) # return the decoded uri
+        return urllib.parse.unquote(encoded_term_uri)  # return the decoded uri
     else:
         return field_type
 
@@ -95,22 +128,43 @@ def get_recommended_values_as_string(recommended_values):
         return "|".join(recommended_values)
 
 
-def get_matching_score(expected_value, value, normalization=True):
+def is_same_concept(term_uri1, term_uri2, mappings):
+    """
+    Checks if two term uris have the same meaning. It makes use of a file with mappings
+    :param term_uri1: 
+    :param term_uri2: 
+    """
+    if term_uri1 == term_uri2:
+        return True
+    elif term_uri1 in mappings[term_uri2] or term_uri2 in mappings[term_uri1]:
+        print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+        return True
+    else:
+        return False
+
+
+def get_matching_score(expected_value, value, mappings, normalization=True, extend_with_mappings=False):
     if value == MISSING_VALUE:
         return MISSING_VALUE
     else:
-        if normalization:
-            value = value.lower()
-            expected_value = expected_value.lower()
-
-            # Remove punctuation
-            value = value.translate(str.maketrans('', '', string.punctuation))
-            expected_value = expected_value.translate(str.maketrans('', '', string.punctuation))
-
-        if expected_value == value:
-            return 1
+        if extend_with_mappings:
+            if is_same_concept(value, expected_value, mappings):
+                return 1
+            else:
+                return 0
         else:
-            return 0
+            if normalization:
+                value = value.lower()
+                expected_value = expected_value.lower()
+
+                # Remove punctuation
+                value = value.translate(str.maketrans('', '', string.punctuation))
+                expected_value = expected_value.translate(str.maketrans('', '', string.punctuation))
+
+            if expected_value == value:
+                return 1
+            else:
+                return 0
 
 
 def populated_fields_to_string(populated_fields):
@@ -121,13 +175,13 @@ def populated_fields_to_string(populated_fields):
 
 
 # Calculates the Reciprocal Rank (https://en.wikipedia.org/wiki/Mean_reciprocal_rank). The MRR will be computed later
-def reciprocal_rank(expected_value, actual_values, use_na=True):
+def reciprocal_rank(expected_value, actual_values, mappings, use_na=True, extend_with_mappings=False):
     if use_na and (actual_values == MISSING_VALUE or actual_values is None or len(actual_values) == 0):
         return MISSING_VALUE
     else:
         position = 1
         for value in actual_values:
-            if value == expected_value:
+            if get_matching_score(expected_value, value, mappings, extend_with_mappings) == 1:
                 return 1 / float(position)
             position += 1
         return 0
@@ -145,3 +199,5 @@ def save_to_folder(instance, instance_number, output_path, output_base_file_name
 
     with open(output_file_path, 'w') as output_file:
         json.dump(instance, output_file, indent=4)
+
+
