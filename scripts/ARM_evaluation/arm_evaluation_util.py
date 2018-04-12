@@ -113,8 +113,11 @@ def get_recommended_values(recommendation_results, max_size):
     if max_size <= 0:
         raise ValueError("max_size must be > 0")
     recommended_values = []
-    for rv in recommendation_results['recommendedValues']:
-        recommended_values.append(rv['value'])
+    if 'recommendedValues' in recommendation_results:
+        for rv in recommendation_results['recommendedValues']:
+            recommended_values.append(rv['value'])
+    else:
+        print('Error: recommendedValues not found in recommendation_results')
     result = recommended_values[:max_size]
     return result
 
@@ -137,7 +140,7 @@ def is_same_concept(term_uri1, term_uri2, mappings):
     if term_uri1 == term_uri2:
         return True
     elif term_uri1 in mappings[term_uri2] or term_uri2 in mappings[term_uri1]:
-        print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+        #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
         return True
     else:
         return False

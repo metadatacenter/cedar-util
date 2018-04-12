@@ -16,10 +16,10 @@ from arm_constants import BIOSAMPLES_DB
 import cedar_util
 
 # Input # Don't forget to regenerate the most frequent values from the ARFF files if needed
-TRAINING_DB = BIOSAMPLES_DB.EBI
-TESTING_DB = BIOSAMPLES_DB.NCBI
+TRAINING_DB = BIOSAMPLES_DB.NCBI
+TESTING_DB = BIOSAMPLES_DB.EBI
 VR_STRICT_MATCH = False
-MAX_NUMBER_INSTANCES = 10  # Max number of instances that will be part of the test set
+MAX_NUMBER_INSTANCES = 20000  # Max number of instances that will be part of the test set
 ANNOTATED_VALUES = True
 EXTEND_URIS_WITH_MAPPINGS = True  # If true, it will try to check if two different uris have the same meaning
 MAPPINGS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/mappings.json'
@@ -71,7 +71,7 @@ NCBI_TO_EBI_MAPPINGS = {
 STANDARD_FIELD_NAMES_FOR_PLOTS = {
     'sex': 'sex', 'tissue': 'organism part', 'cell_line': 'cell line', 'cell_type': 'cell type', 'disease': 'disease',
     'ethnicity': 'ethnicity',
-    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type', 'diseaseState': 'disease'
+    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type', 'cellLine': 'cell line', 'diseaseState': 'disease'
 }
 
 
