@@ -10,6 +10,7 @@ from enum import Enum
 
 MISSING_VALUE = 'NA'
 
+
 def get_training_instances_folder(database, annotated_instances=False):
     if database == arm_constants.BIOSAMPLES_DB.NCBI:
         base = arm_constants.TRAINING_BASE_FOLDERS['NCBI']
@@ -140,7 +141,7 @@ def is_same_concept(term_uri1, term_uri2, mappings):
     if term_uri1 == term_uri2:
         return True
     elif term_uri1 in mappings[term_uri2] or term_uri2 in mappings[term_uri1]:
-        #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+        # print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
         return True
     else:
         return False
@@ -171,23 +172,50 @@ def get_matching_score(expected_value, value, mappings, normalization=True, exte
 
 
 def populated_fields_to_string(populated_fields):
+    if len(populated_fields) == 0:
+        return 'NA'
     field_value_pairs = []
     for pf in populated_fields:
         field_value_pairs.append(pf['path'] + '=' + pf['value'])
     return "|".join(field_value_pairs)
 
 
+def position_of_expected_value(expected_value, values, mappings, extend_with_mappings=False):
+    position = 1  # 1-based position
+    for value in values:
+        if get_matching_score(expected_value, value, mappings, extend_with_mappings) == 1:
+            return position
+        position += 1
+    return 'NA'  # If not found
+
+
 # Calculates the Reciprocal Rank (https://en.wikipedia.org/wiki/Mean_reciprocal_rank). The MRR will be computed later
-def reciprocal_rank(expected_value, actual_values, mappings, use_na=True, extend_with_mappings=False):
+def reciprocal_rank(number_of_positions, expected_value, actual_values, mappings, use_na=False,
+                    extend_with_mappings=False):
     if use_na and (actual_values == MISSING_VALUE or actual_values is None or len(actual_values) == 0):
         return MISSING_VALUE
     else:
+        values = actual_values[0, number_of_positions]
         position = 1
-        for value in actual_values:
+        for value in values:
             if get_matching_score(expected_value, value, mappings, extend_with_mappings) == 1:
                 return 1 / float(position)
             position += 1
         return 0
+
+
+# Note that position is 1-based
+def reciprocal_rank_using_position(number_of_positions, position, use_na=False):
+    if position is None or position is 'NA':
+        if use_na:
+            return MISSING_VALUE
+        else:
+            return 0
+    else:
+        if position > number_of_positions:
+            return 0
+        else:
+            return 1 / float(position)
 
 
 def save_to_folder(instance, instance_number, output_path, output_base_file_name):
@@ -202,5 +230,3 @@ def save_to_folder(instance, instance_number, output_path, output_base_file_name
 
     with open(output_file_path, 'w') as output_file:
         json.dump(instance, output_file, indent=4)
-
-

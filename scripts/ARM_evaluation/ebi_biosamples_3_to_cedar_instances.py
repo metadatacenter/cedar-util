@@ -8,6 +8,7 @@
 import json
 import os
 from random import shuffle
+import uuid
 
 import arm_evaluation_util
 import datasources_util
@@ -145,6 +146,9 @@ def ebi_biosample_to_cedar_instance(ebi_biosample):
     json_file = open(EMPTY_BIOSAMPLE_INSTANCE_PATH, "r")  # Open the JSON file for writing
     instance = json.load(json_file)  # Read the JSON into the buffer
     json_file.close()  # Close the JSON file
+
+    if '@id' not in instance: # Generate @id if it's not there
+        instance['@id'] = str(uuid.uuid4())
 
     # set field values
     for field_name in EBI_BIOSAMPLE_ALL_FIELDS:

@@ -17,9 +17,9 @@ import cedar_util
 
 # Input # Don't forget to regenerate the most frequent values from the ARFF files if needed
 TRAINING_DB = BIOSAMPLES_DB.NCBI
-TESTING_DB = BIOSAMPLES_DB.EBI
+TESTING_DB = BIOSAMPLES_DB.NCBI
 VR_STRICT_MATCH = False
-MAX_NUMBER_INSTANCES = 20000  # Max number of instances that will be part of the test set
+MAX_NUMBER_INSTANCES = 5000  # Max number of instances that will be part of the test set
 ANNOTATED_VALUES = True
 EXTEND_URIS_WITH_MAPPINGS = True  # If true, it will try to check if two different uris have the same meaning
 MAPPINGS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/mappings.json'
@@ -71,7 +71,8 @@ NCBI_TO_EBI_MAPPINGS = {
 STANDARD_FIELD_NAMES_FOR_PLOTS = {
     'sex': 'sex', 'tissue': 'organism part', 'cell_line': 'cell line', 'cell_type': 'cell type', 'disease': 'disease',
     'ethnicity': 'ethnicity',
-    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type', 'cellLine': 'cell line', 'diseaseState': 'disease'
+    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type',
+    'cellLine': 'cell line', 'diseaseState': 'disease'
 }
 
 
@@ -121,12 +122,12 @@ def get_mapped_populated_fields(field_details, fields_types_and_values, target_f
     return populated_fields
 
 
-def get_baseline_top3_recommendation(field_name, training_db=TRAINING_DB, testing_db=TESTING_DB,
-                                     ncbi_frequent_values=arm_constants.NCBI_MOST_FREQUENT_VALUES,
-                                     ebi_frequent_values=arm_constants.EBI_MOST_FREQUENT_VALUES,
-                                     ncbi_frequent_values_annotated=arm_constants.NCBI_MOST_FREQUENT_VALUES_ANNOTATED,
-                                     ebi_frequent_values_annotated=arm_constants.EBI_MOST_FREQUENT_VALUES_ANNOTATED,
-                                     annotated_values=ANNOTATED_VALUES):
+def get_baseline_top10_recommendation(field_name, training_db=TRAINING_DB, testing_db=TESTING_DB,
+                                      ncbi_frequent_values=arm_constants.NCBI_MOST_FREQUENT_VALUES,
+                                      ebi_frequent_values=arm_constants.EBI_MOST_FREQUENT_VALUES,
+                                      ncbi_frequent_values_annotated=arm_constants.NCBI_MOST_FREQUENT_VALUES_ANNOTATED,
+                                      ebi_frequent_values_annotated=arm_constants.EBI_MOST_FREQUENT_VALUES_ANNOTATED,
+                                      annotated_values=ANNOTATED_VALUES):
     if annotated_values:
         ncbi_frequent_values = ncbi_frequent_values_annotated
         ebi_frequent_values = ebi_frequent_values_annotated
@@ -186,17 +187,22 @@ def main():
     results_populated_fields = []
     results_populated_fields_size = []
     results_field_names = []
-    results_field_names_std = [] # standard field names, used for plots
+    results_field_names_std = []  # standard field names, used for plots
     results_expected_values = []
     results_top1_values_vr = []
     results_top1_values_baseline = []
     results_correct_recommendations_vr = []
     results_correct_recommendations_baseline = []
-    results_top3_values_vr = []
-    results_top3_values_baseline = []
-    results_reciprocal_rank_vr = []
-    results_reciprocal_rank_vr_no_na = []
-    results_reciprocal_rank_baseline = []
+    results_top10_values_vr = []
+    results_top10_values_baseline = []
+    results_correct_position_vr = []
+    results_correct_position_baseline = []
+    results_reciprocal_rank_top3_vr = []
+    results_reciprocal_rank_top5_vr = []
+    results_reciprocal_rank_top10_vr = []
+    results_reciprocal_rank_top3_baseline = []
+    results_reciprocal_rank_top5_baseline = []
+    results_reciprocal_rank_top10_baseline = []
     results_exec_times_vr = []
     start_time = time.time()
 
@@ -227,6 +233,10 @@ def main():
                     file_path = root + '/' + file
                     # Read instance
                     instance_json = json.load(open(file_path))
+                    if '@id' in instance_json:
+                        instance_id = instance_json['@id']
+                    else:
+                        instance_id = 'NA'
                     # Read instance field values
                     fields_types_and_values = arm_evaluation_util.get_instance_fields_types_and_values(instance_json,
                                                                                                        field_details)
@@ -262,7 +272,7 @@ def main():
                                     recommended_top1_value_vr = arm_evaluation_util.get_recommended_values(
                                         recommendation_vr, 1)
 
-                                    recommended_top1_value_baseline = get_baseline_top3_recommendation(field_name)[0]
+                                    recommended_top1_value_baseline = get_baseline_top10_recommendation(field_name)[0]
 
                                     is_correct_vr = arm_evaluation_util.get_matching_score(
                                         fields_types_and_values[field_name]['value'],
@@ -276,33 +286,40 @@ def main():
                                         mappings,
                                         extend_with_mappings=actually_extend_with_mappings)
 
-                                    recommended_top3_values_vr = arm_evaluation_util.get_recommended_values(
-                                        recommendation_vr, 3)
+                                    recommended_top10_values_vr = arm_evaluation_util.get_recommended_values(
+                                        recommendation_vr, 10)
 
-                                    recommended_top3_values_baseline = get_baseline_top3_recommendation(field_name)
+                                    recommended_top10_values_baseline = get_baseline_top10_recommendation(field_name)
 
-                                    reciprocal_rank_vr = arm_evaluation_util.reciprocal_rank(
-                                        fields_types_and_values[field_name]['value'],
-                                        recommended_top3_values_vr,
-                                        mappings,
+                                    expected_value = fields_types_and_values[field_name]['value']
+
+                                    position_of_expected_value_vr = arm_evaluation_util.position_of_expected_value(
+                                        expected_value, recommended_top10_values_vr, mappings,
                                         extend_with_mappings=actually_extend_with_mappings)
 
-                                    reciprocal_rank_baseline = arm_evaluation_util.reciprocal_rank(
-                                        fields_types_and_values[field_name]['value'],
-                                        recommended_top3_values_baseline,
-                                        mappings,
+                                    position_of_expected_value_baseline = arm_evaluation_util.position_of_expected_value(
+                                        expected_value, recommended_top10_values_baseline, mappings,
                                         extend_with_mappings=actually_extend_with_mappings)
 
-                                    # this is the reciprocal rank with 0s instead of NAs
-                                    reciprocal_rank_vr_no_na = arm_evaluation_util.reciprocal_rank(
-                                        fields_types_and_values[field_name]['value'],
-                                        recommended_top3_values_vr,
-                                        mappings,
-                                        use_na=False,
-                                        extend_with_mappings=actually_extend_with_mappings)
+                                    reciprocal_rank_top3_vr = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (3, position_of_expected_value_vr, use_na=False)
+
+                                    reciprocal_rank_top5_vr = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (5, position_of_expected_value_vr, use_na=False)
+
+                                    reciprocal_rank_top10_vr = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (10, position_of_expected_value_vr, use_na=False)
+
+                                    reciprocal_rank_top3_baseline = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (3, position_of_expected_value_baseline, use_na=False)
+
+                                    reciprocal_rank_top5_baseline = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (5, position_of_expected_value_baseline, use_na=False)
+
+                                    reciprocal_rank_top10_baseline = arm_evaluation_util.reciprocal_rank_using_position \
+                                        (10, position_of_expected_value_baseline, use_na=False)
 
                                     # Store results in arrays
-                                    instance_id = instances_count  # There is no id for instances read from a local folder so we just store the count
                                     results_instance_ids.append(instance_id)
                                     results_database.append(TESTING_DB.name)
                                     results_populated_fields.append(
@@ -310,44 +327,57 @@ def main():
                                     results_populated_fields_size.append(str(len(populated_fields)))
                                     results_field_names.append(field_name_full)
                                     results_field_names_std.append(STANDARD_FIELD_NAMES_FOR_PLOTS[field_name])
-                                    results_expected_values.append(fields_types_and_values[field_name]['value'])
+                                    results_expected_values.append(expected_value)
                                     results_top1_values_vr.append(
                                         arm_evaluation_util.get_recommended_values_as_string(recommended_top1_value_vr))
                                     results_top1_values_baseline.append(recommended_top1_value_baseline)
                                     results_correct_recommendations_vr.append(is_correct_vr)
                                     results_correct_recommendations_baseline.append(is_correct_baseline)
-                                    results_top3_values_vr.append(
+                                    results_top10_values_vr.append(
                                         arm_evaluation_util.get_recommended_values_as_string(
-                                            recommended_top3_values_vr))
-                                    results_top3_values_baseline.append(
+                                            recommended_top10_values_vr))
+                                    results_top10_values_baseline.append(
                                         arm_evaluation_util.get_recommended_values_as_string(
-                                            recommended_top3_values_baseline))
-                                    results_reciprocal_rank_vr.append(reciprocal_rank_vr)
-                                    results_reciprocal_rank_vr_no_na.append(reciprocal_rank_vr_no_na)
-                                    results_reciprocal_rank_baseline.append(reciprocal_rank_baseline)
+                                            recommended_top10_values_baseline))
+                                    results_correct_position_vr.append(position_of_expected_value_vr)
+                                    results_correct_position_baseline.append(position_of_expected_value_baseline)
+                                    results_reciprocal_rank_top3_vr.append(reciprocal_rank_top3_vr)
+                                    results_reciprocal_rank_top5_vr.append(reciprocal_rank_top5_vr)
+                                    results_reciprocal_rank_top10_vr.append(reciprocal_rank_top10_vr)
+                                    results_reciprocal_rank_top3_baseline.append(reciprocal_rank_top3_baseline)
+                                    results_reciprocal_rank_top5_baseline.append(reciprocal_rank_top5_baseline)
+                                    results_reciprocal_rank_top10_baseline.append(reciprocal_rank_top10_baseline)
                                     results_exec_times_vr.append(execution_time_vr)
 
                             else:
                                 print('Not doing anything for field: ' + field_name)
 
                     instances_count = instances_count + 1
-                    if (instances_count % 100 == 0):
+                    if instances_count % 100 == 0:
                         print('No. instances processed: ' + str(instances_count))
 
         # Stack the 1-D arrays generated as columns into a 2-D array
         results = np.column_stack(
             (results_database, results_instance_ids, results_populated_fields, results_populated_fields_size,
-             results_field_names, results_field_names_std, results_expected_values, results_top1_values_vr, results_top1_values_baseline,
+             results_field_names, results_field_names_std, results_expected_values, results_top1_values_vr,
+             results_top1_values_baseline,
              results_correct_recommendations_vr, results_correct_recommendations_baseline,
-             results_top3_values_vr, results_top3_values_baseline, results_reciprocal_rank_vr,
-             results_reciprocal_rank_vr_no_na, results_reciprocal_rank_baseline,
+             results_top10_values_vr, results_top10_values_baseline,
+             results_correct_position_vr, results_correct_position_baseline,
+             results_reciprocal_rank_top3_vr, results_reciprocal_rank_top5_vr, results_reciprocal_rank_top10_vr,
+             results_reciprocal_rank_top3_baseline, results_reciprocal_rank_top5_baseline,
+             results_reciprocal_rank_top10_baseline,
              results_exec_times_vr))
 
         results_df = pd.DataFrame(results,
                                   columns=['database', 'instance_id', 'populated_fields', 'populated_fields_size',
-                                           'target_field', 'target_field_std', 'expected_value', 'top1_value_vr', 'top1_value_baseline',
-                                           'is_correct_vr', 'is_correct_baseline', 'top3_values_vr',
-                                           'top3_values_baseline', 'RR_vr', 'RR_vr_no_NA', 'RR_baseline',
+                                           'target_field', 'target_field_std', 'expected_value', 'top1_value_vr',
+                                           'top1_value_baseline',
+                                           'is_correct_vr', 'is_correct_baseline', 'top10_values_vr',
+                                           'top10_values_baseline',
+                                           'correct_pos_vr', 'correct_pos_baseline',
+                                           'RR_top3_vr', 'RR_top5_vr', 'RR_top10_vr',
+                                           'RR_top3_baseline', 'RR_top5_baseline', 'RR_top10_baseline',
                                            'exec_time_vr'])
 
         print("\nExecution time:  %s seconds " % (time.time() - start_time))

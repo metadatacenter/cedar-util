@@ -3,17 +3,18 @@
 # Utility to download biosamples metadata from EBI's API and store them into a folder in multiple files
 
 import json
-
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import os
+import arm_constants
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)  # Disable InsecureRequestWarning
 
-BIOSAMPLES_URL = 'https://www.ebi.ac.uk/biosamples/api/samples'
-MAX_SIZE_PER_PAGE = 1000  # Max number of biosamples to retrieve per call (page). The API does not accept values higher than 1000
-PAGES_PER_FILE = 10 # Number of pages that will be stored into each file
-EBI_BIOSAMPLES_OUTPUT_FOLDER = "/Users/marcosmr/Dropbox/TMP_LOCATION/ARM_resources/ebi_biosamples/biosamples_original"  # Source NCBI Biosample instances
-MAX_PAGES = -1  # Max number of pages to iterate over. -1 means no limit
+BIOSAMPLES_URL = arm_constants.EBI_DOWNLOAD_URL
+MAX_SIZE_PER_PAGE = arm_constants.EBI_DOWNLOAD_MAX_SIZE_PER_PAGE  # Max number of biosamples to retrieve per call (page). The API does not accept values higher than 1000
+PAGES_PER_FILE = arm_constants.EBI_DOWNLOAD_PAGES_PER_FILE  # Number of pages that will be stored into each file
+MAX_PAGES = arm_constants.EBI_DOWNLOAD_MAX_PAGES  # Max number of pages to iterate over. -1 means no limit
+EBI_BIOSAMPLES_OUTPUT_FOLDER = arm_constants.EBI_DOWNLOAD_OUTPUT_FOLDER  # Source NCBI Biosample instances
 
 
 def get_biosamples(page=0, size=MAX_SIZE_PER_PAGE):
@@ -41,9 +42,12 @@ def get_all_biosamples(max_pages=MAX_PAGES, pages_per_file=PAGES_PER_FILE):
     start_page_range = 0
     current_page = 0
     first_call = True
-    total_pages = 1 # just for the first call
+    total_pages = 1  # just for the first call
     total_biosamples_count = 0
-    #start_range_biosamples_count = 0
+
+    if not os.path.exists(EBI_BIOSAMPLES_OUTPUT_FOLDER):
+        os.makedirs(EBI_BIOSAMPLES_OUTPUT_FOLDER)
+
     while current_page < total_pages:
         response = get_biosamples(current_page)
         print(response.url)
@@ -68,8 +72,9 @@ def get_all_biosamples(max_pages=MAX_PAGES, pages_per_file=PAGES_PER_FILE):
                     raise KeyError('totalPages not found')
 
             # save to file
-            if current_page == start_page_range + (pages_per_file - 1):
-                file_path = EBI_BIOSAMPLES_OUTPUT_FOLDER + "/ebi_biosamples_" + str((start_page_range * MAX_SIZE_PER_PAGE) + 1) \
+            if (current_page == start_page_range + (pages_per_file - 1)) or current_page == total_pages-1:
+                file_path = EBI_BIOSAMPLES_OUTPUT_FOLDER + "/ebi_biosamples_" + str(
+                    (start_page_range * MAX_SIZE_PER_PAGE) + 1) \
                             + "to" + str((current_page + 1) * MAX_SIZE_PER_PAGE) + '.json'
                 print('Limit reached. Page range: ' + str(start_page_range) + '-' + str(current_page))
                 print('Saving ' + str(len(biosamples_to_export)) + ' biosamples to file: ' + file_path)
@@ -80,7 +85,6 @@ def get_all_biosamples(max_pages=MAX_PAGES, pages_per_file=PAGES_PER_FILE):
                 outfile.close()
                 biosamples_to_export = []
                 start_page_range = current_page + 1
-                #start_range_biosamples_count = total_biosamples_count + 1
 
             current_page = current_page + 1
     print('Done. Total number of biosamples saved: ' + str(total_biosamples_count))

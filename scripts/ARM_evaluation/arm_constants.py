@@ -2,8 +2,20 @@
 
 from enum import Enum
 
+BASE_PATH = "/Users/marcosmr/tmp/ARM_resources/EVALUATION"
 
-# Constants
+####################
+# DOWNLOAD SAMPLES #
+####################
+
+EBI_DOWNLOAD_URL = 'https://www.ebi.ac.uk/biosamples/api/samples'
+EBI_DOWNLOAD_MAX_SIZE_PER_PAGE = 1000
+EBI_DOWNLOAD_PAGES_PER_FILE = 1
+EBI_DOWNLOAD_MAX_PAGES = -1
+EBI_DOWNLOAD_OUTPUT_FOLDER = BASE_PATH + "/samples/ebi_samples/original"
+
+###
+
 
 class BIOSAMPLES_DB(Enum):
     NCBI = 1
