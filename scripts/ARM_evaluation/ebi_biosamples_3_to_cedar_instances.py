@@ -9,9 +9,9 @@ import json
 import os
 from random import shuffle
 import uuid
-
 import arm_evaluation_util
 import datasources_util
+import arm_constants
 
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
@@ -37,38 +37,27 @@ class EbiBiosample:
         self.diseaseState = diseaseState
         self.ethnicity = ethnicity
 
+# Constants
+TRAINING_SET_SIZE = arm_constants.EBI_INSTANCES_TRAINING_SET_SIZE
+TESTING_SET_SIZE = arm_constants.EBI_INSTANCES_TESTING_SET_SIZE
+MAX_FILES_PER_FOLDER = arm_constants.EBI_INSTANCES_MAX_FILES_PER_FOLDER
+INPUT_PATH = arm_constants.EBI_INSTANCES_INPUT_PATH
+OUTPUT_BASE_PATH = arm_constants.EBI_INSTANCES_OUTPUT_BASE_PATH
+TRAINING_BASE_PATH = arm_constants.EBI_INSTANCES_TRAINING_BASE_PATH
+TESTING_BASE_PATH = arm_constants.EBI_INSTANCES_TESTING_BASE_PATH
+EXCLUDE_IDS = arm_constants.EBI_INSTANCES_EXCLUDE_IDS
+EXCLUDED_IDS_FILE_PATH = arm_constants.EBI_INSTANCES_EXCLUDED_IDS_FILE_PATH
+OUTPUT_BASE_FILE_NAME = arm_constants.EBI_INSTANCES_OUTPUT_BASE_FILE_NAME
+EMPTY_BIOSAMPLE_INSTANCE_PATH = arm_constants.EBI_INSTANCES_EMPTY_BIOSAMPLE_INSTANCE_PATH
 
-"""
-MAIN EXECUTION SETTINGS
-"""
-TRAINING_SET_SIZE = 0
-TESTING_SET_SIZE = 20000
-MAX_FILES_PER_FOLDER = 10000
-
-# Input
-INPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'
-
-# Output
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/cedar_instances_tmp/'
-
-TRAINING_BASE_PATH = OUTPUT_BASE_PATH + '/1_training'
-TESTING_BASE_PATH = OUTPUT_BASE_PATH + '/2_testing'
-EXCLUDE_TESTING_IDS = True
-EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE/training_ids.txt'
-
-"""
-CONSTANTS
-"""
-OUTPUT_BASE_FILE_NAME = 'ebi_biosample_instance'
-EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/ebi_biosample_instance_empty.json'  # Empty CEDAR instance
 EBI_BIOSAMPLE_BASIC_FIELDS = ['accession', 'name', 'releaseDate', 'updateDate', 'organization', 'contact']
 EBI_BIOSAMPLE_ATTRIBUTES = ['organism', 'age', 'sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState',
                             'ethnicity']
 
 EBI_BIOSAMPLE_ALL_FIELDS = EBI_BIOSAMPLE_BASIC_FIELDS + EBI_BIOSAMPLE_ATTRIBUTES
 
-
 # Function definitions
+
 
 def extract_ebi_ids(sample):
     """
@@ -161,7 +150,7 @@ def ebi_biosample_to_cedar_instance(ebi_biosample):
 
 
 def main():
-    if EXCLUDE_TESTING_IDS:
+    if EXCLUDE_IDS:
         excluded_ids = set(line.strip() for line in open(EXCLUDED_IDS_FILE_PATH))
     excluded_samples_count = 0
     # Read biosamples
@@ -193,12 +182,12 @@ def main():
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        if not EXCLUDE_TESTING_IDS or (EXCLUDE_TESTING_IDS and (len(biosample.ids.intersection(excluded_ids))) == 0):
+        if not EXCLUDE_IDS or (EXCLUDE_IDS and (len(biosample.ids.intersection(excluded_ids))) == 0):
             if (instance_number % 1000) == 0:
                 print('Saving instance #' + str(instance_number) + ' to ' + output_path)
             arm_evaluation_util.save_to_folder(instance, instance_number, output_path, OUTPUT_BASE_FILE_NAME)
             instance_number = instance_number + 1
-        elif EXCLUDE_TESTING_IDS and (len(biosample.ids.intersection(excluded_ids))) > 0:
+        elif EXCLUDE_IDS and (len(biosample.ids.intersection(excluded_ids))) > 0:
             print('Excluding: ' + str(biosample.ids.intersection(excluded_ids)))
             excluded_samples_count = excluded_samples_count + 1
 

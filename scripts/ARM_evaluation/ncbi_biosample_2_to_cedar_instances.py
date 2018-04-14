@@ -6,10 +6,10 @@ import json
 import xml.etree.ElementTree as ET
 from random import shuffle
 import os
+import uuid
 import datasources_util
 import arm_evaluation_util
-import uuid
-
+import arm_constants
 
 # Class that represents a biological sample for the NCBI's BioSample Human Package 1.0
 # https://submit.ncbi.nlm.nih.gov/biosample/template/?package=Human.1.0&action=definition
@@ -52,26 +52,19 @@ class NcbiBiosample:
         self.description = description
 
 
-"""
-MAIN EXECUTION SETTINGS
-"""
-TRAINING_SET_SIZE = 0
-TESTING_SET_SIZE = 19000
-MAX_FILES_PER_FOLDER = 10000
-# Input
-INPUT_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs_valid/biosample_result_filtered.xml'  # Source NCBI biosamples
-# Output
-OUTPUT_BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/cedar_instances_tmp/'
-TRAINING_BASE_PATH = OUTPUT_BASE_PATH + '/1_training'
-TESTING_BASE_PATH = OUTPUT_BASE_PATH + '/2_testing'
-EXCLUDE_IDS = True
-EXCLUDED_IDS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE/training_ids.txt'
+# Constants
+TRAINING_SET_SIZE = arm_constants.NCBI_INSTANCES_TRAINING_SET_SIZE
+TESTING_SET_SIZE = arm_constants.NCBI_INSTANCES_TESTING_SET_SIZE
+MAX_FILES_PER_FOLDER = arm_constants.NCBI_INSTANCES_MAX_FILES_PER_FOLDER
+INPUT_PATH = arm_constants.NCBI_INSTANCES_INPUT_PATH
+OUTPUT_BASE_PATH = arm_constants.NCBI_INSTANCES_OUTPUT_BASE_PATH
+TRAINING_BASE_PATH = arm_constants.NCBI_INSTANCES_TRAINING_BASE_PATH
+TESTING_BASE_PATH = arm_constants.NCBI_INSTANCES_TESTING_BASE_PATH
+EXCLUDE_IDS = arm_constants.NCBI_INSTANCES_EXCLUDE_IDS
+EXCLUDED_IDS_FILE_PATH = arm_constants.NCBI_INSTANCES_EXCLUDED_IDS_FILE_PATH
+OUTPUT_BASE_FILE_NAME = arm_constants.NCBI_INSTANCES_OUTPUT_BASE_FILE_NAME
+EMPTY_BIOSAMPLE_INSTANCE_PATH = arm_constants.NCBI_INSTANCES_EMPTY_BIOSAMPLE_INSTANCE_PATH
 
-"""
-CONSTANTS
-"""
-OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
-EMPTY_BIOSAMPLE_INSTANCE_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/ncbi_biosample_instance_empty.json'  # Empty NCBI empty instance
 BIOSAMPLE_BASIC_FIELDS = ['biosample_accession', 'sample_name', 'sample_title', 'bioproject_accession', 'organism']
 BIOSAMPLE_ATTRIBUTES = ['isolate', 'age', 'biomaterial_provider', 'sex', 'tissue', 'cell_line', 'cell_type',
                         'cell_subtype', 'culture_collection', 'dev_stage', 'disease', 'disease_stage',
@@ -95,7 +88,10 @@ def read_ncbi_biosamples(file_path, max=TRAINING_SET_SIZE + TESTING_SET_SIZE):
     tree = ET.parse(file_path)
     root = tree.getroot()
     num_biosamples = len(root.getchildren())
-    limit = min(num_biosamples, max)  # Limit of biosamples that will be read
+    if max is None:
+        limit = num_biosamples # Limit of biosamples that will be read
+    else:
+        limit = min(num_biosamples, max)
     print('Extracting all samples from file (no. samples: ' + str(num_biosamples) + ')')
     for child in root:
         biosample = NcbiBiosample()
@@ -198,7 +194,7 @@ def main():
         excluded_ids = set(line.strip() for line in open(EXCLUDED_IDS_FILE_PATH))
     excluded_samples_count = 0
     # Read biosamples from XML file
-    biosamples_list = read_ncbi_biosamples(INPUT_PATH)
+    biosamples_list = read_ncbi_biosamples(INPUT_PATH, max=None)
     testing_ids = set()
     training_ids = set()
     instance_number = 1
@@ -208,7 +204,6 @@ def main():
         if instance_number <= TRAINING_SET_SIZE:  # Training set
             output_folder = TRAINING_BASE_PATH
             training_ids.update(biosample.ids)
-
         elif instance_number <= (TRAINING_SET_SIZE + TESTING_SET_SIZE):  # Testing set
             output_folder = TESTING_BASE_PATH
             testing_ids.update(biosample.ids)
@@ -232,18 +227,21 @@ def main():
             arm_evaluation_util.save_to_folder(instance, instance_number, output_path, OUTPUT_BASE_FILE_NAME)
             instance_number = instance_number + 1
         elif EXCLUDE_IDS and (len(biosample.ids.intersection(excluded_ids))) > 0:
-            print('Excluding: ' + str(biosample.ids.intersection(excluded_ids)))
+            #print('Excluding: ' + str(biosample.ids.intersection(excluded_ids)))
             excluded_samples_count = excluded_samples_count + 1
 
     # Save training ids
-    with open(OUTPUT_BASE_PATH + '/training_ids.txt', 'w') as output_file:
-        for training_id in training_ids:
-            output_file.write("%s\n" % training_id)
+    if TRAINING_SET_SIZE > 0:
+        with open(OUTPUT_BASE_PATH + '/training_ids.txt', 'w') as output_file:
+            for training_id in training_ids:
+                output_file.write("%s\n" % training_id)
+
 
     # Save testing ids
-    with open(OUTPUT_BASE_PATH + '/testing_ids.txt', 'w') as output_file:
-        for testing_id in testing_ids:
-            output_file.write("%s\n" % testing_id)
+    if TESTING_SET_SIZE > 0:
+        with open(OUTPUT_BASE_PATH + '/testing_ids.txt', 'w') as output_file:
+            for testing_id in testing_ids:
+                output_file.write("%s\n" % testing_id)
 
     print('No. of excluded samples: ' + str(excluded_samples_count))
     print('Finished')

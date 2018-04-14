@@ -1,18 +1,16 @@
 #!/usr/bin/python3
 
-# Utility to filter NCBI biosamples based on different criteria. It generates an output XML file with all the
-# biosamples selected
+# Utility to filter NCBI biosamples based on different criteria. It generates an output XML file with all the selected biosamples
 
-import cedar_util
 import codecs
 import xml.dom.pulldom as pulldom
 import xml.etree.ElementTree as ET
+import os
+import datasources_util
+import arm_constants
 
-# INPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_original/2013-03-09-biosample_set.xml'
-# OUTPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/biosample_result_filtered.xml'
-
-INPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs/biosample_result_filtered.xml'
-OUTPUT_FILE = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/biosamples_filtered/homo_sapiens-min_3_attribs_valid/biosample_result_filtered.xml'
+INPUT_FILE = arm_constants.NCBI_FILTER_INPUT_FILE
+OUTPUT_FILE = arm_constants.NCBI_FILTER_OUTPUT_FILE
 
 
 def is_homo_sapiens_sample(sample):
@@ -71,8 +69,7 @@ def has_minimum_relevant_attributes_count(sample, min_count=2):
     :param min_count: Minimum number of attributes
     :return: Boolean
     """
-    relevant_att_names = ['sex', 'tissue', 'disease', 'cell_type', 'cell type' 'cell_line', 'cell line' 'ethnicity',
-                          'treatment']
+    relevant_att_names = arm_constants.NCBI_FILTER_RELEVANT_ATTS
     biosample_node = ET.fromstring(sample)
     attributes = biosample_node.find('Attributes')
     if attributes is not None:
@@ -84,14 +81,14 @@ def has_minimum_relevant_attributes_count(sample, min_count=2):
                 harmonized_name = att.get('harmonized_name')
                 value = None
                 if attribute_name in relevant_att_names:
-                    value = cedar_util.extract_ncbi_attribute_value(att, attribute_name)
+                    value = datasources_util.extract_ncbi_attribute_value(att, attribute_name)
                 elif display_name in relevant_att_names:
-                    value = cedar_util.extract_ncbi_attribute_value(att, display_name)
+                    value = datasources_util.extract_ncbi_attribute_value(att, display_name)
                 elif harmonized_name in relevant_att_names:
-                    value = cedar_util.extract_ncbi_attribute_value(att, harmonized_name)
+                    value = datasources_util.extract_ncbi_attribute_value(att, harmonized_name)
 
                 # Check if the value is valid
-                if value is not None and cedar_util.is_valid_value(value):
+                if value is not None and datasources_util.is_valid_value(value):
                     matches = matches + 1
 
             if matches >= min_count:
@@ -105,6 +102,9 @@ def has_minimum_relevant_attributes_count(sample, min_count=2):
 
 
 def main():
+    if not os.path.exists(os.path.dirname(OUTPUT_FILE)):
+        os.makedirs(os.path.dirname(OUTPUT_FILE))
+
     # Read biosamples from XML file
     content = pulldom.parse(INPUT_FILE)
     processed_samples_count = 0
@@ -117,20 +117,14 @@ def main():
                 content.expandNode(node)
                 node_xml = node.toxml()
 
-                # if is_homo_sapiens_sample(node_xml):
-                if has_minimum_relevant_attributes_count(node_xml, 3):
-                    f.write('\n' + node.toxml())
-                    selected_samples_count = selected_samples_count + 1
-                    # Filter: is from GEO
-                    # if is_geo_sample(node_xml):
-                    #     # Filter: has a minimum number of attributes
-                    #     if has_minimum_relevant_attributes_count(node_xml):
-                    #         f.write('\n' + node.toxml())
-                    #         selected_samples_count = selected_samples_count + 1
-                processed_samples_count = processed_samples_count + 1
-                if processed_samples_count % 1000 == 0:
-                    print('Processed samples: ' + str(processed_samples_count))
-                    print('Selected samples: ' + str(selected_samples_count))
+                if is_homo_sapiens_sample(node_xml):
+                    if has_minimum_relevant_attributes_count(node_xml, arm_constants.NCBI_FILTER_MIN_RELEVANT_ATTS):
+                        f.write('\n' + node.toxml())
+                        selected_samples_count = selected_samples_count + 1
+                    processed_samples_count = processed_samples_count + 1
+                    if processed_samples_count % 1000 == 0:
+                        print('Processed samples: ' + str(processed_samples_count))
+                        print('Selected samples: ' + str(selected_samples_count))
 
         f.write("\n</BioSampleSet>\n")
     f.close()

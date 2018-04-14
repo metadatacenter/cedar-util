@@ -4,11 +4,11 @@
 
 import json
 import os
-import cedar_util
+import datasources_util
+import arm_constants
 
-#INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_original'
-INPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens'
-OUTPUT_FOLDER = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/biosamples_filtered/homo_sapiens-min_3_attribs_valid'
+INPUT_FOLDER = arm_constants.EBI_FILTER_INPUT_FOLDER
+OUTPUT_FOLDER = arm_constants.EBI_FILTER_OUTPUT_FOLDER
 
 # Enabled filters (note that the filter_is_homo_sapiens is always enabled)
 ENABLED_FILTER_NOT_NCBI_SAMPLE = False
@@ -142,22 +142,22 @@ def filter_has_minimum_relevant_attributes_count(samples, min_count=2):
     :param min_count: Minimum number of attributes
     :return: An array of filtered samples
     """
-    relevant_att_names = ['sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState', 'ethnicity']
+    relevant_att_names = arm_constants.EBI_FILTER_RELEVANT_ATTS
     selected_samples = []
     for sample in samples:
         matches = 0
         if 'characteristics' in sample:
             for ch_name in sample['characteristics'].keys():
                 if ch_name in relevant_att_names:
-                    value = cedar_util.extract_ebi_value(sample['characteristics'], ch_name)
+                    value = datasources_util.extract_ebi_value(sample['characteristics'], ch_name)
                     # Check if the value is valid
-                    if value is not None and cedar_util.is_valid_value(value):
+                    if value is not None and datasources_util.is_valid_value(value):
                         matches = matches + 1
-                    # else:
-                    #     print('Invalid value: ' + value)
+                        # else:
+                        #     print('Invalid value: ' + value)
             if matches >= min_count:
                 selected_samples.append(sample)
-    return (selected_samples)
+    return selected_samples
 
 
 def save_to_files(json_array, output_folder_path, items_per_file, file_base_name):
@@ -168,6 +168,8 @@ def save_to_files(json_array, output_folder_path, items_per_file, file_base_name
     :param items_per_file: 
     :param file_base_name: 
     """
+    if not os.path.exists(output_folder_path):
+        os.makedirs(output_folder_path)
     file_items = []
     start_index = 0
     file_count = 1
@@ -262,7 +264,8 @@ def apply_remove_filters():
             if ENABLED_FILTER_HAS_MINIMUM_RELEVANT_ATTRIBUTES_COUNT:
                 # Apply filter_has_minimum_relevant_attributes_count
                 before_filtering_count = len(selected_samples_partial)
-                selected_samples_partial = filter_has_minimum_relevant_attributes_count(selected_samples_partial)
+                selected_samples_partial = filter_has_minimum_relevant_attributes_count(selected_samples_partial,
+                                                                                        arm_constants.EBI_FILTER_MIN_RELEVANT_ATTS)
                 removed_count = before_filtering_count - len(selected_samples_partial)
                 removed_filter_has_minimum_relevant_attributes_count = removed_filter_has_minimum_relevant_attributes_count + removed_count
 
