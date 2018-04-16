@@ -30,11 +30,11 @@ most_frequent_values <- function(dataset, max_positions = 10, output_file_path, 
       else {
         value <- substr(value_full, start=2, stop=pos_separator-1)
       }
-      values_string <- paste(values_string, "'", value, "'", ",", sep = "")
+      values_string <- paste(values_string, "\"", value, "\"", ",", sep = "")
     }
     values_string <- substr(values_string, 1, nchar(values_string) - 1)
     values_string <- paste(values_string, "],", sep = "")
-    result <- paste(result, "'", var_name, "':", values_string, sep = "")
+    result <- paste(result, "\"", var_name, "\":", values_string, sep = "")
   }
   result <- substr(result, 1, nchar(result) - 1)
   result <- paste("{", result, "}", sep = "")

@@ -2,9 +2,11 @@
 
 from enum import Enum
 
+
 class BIOSAMPLES_DB(Enum):
     NCBI = 1
     EBI = 2
+
 
 BASE_PATH = "/Users/marcosmr/tmp/ARM_resources/EVALUATION"
 
@@ -78,55 +80,84 @@ NCBI_INSTANCES_EXCLUDED_IDS_FILE_PATH = BASE_PATH + '/cedar_instances/ncbi_ebi_t
 NCBI_INSTANCES_OUTPUT_BASE_FILE_NAME = 'ncbi_biosample_instance'
 NCBI_INSTANCES_EMPTY_BIOSAMPLE_INSTANCE_PATH = BASE_PATH + '/cedar_templates_and_reference_instances/ncbi/ncbi_biosample_instance_empty.json'
 
-
 ##############################################
 # SYSTEM EVALUATION (arm_evaluation_main.py) #
 ##############################################
 
-EVALUATION_TRAINING_INSTANCES_BASE_FOLDERS = {
-    "NCBI": BASE_PATH + '/cedar_instances/ncbi_cedar_instances/training',
-    "EBI": BASE_PATH + '/cedar_instances/ebi_cedar_instances/training'
-}
+EVALUATION_TRAINING_DB = BIOSAMPLES_DB.EBI
+EVALUATION_TESTING_DB = BIOSAMPLES_DB.EBI
+EVALUATION_USE_ANNOTATED_VALUES = False
+EVALUATION_EXTEND_URIS_WITH_MAPPINGS = False
+EVALUATION_MAX_NUMBER_INSTANCES = 20000
+EVALUATION_CEDAR_API_KEY = ''
+
+# EVALUATION_TRAINING_INSTANCES_BASE_FOLDERS = {
+#     "NCBI": BASE_PATH + '/cedar_instances/ncbi_cedar_instances/training',
+#     "EBI": BASE_PATH + '/cedar_instances/ebi_cedar_instances/training'
+# }
 EVALUATION_TESTING_INSTANCES_BASE_FOLDERS = {
     "NCBI": BASE_PATH + '/cedar_instances/ncbi_cedar_instances/testing',
     "EBI": BASE_PATH + '/cedar_instances/ebi_cedar_instances/testing'
 }
-EVALUATION_TRAINING_INSTANCES_ANNOTATED_BASE_FOLDERS = {
-    "NCBI": BASE_PATH + '/cedar_instances_annotated/ncbi_cedar_instances/training',
-    "EBI": BASE_PATH + '/cedar_instances_annotated/ebi_cedar_instances/training'
-}
+# EVALUATION_TRAINING_INSTANCES_ANNOTATED_BASE_FOLDERS = {
+#     "NCBI": BASE_PATH + '/cedar_instances_annotated/ncbi_cedar_instances/training',
+#     "EBI": BASE_PATH + '/cedar_instances_annotated/ebi_cedar_instances/training'
+# }
 EVALUATION_TESTING_INSTANCES_ANNOTATED_BASE_FOLDERS = {
     "NCBI": BASE_PATH + '/cedar_instances_annotated/ncbi_cedar_instances/testing',
     "EBI": BASE_PATH + '/cedar_instances_annotated/ebi_cedar_instances/testing'
 }
+
 EVALUATION_NCBI_MOST_FREQUENT_VALUES_PATH = BASE_PATH + '/most_frequent_values/ncbi_frequent_values.json'
 EVALUATION_EBI_MOST_FREQUENT_VALUES_PATH = BASE_PATH + '/most_frequent_values/ebi_frequent_values.json'
 EVALUATION_NCBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH = BASE_PATH + '/most_frequent_values/ncbi_annotated_frequent_values.json'
 EVALUATION_EBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH = BASE_PATH + '/most_frequent_values/ebi_annotated_frequent_values.json'
 
+EVALUATION_MAPPINGS_FILE_PATH = BASE_PATH + '/cedar_instances_annotated/unique_values/mappings.json'
 
+EVALUATION_READ_TEST_INSTANCES_FROM_CEDAR = False  # If false, the instances are read from a local folder
+EVALUATION_VR_SERVER = 'https://valuerecommender.metadatacenter.orgx/'
+EVALUATION_VR_STRICT_MATCH = False
+EVALUATION_NCBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91'
+EVALUATION_EBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/6b6c76e6-1d9b-4096-9702-133e25ecd140'
+EVALUATION_UNIQUE_VALUES_ANNOTATED_FILE_PATH = BASE_PATH + '/cedar_instances_annotated/unique_values/unique_values_annotated.json'
+EVALUATION_OUTPUT_RESULTS_PATH = BASE_PATH + '/results'
 
+EVALUATION_NCBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
+                      'tissue': {'path': 'tissue', 'json_path': '$.tissue'},
+                      'cell_line': {'path': 'cell_line', 'json_path': '$.cell_line'},
+                      'cell_type': {'path': 'cell_type', 'json_path': '$.cell_type'},
+                      'disease': {'path': 'disease', 'json_path': '$.disease'},
+                      'ethnicity': {'path': 'ethnicity', 'json_path': '$.ethnicity'}}
+EVALUATION_EBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
+                     'organismPart': {'path': 'organismPart', 'json_path': '$.organismPart'},
+                     'cellLine': {'path': 'cellLine', 'json_path': '$.cellLine'},
+                     'cellType': {'path': 'cellType', 'json_path': '$.cellType'},
+                     'diseaseState': {'path': 'diseaseState', 'json_path': '$.diseaseState'},
+                     'ethnicity': {'path': 'ethnicity', 'json_path': '$.ethnicity'}}
 
+EVALUATION_EBI_TO_NCBI_MAPPINGS = {
+    'sex': 'sex',
+    'organismPart': 'tissue',
+    'cellLine': 'cell_line',
+    'cellType': 'cell_type',
+    'diseaseState': 'disease',
+    'ethnicity': 'ethnicity'
+}
+EVALUATION_NCBI_TO_EBI_MAPPINGS = {
+    'sex': 'sex',
+    'tissue': 'organismPart',
+    'cell_line': 'cellLine',
+    'cell_type': 'cellType',
+    'disease': 'diseaseState',
+    'ethnicity': 'ethnicity'
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Note that I have mapped 'tissue' to 'organism part' because in EBI they use organism part and explain that it
+# refers to the general location on the organism rather than a particular tissue (https://www.ebi.ac.uk/biosamples/help/st_scd)
+EVALUATION_STANDARD_FIELD_NAMES_FOR_PLOTS = {
+    'sex': 'sex', 'tissue': 'organism part', 'cell_line': 'cell line', 'cell_type': 'cell type', 'disease': 'disease',
+    'ethnicity': 'ethnicity',
+    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type',
+    'cellLine': 'cell line', 'diseaseState': 'disease'
+}

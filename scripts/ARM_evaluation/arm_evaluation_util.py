@@ -9,48 +9,30 @@ import arm_constants
 MISSING_VALUE = 'NA'
 
 
-def get_training_instances_folder(database, annotated_instances=False):
+def get_test_instances_folder(database, annotated_instances):
+    """
+    Returns the path to the appropriate test instances folder
+    :param database: 
+    :param is_training: If False, then it's testing
+    :param annotated_instances: 
+    :return: 
+    """
     if database == arm_constants.BIOSAMPLES_DB.NCBI:
-        base = arm_constants.TRAINING_BASE_FOLDERS['NCBI']
+        db = 'NCBI'
     elif database == arm_constants.BIOSAMPLES_DB.EBI:
-        base = arm_constants.TRAINING_BASE_FOLDERS['EBI']
+        db = 'EBI'
     else:
         raise Exception('Invalid database')
 
-    if annotated_instances:
-        return base + "/" + arm_constants.TRAINING_INSTANCES_ANNOTATED_FOLDER_NAME
+    if not annotated_instances:  # free text
+        return arm_constants.EVALUATION_TESTING_INSTANCES_BASE_FOLDERS[db]
     else:
-        return base + "/" + arm_constants.TRAINING_INSTANCES_FOLDER_NAME
-
-
-def get_testing_instances_folder(training_database, testing_database, annotated_instances=False):
-    if training_database == arm_constants.BIOSAMPLES_DB.NCBI:
-        if testing_database == arm_constants.BIOSAMPLES_DB.NCBI:
-            base = arm_constants.TESTING_BASE_FOLDERS['NCBI_NCBI']
-        elif testing_database == arm_constants.BIOSAMPLES_DB.EBI:
-            base = arm_constants.TESTING_BASE_FOLDERS['NCBI_EBI']
-        else:
-            raise Exception('Invalid database')
-    elif training_database == arm_constants.BIOSAMPLES_DB.EBI:
-        if testing_database == arm_constants.BIOSAMPLES_DB.NCBI:
-            base = arm_constants.TESTING_BASE_FOLDERS['EBI_NCBI']
-        elif testing_database == arm_constants.BIOSAMPLES_DB.EBI:
-            base = arm_constants.TESTING_BASE_FOLDERS['EBI_EBI']
-        else:
-            raise Exception('Invalid database')
-    else:
-        raise Exception('Invalid database')
-
-    if annotated_instances:
-        return base + "/" + arm_constants.TESTING_INSTANCES_ANNOTATED_FOLDER_NAME
-    else:
-        return base + "/" + arm_constants.TESTING_INSTANCES_FOLDER_NAME
+        return arm_constants.EVALUATION_TESTING_INSTANCES_ANNOTATED_BASE_FOLDERS[db]
 
 
 # Returns the instance fields (with their types and values) that are used for the evaluation as a Panda data frame
 def get_instance_fields_types_and_values(instance, field_details):
     field_values = {}
-
     for field in field_details:
         jsonpath_expr = parse(field_details[field]['json_path'])
         matches = jsonpath_expr.find(instance)

@@ -2,78 +2,39 @@
 
 # evaluation_main.py: Utility to perform the evaluation of the ARM-based metadata recommender
 
-import time
-import os
+import itertools
 import json
-import argparse
+import os
+import time
+
+import arm_constants
+import arm_evaluation_util
+import cedar_util
 import numpy as np
 import pandas as pd
-import itertools
-# CEDAR dependencies
-import arm_evaluation_util
-import arm_constants
 from arm_constants import BIOSAMPLES_DB
-import cedar_util
 
-# Input # Don't forget to regenerate the most frequent values from the ARFF files if needed
-TRAINING_DB = BIOSAMPLES_DB.NCBI
-TESTING_DB = BIOSAMPLES_DB.NCBI
-VR_STRICT_MATCH = False
-MAX_NUMBER_INSTANCES = 5000  # Max number of instances that will be part of the test set
-ANNOTATED_VALUES = True
-EXTEND_URIS_WITH_MAPPINGS = True  # If true, it will try to check if two different uris have the same meaning
-MAPPINGS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/mappings.json'
-
-READ_TEST_INSTANCES_FROM_CEDAR = False  # If false, the instances are read from a local folder
-VR_SERVER = 'https://valuerecommender.metadatacenter.orgx/'
-NCBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/eef6f399-aa4e-4982-ab04-ad8e9635aa91'
-EBI_TEMPLATE_ID = 'https://repo.metadatacenter.orgx/templates/6b6c76e6-1d9b-4096-9702-133e25ecd140'
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.txt'
-
+CEDAR_API_KEY = arm_constants.EVALUATION_CEDAR_API_KEY
+# Input (Don't forget to regenerate the most frequent values from the ARFF files if needed)
+TRAINING_DB = arm_constants.EVALUATION_TRAINING_DB
+TESTING_DB = arm_constants.EVALUATION_TESTING_DB
+VR_STRICT_MATCH = arm_constants.EVALUATION_VR_STRICT_MATCH
+MAX_NUMBER_INSTANCES = arm_constants.EVALUATION_MAX_NUMBER_INSTANCES  # Max number of instances that will be part of the test set
+ANNOTATED_VALUES = arm_constants.EVALUATION_USE_ANNOTATED_VALUES
+EXTEND_URIS_WITH_MAPPINGS = arm_constants.EVALUATION_EXTEND_URIS_WITH_MAPPINGS  # If true, it will try to check if two different uris have the same meaning
+MAPPINGS_FILE_PATH = arm_constants.EVALUATION_MAPPINGS_FILE_PATH
+READ_TEST_INSTANCES_FROM_CEDAR = arm_constants.EVALUATION_READ_TEST_INSTANCES_FROM_CEDAR  # If false, the instances are read from a local folder
+VR_SERVER = arm_constants.EVALUATION_VR_SERVER
+NCBI_TEMPLATE_ID = arm_constants.EVALUATION_NCBI_TEMPLATE_ID
+EBI_TEMPLATE_ID = arm_constants.EVALUATION_EBI_TEMPLATE_ID
 # Output
-EXPORT_RESULTS_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results'
-
+EXPORT_RESULTS_PATH = arm_constants.EVALUATION_OUTPUT_RESULTS_PATH
 # Relevant fields, with their paths and json path expressions
-NCBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
-                      'tissue': {'path': 'tissue', 'json_path': '$.tissue'},
-                      'cell_line': {'path': 'cell_line', 'json_path': '$.cell_line'},
-                      'cell_type': {'path': 'cell_type', 'json_path': '$.cell_type'},
-                      'disease': {'path': 'disease', 'json_path': '$.disease'},
-                      'ethnicity': {'path': 'ethnicity', 'json_path': '$.ethnicity'}}
-
-# Other constants
-# EBI_BIOSAMPLE_BASIC_FIELDS = ['accession', 'name', 'releaseDate', 'updateDate', 'organization', 'contact']
-# EBI_BIOSAMPLE_ATTRIBUTES = ['organism', 'age', 'sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState',
-#                             'ethnicity']
-
-EBI_FIELD_DETAILS = {'sex': {'path': 'sex', 'json_path': '$.sex'},
-                     'organismPart': {'path': 'organismPart', 'json_path': '$.organismPart'},
-                     'cellLine': {'path': 'cellLine', 'json_path': '$.cellLine'},
-                     'cellType': {'path': 'cellType', 'json_path': '$.cellType'},
-                     'diseaseState': {'path': 'diseaseState', 'json_path': '$.diseaseState'},
-                     'ethnicity': {'path': 'ethnicity', 'json_path': '$.ethnicity'}}
-
-EBI_TO_NCBI_MAPPINGS = {
-    'sex': 'sex', 'organismPart': 'tissue', 'cellLine': 'cell_line', 'cellType': 'cell_type', 'diseaseState': 'disease',
-    'ethnicity': 'ethnicity'}
-
-NCBI_TO_EBI_MAPPINGS = {
-    'sex': 'sex',
-    'tissue': 'organismPart',
-    'cell_line': 'cellLine',
-    'cell_type': 'cellType',
-    'disease': 'diseaseState',
-    'ethnicity': 'ethnicity'
-}
-
-# Note that I have mapped 'tissue' to 'organism part' because in EBI they use organism part and explain that it
-# refers to the general location on the organism rather than a particular tissue (https://www.ebi.ac.uk/biosamples/help/st_scd)
-STANDARD_FIELD_NAMES_FOR_PLOTS = {
-    'sex': 'sex', 'tissue': 'organism part', 'cell_line': 'cell line', 'cell_type': 'cell type', 'disease': 'disease',
-    'ethnicity': 'ethnicity',
-    'sex': 'sex', 'organismPart': 'tissue', 'organism part': 'cell line', 'cellType': 'cell type',
-    'cellLine': 'cell line', 'diseaseState': 'disease'
-}
+NCBI_FIELD_DETAILS = arm_constants.EVALUATION_NCBI_FIELD_DETAILS
+EBI_FIELD_DETAILS = arm_constants.EVALUATION_EBI_FIELD_DETAILS
+EBI_TO_NCBI_MAPPINGS = arm_constants.EVALUATION_EBI_TO_NCBI_MAPPINGS
+NCBI_TO_EBI_MAPPINGS = arm_constants.EVALUATION_NCBI_TO_EBI_MAPPINGS
+STANDARD_FIELD_NAMES_FOR_PLOTS = arm_constants.EVALUATION_STANDARD_FIELD_NAMES_FOR_PLOTS
 
 
 def get_mapped_field_path(field_name, training_db=TRAINING_DB, testing_db=TESTING_DB,
@@ -122,30 +83,34 @@ def get_mapped_populated_fields(field_details, fields_types_and_values, target_f
     return populated_fields
 
 
-def get_baseline_top10_recommendation(field_name, training_db=TRAINING_DB, testing_db=TESTING_DB,
-                                      ncbi_frequent_values=arm_constants.NCBI_MOST_FREQUENT_VALUES,
-                                      ebi_frequent_values=arm_constants.EBI_MOST_FREQUENT_VALUES,
-                                      ncbi_frequent_values_annotated=arm_constants.NCBI_MOST_FREQUENT_VALUES_ANNOTATED,
-                                      ebi_frequent_values_annotated=arm_constants.EBI_MOST_FREQUENT_VALUES_ANNOTATED,
+def get_baseline_top10_recommendation(field_name,
+                                      ncbi_frequent_values,
+                                      ebi_frequent_values,
+                                      ncbi_frequent_values_annotated,
+                                      ebi_frequent_values_annotated,
+                                      training_db=TRAINING_DB, testing_db=TESTING_DB,
                                       annotated_values=ANNOTATED_VALUES):
-    if annotated_values:
-        ncbi_frequent_values = ncbi_frequent_values_annotated
-        ebi_frequent_values = ebi_frequent_values_annotated
+    if not annotated_values:
+        ncbi_fv = ncbi_frequent_values
+        ebi_fv = ebi_frequent_values
+    else:
+        ncbi_fv = ncbi_frequent_values_annotated
+        ebi_fv = ebi_frequent_values_annotated
 
     if training_db == BIOSAMPLES_DB.NCBI:
         if testing_db == BIOSAMPLES_DB.NCBI:
-            return ncbi_frequent_values[field_name]
+            return ncbi_fv[field_name]
         elif testing_db == BIOSAMPLES_DB.EBI:
             mapped_field_name = EBI_TO_NCBI_MAPPINGS[field_name]
-            return ncbi_frequent_values[mapped_field_name]
+            return ncbi_fv[mapped_field_name]
 
     elif training_db == BIOSAMPLES_DB.EBI:
         if testing_db == BIOSAMPLES_DB.EBI:
-            return ebi_frequent_values[field_name]
+            return ebi_fv[field_name]
         elif testing_db == BIOSAMPLES_DB.NCBI:
             mapped_field_name = NCBI_TO_EBI_MAPPINGS[field_name]
-            if mapped_field_name in ebi_frequent_values:
-                return ebi_frequent_values[mapped_field_name]
+            if mapped_field_name in ebi_fv:
+                return ebi_fv[mapped_field_name]
             else:
                 return None
 
@@ -172,15 +137,20 @@ def generate_populated_fields_sets(populated_fields, include_empty_list=True):
 
 
 def main():
-    # Read api key from command line
-    parser = argparse.ArgumentParser()
-    parser.add_argument("apiKey", help="Your CEDAR apiKey")
-    args = parser.parse_args()
-    api_key = args.apiKey
+
+    # Read frequent values files, used for baseline recommendations
+    ncbi_frequent_values = json.load(open(arm_constants.EVALUATION_NCBI_MOST_FREQUENT_VALUES_PATH))
+    ebi_frequent_values = json.load(open(arm_constants.EVALUATION_EBI_MOST_FREQUENT_VALUES_PATH))
+    ncbi_annotated_frequent_values = json.load(open(arm_constants.EVALUATION_NCBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH))
+    ebi_annotated_frequent_values = json.load(open(arm_constants.EVALUATION_EBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH))
+
 
     if ANNOTATED_VALUES and EXTEND_URIS_WITH_MAPPINGS:
         actually_extend_with_mappings = True
         mappings = json.load(open(MAPPINGS_FILE_PATH))
+    else:
+        actually_extend_with_mappings = False
+        mappings = {}
 
     results_database = []
     results_instance_ids = []
@@ -220,8 +190,7 @@ def main():
     else:
         template_id = None
 
-    test_instances_base_folder = arm_evaluation_util.get_testing_instances_folder(TRAINING_DB, TESTING_DB,
-                                                                                  ANNOTATED_VALUES)
+    test_instances_base_folder = arm_evaluation_util.get_test_instances_folder(TESTING_DB, ANNOTATED_VALUES)
 
     if READ_TEST_INSTANCES_FROM_CEDAR:
         pass  # TODO
@@ -266,13 +235,18 @@ def main():
                                     recommendation_vr = cedar_util.get_value_recommendation(VR_SERVER, template_id,
                                                                                             field_path,
                                                                                             populated_fields,
-                                                                                            api_key, VR_STRICT_MATCH)
+                                                                                            CEDAR_API_KEY, VR_STRICT_MATCH)
+
                                     execution_time_vr = int(round((time.time() - start_time_vr) * 1000))
 
                                     recommended_top1_value_vr = arm_evaluation_util.get_recommended_values(
                                         recommendation_vr, 1)
 
-                                    recommended_top1_value_baseline = get_baseline_top10_recommendation(field_name)[0]
+                                    recommended_top1_value_baseline = get_baseline_top10_recommendation(field_name,
+                                                                                                        ncbi_frequent_values,
+                                                                                                        ebi_frequent_values,
+                                                                                                        ncbi_annotated_frequent_values,
+                                                                                                        ebi_annotated_frequent_values)[0]
 
                                     is_correct_vr = arm_evaluation_util.get_matching_score(
                                         fields_types_and_values[field_name]['value'],
@@ -289,7 +263,11 @@ def main():
                                     recommended_top10_values_vr = arm_evaluation_util.get_recommended_values(
                                         recommendation_vr, 10)
 
-                                    recommended_top10_values_baseline = get_baseline_top10_recommendation(field_name)
+                                    recommended_top10_values_baseline = get_baseline_top10_recommendation(field_name,
+                                                                                                        ncbi_frequent_values,
+                                                                                                        ebi_frequent_values,
+                                                                                                        ncbi_annotated_frequent_values,
+                                                                                                        ebi_annotated_frequent_values)
 
                                     expected_value = fields_types_and_values[field_name]['value']
 
@@ -390,13 +368,13 @@ def main():
             os.makedirs(results_path)
 
         # to CSV
+        annotated_str = ''
+        if ANNOTATED_VALUES:
+            annotated_str = 'annotated'
         results_df.to_csv(
-            results_path + '/' + 'results_train-' + TRAINING_DB.name + '_instances_test-' + TESTING_DB.name +
-            '_' + str(instances_count - 1) + 'instances_' + current_time + '.csv',
+            results_path + '/' + 'results_train' + TRAINING_DB.name + '_test' + TESTING_DB.name +
+            '_' + annotated_str + '_' + current_time + '.csv',
             index=False, header=True)
-
-        # Analysis of results
-        # results_analysis.analyze_results(results_df)
 
 
 if __name__ == "__main__": main()
