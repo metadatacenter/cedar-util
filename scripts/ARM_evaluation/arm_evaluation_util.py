@@ -1,12 +1,10 @@
 # Evaluation utils
 
-import cedar_util
-import arm_constants
-import string
-from jsonpath_rw import jsonpath, parse
 import json
+import string
 import urllib.parse
-from enum import Enum
+from jsonpath_rw import parse
+import arm_constants
 
 MISSING_VALUE = 'NA'
 

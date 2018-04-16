@@ -1,28 +1,22 @@
 #!/usr/bin/python3
 
-# Utility to extract all the unique values used in CEDAR instances and saves them to different files (one file per instance field)...
+# Utility to extract all the unique values used in CEDAR instances and save them to different files
 
-import argparse
 import json
-import sys
-import xml.etree.ElementTree as ET
-from random import shuffle
-import bioportal_util
 import os
+import annotation_constants
 
-INSTANCES_BASE_PATH_1 = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_25_1-training_124200_ncbi-testing-12800_ncbi/training_samples'
-INSTANCES_BASE_PATH_2 = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT/testing_samples'
-INSTANCES_BASE_PATH_3 = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_26_1-training_124200_ebi-testing-12800_ebi/training_samples'
-INSTANCES_BASE_PATH_4 = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE/testing_samples'
-INSTANCE_PATHS = [INSTANCES_BASE_PATH_1, INSTANCES_BASE_PATH_2, INSTANCES_BASE_PATH_3, INSTANCES_BASE_PATH_4]
-
-NCBI_BIOSAMPLE_ATTRIBUTES = ['sex', 'tissue', 'cell_line', 'cell_type', 'disease', 'ethnicity', 'treatment']
-EBI_BIOSAMPLE_ATTRIBUTES = ['sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState', 'ethnicity']
-
-OUTPUT_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase.txt'
+INSTANCE_PATHS = annotation_constants.VALUES_EXTRACTION_INSTANCE_PATHS
+NCBI_BIOSAMPLE_ATTRIBUTES = annotation_constants.NCBI_RELEVANT_ATTRIBUTES
+EBI_BIOSAMPLE_ATTRIBUTES = annotation_constants.EBI_RELEVANT_ATTRIBUTES
+OUTPUT_FILE_PATH = annotation_constants.VALUES_EXTRACTION_OUTPUT_FILE_PATH
 
 
 def main():
+
+    if not os.path.exists(os.path.dirname(OUTPUT_FILE_PATH)):
+        os.makedirs(os.path.dirname(OUTPUT_FILE_PATH))
+
     count = 0
     unique_values = set()
     for path in INSTANCE_PATHS:
@@ -52,6 +46,8 @@ def main():
         unique_values.add(att)
     for att in EBI_BIOSAMPLE_ATTRIBUTES:
         unique_values.add(att)
+
+    print('No. unique values extracted: ' + str(len(unique_values)))
 
     # Save values
     with open(OUTPUT_FILE_PATH, 'w') as output_file:

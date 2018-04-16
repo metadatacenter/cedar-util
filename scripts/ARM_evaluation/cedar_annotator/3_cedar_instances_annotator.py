@@ -7,37 +7,31 @@ import os
 from enum import Enum
 import term_normalizer
 import sys
+import annotation_constants
 
-# Input
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_25_1-training_124200_ncbi-testing-12800_ncbi' # NCBI training
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_2-training_124200_ncbi-testing-13800_ncbi_NOSTRICT' # NCBI-NCBI testing
-BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_6-training_124200_ebi-testing-13800_ncbi_NOSTRICT_BASELINE' # EBI-NCBI testing
+# INPUT
+INPUT_BASE_PATH = annotation_constants.INSTANCES_ANNOTATION_INPUT_BASE_PATH
+INPUT_FOLDERS = annotation_constants.INSTANCES_ANNOTATION_INPUT_FOLDERS
 
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_26_1-training_124200_ebi-testing-12800_ebi' # EBI training
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_5-training_124200_ebi-testing-13800_ebi_NOSTRICT_BASELINE' # EBI-EBI testing
-#BASE_PATH = '/Users/marcosmr/tmp/ARM_resources/evaluation_results/2018_03_27_1-training_124200_ncbi-testing-13800_ebi_NOSTRICT' # NCBI-EBI testing
+# OUTPUT
+OUTPUT_BASE_PATH = annotation_constants.INSTANCES_ANNOTATION_OUTPUT_BASE_PATH
+OUTPUT_SUFFIX = annotation_constants.INSTANCES_ANNOTATION_OUTPUT_SUFFIX
+NON_ANNOTATED_VALUES_REPORT_FILE_NAME = annotation_constants.INSTANCES_ANNOTATION_NON_ANNOTATED_VALUES_FILE_NAME
 
-#INSTANCES_FOLDER = 'training_samples'
-INSTANCES_FOLDER = 'testing_samples'
-INSTANCES_BASE_PATH = BASE_PATH + '/' + INSTANCES_FOLDER
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.txt'
-
+# OTHER CONSTANTS
+UNIQUE_VALUES_ANNOTATED_FILE_PATH = annotation_constants.INSTANCES_ANNOTATION_VALUES_ANNOTATED_FILE_PATH
 # The following two reference instances are using to extract the @type (instance types)
-EBI_EMPTY_INSTANCE_ANNOTATED_PATH = '/Users/marcosmr/tmp/ARM_resources/ebi_biosamples/ebi_biosample_instance_annotated_empty.json'
-NCBI_EMPTY_INSTANCE_ANNOTATED_PATH = '/Users/marcosmr/tmp/ARM_resources/ncbi_biosample/ncbi_biosample_instance_annotated_empty.json'
-
-# Output (annotated instances)
-OUTPUT_BASE_PATH = INSTANCES_BASE_PATH + '_annotated'
-NON_ANNOTATED_VALUES_FILE_PATH = BASE_PATH + '/' + INSTANCES_FOLDER + '_non_annotated_values_report.txt'
-
-NCBI_BIOSAMPLE_ATTRIBUTES = ['sex', 'tissue', 'cell_line', 'cell_type', 'disease', 'ethnicity', 'treatment']
-EBI_BIOSAMPLE_ATTRIBUTES = ['sex', 'organismPart', 'cellLine', 'cellType', 'diseaseState', 'ethnicity']
-
-NORMALIZED_VALUES_FILE_NAME = 'normalized_values.json'  # We assume that the file is stored in the current path
+EBI_EMPTY_INSTANCE_ANNOTATED_PATH = annotation_constants.INSTANCES_ANNOTATION_EBI_EMPTY_INSTANCE_ANNOTATED_PATH
+NCBI_EMPTY_INSTANCE_ANNOTATED_PATH = annotation_constants.INSTANCES_ANNOTATION_NCBI_EMPTY_INSTANCE_ANNOTATED_PATH
+USE_NORMALIZED_VALUES = annotation_constants.INSTANCES_ANNOTATION_USE_NORMALIZED_VALUES
+NORMALIZED_VALUES_FILE_NAME = annotation_constants.INSTANCES_ANNOTATION_NORMALIZED_VALUES_FILE_NAME  # We assume that the file is stored in the current path
+NCBI_BIOSAMPLE_ATTRIBUTES = annotation_constants.NCBI_RELEVANT_ATTRIBUTES
+EBI_BIOSAMPLE_ATTRIBUTES = annotation_constants.EBI_RELEVANT_ATTRIBUTES
 
 total_values_count = 0
 non_annotated_values = {}  # This dictionary will store all values that could not be annotated, as well as their frequency
 non_annotated_values_count = 0
+
 
 class BIOSAMPLES_DB(Enum):
     NCBI = 1
@@ -82,57 +76,70 @@ def annotate_instance(instance_json, unique_values_annotated, normalized_values,
                 else:
                     non_annotated_values[att_value_normalized] = non_annotated_values[att_value_normalized] + 1
 
-        else: # If there is no @value, we have to generate an empty object because @id cannot be null
+        else:  # If there is no @value, we have to generate an empty object because @id cannot be null
             instance_json[att] = {}
 
-    #print(instance_json)
+    # print(instance_json)
     return instance_json
+
 
 def main():
     annotations = json.load(open(UNIQUE_VALUES_ANNOTATED_FILE_PATH))
 
-    # Load file with normalized values
-    normalized_values = json.loads(open(os.path.join(sys.path[0], NORMALIZED_VALUES_FILE_NAME)).read())
+    normalized_values = {}
+    if USE_NORMALIZED_VALUES:
+        # Load file with normalized values
+        normalized_values = json.loads(open(os.path.join(sys.path[0], NORMALIZED_VALUES_FILE_NAME)).read())
 
     # print(str(len(annotations)))
     # print(annotations['female'])
     count = 0
-    for root, dirs, files in os.walk(INSTANCES_BASE_PATH):
-        for file in files:
-            if '.json' in file:  # basic check that we are processing the right file
-                instance_json = json.load(open(root + '/' + file, "r"))
 
-                if file.startswith('ncbi_'):
-                    samples_db = BIOSAMPLES_DB.NCBI
-                elif file.startswith('ebi_'):
-                    samples_db = BIOSAMPLES_DB.EBI
+    for input_instances_path in INPUT_FOLDERS:
+        output_path = OUTPUT_BASE_PATH + input_instances_path.replace(INPUT_BASE_PATH, '')
+        print('Processing instances folder: ' + input_instances_path)
+        for root, dirs, files in os.walk(input_instances_path):
+            for file in files:
+                if '.json' in file:  # basic check that we are processing the right file
+                    instance_json = json.load(open(root + '/' + file, "r"))
 
-                annotated_instance = annotate_instance(instance_json, annotations, normalized_values, samples_db)
+                    if file.startswith('ncbi_'):
+                        samples_db = BIOSAMPLES_DB.NCBI
+                    elif file.startswith('ebi_'):
+                        samples_db = BIOSAMPLES_DB.EBI
+                    else:
+                        raise Exception('Invalid file name')
 
-                output_path = OUTPUT_BASE_PATH + root.replace(INSTANCES_BASE_PATH, '')
+                    annotated_instance = annotate_instance(instance_json, annotations, normalized_values, samples_db)
 
-                if not os.path.exists(output_path):
-                    os.makedirs(output_path)
+                    full_output_path = output_path + root.replace(input_instances_path, '')
 
-                output_file_path = output_path + '/' + os.path.splitext(file)[0] + '_annotated.json'
+                    if not os.path.exists(full_output_path):
+                        os.makedirs(full_output_path)
 
-                with open(output_file_path, 'w') as outfile:
-                    json.dump(annotated_instance, outfile)
+                    output_file_path = full_output_path + '/' + os.path.splitext(file)[0] + OUTPUT_SUFFIX + '.json'
 
-                count = count + 1
-                if count % 100 == 0:
-                    print("No. annotated instances: " + str(count))
+                    with open(output_file_path, 'w') as outfile:
+                        json.dump(annotated_instance, outfile)
 
-    print()
-    print('No. total values: ' + str(total_values_count))
-    print('No. non annotated values: ' + str(non_annotated_values_count) + ' (' + "{0:.0f}%".format(
-        non_annotated_values_count / total_values_count * 100) + ')')
-    # Sort non annotated values by count
-    sorted_non_annotated_values = sorted(((non_annotated_values[value], value) for value in non_annotated_values),
-                                         reverse=True)
+                    count = count + 1
+                    if count % 100 == 0:
+                        print("No. annotated instances: " + str(count))
 
-    with open(NON_ANNOTATED_VALUES_FILE_PATH, 'w') as outfile:
-        json.dump(sorted_non_annotated_values, outfile, indent=4, separators=(',', ': '))
+        print()
+        print('No. total values: ' + str(total_values_count))
+        print('No. non annotated values: ' + str(non_annotated_values_count) + ' (' + "{0:.0f}%".format(
+            non_annotated_values_count / total_values_count * 100) + ')')
+        # Sort non annotated values by count
+        sorted_non_annotated_values = sorted(((non_annotated_values[value], value) for value in non_annotated_values),
+                                             reverse=True)
+
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        non_annotated_values_file_path = output_path + '/' + NON_ANNOTATED_VALUES_REPORT_FILE_NAME
+        with open(non_annotated_values_file_path, 'w') as outfile:
+            json.dump(sorted_non_annotated_values, outfile, indent=4, separators=(',', ': '))
 
 
 if __name__ == "__main__": main()

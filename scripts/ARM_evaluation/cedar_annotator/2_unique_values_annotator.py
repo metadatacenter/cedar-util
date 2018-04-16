@@ -8,29 +8,24 @@ import os
 import sys
 import term_normalizer
 import bioportal_util
+import annotation_constants
 
-# Input
-UNIQUE_VALUES_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_lowercase_without_normal.txt'
+# INPUT
+UNIQUE_VALUES_FILE_PATH = annotation_constants.VALUES_ANNOTATION_INPUT_VALUES_FILE_PATH
 
-# Output
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/unique_values_annotated.json'
-MAPPINGS_FILE_PATH = '/Users/marcosmr/tmp/ARM_resources/annotation_results/mappings.json'
+# OUTPUT
+UNIQUE_VALUES_ANNOTATED_FILE_PATH = annotation_constants.VALUES_ANNOTATION_OUTPUT_FILE_PATH
+MAPPINGS_FILE_PATH = annotation_constants.VALUES_ANNOTATION_MAPPINGS_FILE_PATH
 
-# Settings
-BIOPORTAL_API_KEY = ''
-VALUES_PER_ITERATION = 2000
-
+# OTHER SETTINGS
+BIOPORTAL_API_KEY = annotation_constants.VALUES_ANNOTATION_BIOPORTAL_API_KEY
+VALUES_PER_ITERATION = annotation_constants.VALUES_ANNOTATION_VALUES_PER_ITERATION
 # List of relevant ontologies. The algorithm will try to pick pref_class_label and pref_class_uri from one of these
 # ontologies. If that's not possible, it will pick values from any other ontologies
-PREFERRED_ONTOLOGIES = ['EFO', 'DOID', 'PATO', 'OBI', 'CL', 'CLO', 'CHEBI', 'BFO', 'PR', 'CPT', 'MEDDRA', 'UBERON',
-                        'RXNORM', 'SNOMEDCT', 'FMA', 'LOINC', 'NDFRT', 'EDAM', 'RCD', 'ICD10CM', 'SNMI', 'BTO',
-                        'MESH', 'NCIT', 'OMIM']
-
-USE_NORMALIZED_VALUES = False
-NORMALIZED_VALUES_FILE_NAME = 'normalized_values.json'  # We assume that the file is stored in the current path
-
-LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES = False
-
+PREFERRED_ONTOLOGIES = annotation_constants.VALUES_ANNOTATION_PREFERRED_ONTOLOGIES
+USE_NORMALIZED_VALUES = annotation_constants.VALUES_ANNOTATION_USE_NORMALIZED_VALUES
+NORMALIZED_VALUES_FILE_NAME = annotation_constants.VALUES_ANNOTATION_NORMALIZED_VALUES_FILE_NAME  # We assume that the file is stored in the current path
+LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES = annotation_constants.VALUES_ANNOTATION_LIMIT_TO_PREFERRED_ONTOLOGIES
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
 class KeywordAnnotation:
@@ -276,7 +271,6 @@ def main():
 #     mappings = generate_mappings(unique_values_annotated)
 #     with open(MAPPINGS_FILE_PATH, 'w') as outfile:
 #         json.dump(mappings, outfile)
-
 
 
 if __name__ == "__main__": main()
