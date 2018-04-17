@@ -144,7 +144,6 @@ def main():
     ncbi_annotated_frequent_values = json.load(open(arm_constants.EVALUATION_NCBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH))
     ebi_annotated_frequent_values = json.load(open(arm_constants.EVALUATION_EBI_MOST_FREQUENT_VALUES_ANNOTATED_PATH))
 
-
     if ANNOTATED_VALUES and EXTEND_URIS_WITH_MAPPINGS:
         actually_extend_with_mappings = True
         mappings = json.load(open(MAPPINGS_FILE_PATH))
@@ -368,12 +367,13 @@ def main():
             os.makedirs(results_path)
 
         # to CSV
-        annotated_str = ''
+        suffix = ''
         if ANNOTATED_VALUES:
-            annotated_str = 'annotated'
+            suffix = suffix + '_annotated'
+        if actually_extend_with_mappings:
+            suffix = suffix + '_mappings'
         results_df.to_csv(
-            results_path + '/' + 'results_train' + TRAINING_DB.name + '_test' + TESTING_DB.name +
-            '_' + annotated_str + '_' + current_time + '.csv',
+            results_path + '/' + 'results_train' + TRAINING_DB.name + '_test' + TESTING_DB.name + suffix + '_' + current_time + '.csv',
             index=False, header=True)
 
 

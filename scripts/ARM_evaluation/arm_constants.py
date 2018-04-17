@@ -85,24 +85,17 @@ NCBI_INSTANCES_EMPTY_BIOSAMPLE_INSTANCE_PATH = BASE_PATH + '/cedar_templates_and
 ##############################################
 
 EVALUATION_TRAINING_DB = BIOSAMPLES_DB.EBI
-EVALUATION_TESTING_DB = BIOSAMPLES_DB.EBI
+EVALUATION_TESTING_DB = BIOSAMPLES_DB.NCBI
 EVALUATION_USE_ANNOTATED_VALUES = False
 EVALUATION_EXTEND_URIS_WITH_MAPPINGS = False
 EVALUATION_MAX_NUMBER_INSTANCES = 20000
 EVALUATION_CEDAR_API_KEY = ''
 
-# EVALUATION_TRAINING_INSTANCES_BASE_FOLDERS = {
-#     "NCBI": BASE_PATH + '/cedar_instances/ncbi_cedar_instances/training',
-#     "EBI": BASE_PATH + '/cedar_instances/ebi_cedar_instances/training'
-# }
 EVALUATION_TESTING_INSTANCES_BASE_FOLDERS = {
     "NCBI": BASE_PATH + '/cedar_instances/ncbi_cedar_instances/testing',
     "EBI": BASE_PATH + '/cedar_instances/ebi_cedar_instances/testing'
 }
-# EVALUATION_TRAINING_INSTANCES_ANNOTATED_BASE_FOLDERS = {
-#     "NCBI": BASE_PATH + '/cedar_instances_annotated/ncbi_cedar_instances/training',
-#     "EBI": BASE_PATH + '/cedar_instances_annotated/ebi_cedar_instances/training'
-# }
+
 EVALUATION_TESTING_INSTANCES_ANNOTATED_BASE_FOLDERS = {
     "NCBI": BASE_PATH + '/cedar_instances_annotated/ncbi_cedar_instances/testing',
     "EBI": BASE_PATH + '/cedar_instances_annotated/ebi_cedar_instances/testing'
