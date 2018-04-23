@@ -90,6 +90,7 @@ def get_baseline_top10_recommendation(field_name,
                                       ebi_frequent_values_annotated,
                                       training_db=TRAINING_DB, testing_db=TESTING_DB,
                                       annotated_values=ANNOTATED_VALUES):
+
     if not annotated_values:
         ncbi_fv = ncbi_frequent_values
         ebi_fv = ebi_frequent_values
@@ -137,7 +138,6 @@ def generate_populated_fields_sets(populated_fields, include_empty_list=True):
 
 
 def main():
-
     # Read frequent values files, used for baseline recommendations
     ncbi_frequent_values = json.load(open(arm_constants.EVALUATION_NCBI_MOST_FREQUENT_VALUES_PATH))
     ebi_frequent_values = json.load(open(arm_constants.EVALUATION_EBI_MOST_FREQUENT_VALUES_PATH))
@@ -201,6 +201,7 @@ def main():
                     file_path = root + '/' + file
                     # Read instance
                     instance_json = json.load(open(file_path))
+
                     if '@id' in instance_json:
                         instance_id = instance_json['@id']
                     else:
@@ -231,21 +232,36 @@ def main():
                                     # Run the value recommender for the given field and populated fields
                                     start_time_vr = time.time()
 
-                                    recommendation_vr = cedar_util.get_value_recommendation(VR_SERVER, template_id,
-                                                                                            field_path,
-                                                                                            populated_fields,
-                                                                                            CEDAR_API_KEY, VR_STRICT_MATCH)
+                                    repeat = True
+                                    while repeat:
+                                        recommendation_vr = cedar_util.get_value_recommendation(VR_SERVER, template_id,
+                                                                                                field_path,
+                                                                                                populated_fields,
+                                                                                                CEDAR_API_KEY,
+                                                                                                VR_STRICT_MATCH)
+                                        if 'recommendedValues' not in recommendation_vr:
+                                            print('Error: recommendedValues not found in recommendation_results.')
+                                            print('  The Value Recommender server or Elasticsearch may be down.')
+                                            print('  Trying again in 5 seconds...')
+                                            time.sleep(5)
+                                        else:
+                                            repeat = False
 
                                     execution_time_vr = int(round((time.time() - start_time_vr) * 1000))
 
                                     recommended_top1_value_vr = arm_evaluation_util.get_recommended_values(
                                         recommendation_vr, 1)
 
-                                    recommended_top1_value_baseline = get_baseline_top10_recommendation(field_name,
+                                    baseline_top_10 = get_baseline_top10_recommendation(field_name,
                                                                                                         ncbi_frequent_values,
                                                                                                         ebi_frequent_values,
                                                                                                         ncbi_annotated_frequent_values,
-                                                                                                        ebi_annotated_frequent_values)[0]
+                                                                                                        ebi_annotated_frequent_values)
+                                    if baseline_top_10 is not None and len(baseline_top_10) > 0:
+                                        recommended_top1_value_baseline = baseline_top_10[0]
+                                    else:
+                                        recommended_top1_value_baseline = 'NA'
+
 
                                     is_correct_vr = arm_evaluation_util.get_matching_score(
                                         fields_types_and_values[field_name]['value'],
@@ -263,10 +279,10 @@ def main():
                                         recommendation_vr, 10)
 
                                     recommended_top10_values_baseline = get_baseline_top10_recommendation(field_name,
-                                                                                                        ncbi_frequent_values,
-                                                                                                        ebi_frequent_values,
-                                                                                                        ncbi_annotated_frequent_values,
-                                                                                                        ebi_annotated_frequent_values)
+                                                                                                          ncbi_frequent_values,
+                                                                                                          ebi_frequent_values,
+                                                                                                          ncbi_annotated_frequent_values,
+                                                                                                          ebi_annotated_frequent_values)
 
                                     expected_value = fields_types_and_values[field_name]['value']
 

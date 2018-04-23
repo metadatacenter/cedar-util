@@ -11,6 +11,7 @@ ebi_arff_file_path <- paste(base_input_path, "/ebi_training_6b6c76e6-1d9b-4096-9
 # Annotated values
 ncbi_annotated_arff_file_path <- paste(base_input_path, "/ncbi_annotated_training_eef6f399-aa4e-4982-ab04-ad8e9635aa91.arff", sep="")
 ebi_annotated_arff_file_path <- paste(base_input_path, "/ebi_annotated_training_6b6c76e6-1d9b-4096-9702-133e25ecd140.arff", sep="")
+ebi_annotated_diff_onts_arff_file_path <- paste(base_input_path, "/ebi_annotated_training_different_ontologies_80766e2b-0629-49f2-ba77-224a88739ad7.arff", sep="")
 
 ### Functions ###
 
@@ -43,15 +44,17 @@ most_frequent_values <- function(dataset, max_positions = 10, output_file_path, 
 
 ### Main program ###
 
-print_ncbi = TRUE
-print_ebi = TRUE
-print_ncbi_annotated = TRUE
-print_ebi_annotated = TRUE
+print_ncbi = FALSE
+print_ebi = FALSE
+print_ncbi_annotated = FALSE
+print_ebi_annotated = FALSE
+print_ebi_annotated_diff_onts = TRUE
 
 ncbi_data <- read.arff(ncbi_arff_file_path)
 ebi_data <- read.arff(ebi_arff_file_path)
 ncbi_annotated_data <- read.arff(ncbi_annotated_arff_file_path)
 ebi_annotated_data <- read.arff(ebi_annotated_arff_file_path)
+ebi_annotated_diff_onts_data <- read.arff(ebi_annotated_diff_onts_arff_file_path)
 
 if (print_ncbi) {
   print('*** NCBI (FREE TEXT) - MOST COMMON VALUES ***')
@@ -68,6 +71,10 @@ if (print_ncbi_annotated) {
 if (print_ebi_annotated) {
   print('*** EBI (ANNOTATED) - MOST COMMON VALUES ***')
   most_frequent_values(ebi_annotated_data, output_file_path = paste(base_output_path, "/ebi_annotated_frequent_values.json", sep=""), annotated=TRUE)
+}
+if (print_ebi_annotated_diff_onts) {
+  print('*** EBI (ANNOTATED - DIFFERENT ONTOLOGIES) - MOST COMMON VALUES ***')
+  most_frequent_values(ebi_annotated_diff_onts_data, output_file_path = paste(base_output_path, "/ebi_annotated_diff_onts_frequent_values.json", sep=""), annotated=TRUE)
 }
 
 # Count no. different values - NCBI

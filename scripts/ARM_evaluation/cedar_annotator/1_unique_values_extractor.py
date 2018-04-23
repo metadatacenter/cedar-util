@@ -42,9 +42,7 @@ def main():
                     if count % 500 == 0:
                         print('No. files processed: ' + str(count))
 
-    for att in NCBI_BIOSAMPLE_ATTRIBUTES:
-        unique_values.add(att)
-    for att in EBI_BIOSAMPLE_ATTRIBUTES:
+    for att in annotation_constants.RELEVANT_ATTRIBUTES_NAMES:
         unique_values.add(att)
 
     print('No. unique values extracted: ' + str(len(unique_values)))

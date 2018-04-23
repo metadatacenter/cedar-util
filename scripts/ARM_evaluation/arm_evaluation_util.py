@@ -121,7 +121,7 @@ def is_same_concept(term_uri1, term_uri2, mappings):
     if term_uri1 == term_uri2:
         return True
     elif term_uri1 in mappings[term_uri2] or term_uri2 in mappings[term_uri1]:
-        # print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
+        #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
         return True
     else:
         return False
@@ -163,7 +163,7 @@ def populated_fields_to_string(populated_fields):
 def position_of_expected_value(expected_value, values, mappings, extend_with_mappings=False):
     position = 1  # 1-based position
     for value in values:
-        if get_matching_score(expected_value, value, mappings, extend_with_mappings) == 1:
+        if get_matching_score(expected_value, value, mappings, extend_with_mappings=extend_with_mappings) == 1:
             return position
         position += 1
     return 'NA'  # If not found

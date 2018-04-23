@@ -14,18 +14,22 @@ import annotation_constants
 UNIQUE_VALUES_FILE_PATH = annotation_constants.VALUES_ANNOTATION_INPUT_VALUES_FILE_PATH
 
 # OUTPUT
-UNIQUE_VALUES_ANNOTATED_FILE_PATH = annotation_constants.VALUES_ANNOTATION_OUTPUT_FILE_PATH
-MAPPINGS_FILE_PATH = annotation_constants.VALUES_ANNOTATION_MAPPINGS_FILE_PATH
+UNIQUE_VALUES_ANNOTATED_FILE_PATH_1 = annotation_constants.VALUES_ANNOTATION_OUTPUT_FILE_PATH_1
+UNIQUE_VALUES_ANNOTATED_FILE_PATH_2 = annotation_constants.VALUES_ANNOTATION_OUTPUT_FILE_PATH_2
+MAPPINGS_FILE_PATH_1 = annotation_constants.VALUES_ANNOTATION_MAPPINGS_FILE_PATH_1
+MAPPINGS_FILE_PATH_2 = annotation_constants.VALUES_ANNOTATION_MAPPINGS_FILE_PATH_2
 
 # OTHER SETTINGS
 BIOPORTAL_API_KEY = annotation_constants.VALUES_ANNOTATION_BIOPORTAL_API_KEY
 VALUES_PER_ITERATION = annotation_constants.VALUES_ANNOTATION_VALUES_PER_ITERATION
 # List of relevant ontologies. The algorithm will try to pick pref_class_label and pref_class_uri from one of these
 # ontologies. If that's not possible, it will pick values from any other ontologies
-PREFERRED_ONTOLOGIES = annotation_constants.VALUES_ANNOTATION_PREFERRED_ONTOLOGIES
+PREFERRED_ONTOLOGIES_1 = annotation_constants.VALUES_ANNOTATION_PREFERRED_ONTOLOGIES_1
+PREFERRED_ONTOLOGIES_2 = annotation_constants.VALUES_ANNOTATION_PREFERRED_ONTOLOGIES_2
 USE_NORMALIZED_VALUES = annotation_constants.VALUES_ANNOTATION_USE_NORMALIZED_VALUES
 NORMALIZED_VALUES_FILE_NAME = annotation_constants.VALUES_ANNOTATION_NORMALIZED_VALUES_FILE_NAME  # We assume that the file is stored in the current path
 LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES = annotation_constants.VALUES_ANNOTATION_LIMIT_TO_PREFERRED_ONTOLOGIES
+
 
 # Class that represents a biosample object extracted from EBI's BioSamples database
 class KeywordAnnotation:
@@ -60,17 +64,17 @@ def get_ontology_id(annotation):
     return ontology_id
 
 
-def ontology_has_more_priority(ont1, ont2, ontologies_priority=PREFERRED_ONTOLOGIES):
+def ontology_has_more_priority(ont1, ont2, preferred_ontologies):
     """
     Checks if ont1 has more priority than ont2 according to a defined list of priorities
     :param ont1: 
     :param ont2: 
-    :param ontologies_priority: 
+    :param preferred_ontologies: 
     :return: 
     """
-    if ont1 in ontologies_priority:
-        if ont2 in ontologies_priority:
-            if ontologies_priority.index(ont1) < ontologies_priority.index(ont2):
+    if ont1 in preferred_ontologies:
+        if ont2 in preferred_ontologies:
+            if preferred_ontologies.index(ont1) < preferred_ontologies.index(ont2):
                 return True
         else:
             return True
@@ -78,7 +82,7 @@ def ontology_has_more_priority(ont1, ont2, ontologies_priority=PREFERRED_ONTOLOG
         return False
 
 
-def extract_keyword_annotations(keywords, annotations):
+def extract_keyword_annotations(keywords, annotations, preferred_ontologies):
     """
     
     :param keywords: set of input keywords
@@ -106,7 +110,7 @@ def extract_keyword_annotations(keywords, annotations):
                         keyword_annotation.pref_class_ontology = class_ontology_id
                     else:
                         # Check if this ontology has more priority
-                        if ontology_has_more_priority(class_ontology_id, keyword_annotation.pref_class_ontology):
+                        if ontology_has_more_priority(class_ontology_id, keyword_annotation.pref_class_ontology, preferred_ontologies):
                             # Add the prefered class to the list of classes and set the new one as preferred
                             keyword_annotation.class_labels.add(keyword_annotation.pref_class_label)
                             keyword_annotation.class_uris.add(keyword_annotation.pref_class_uri)
@@ -125,70 +129,33 @@ def extract_keyword_annotations(keywords, annotations):
     return keyword_annotations
 
 
-def to_uris_annotated(unique_values_annotated):
-    uris_annotated = {}
-    for value in unique_values_annotated:
-        uri = unique_values_annotated[value]['pref_class_uri']
-        uris_annotated[uri] = unique_values_annotated[value]
-
-    return uris_annotated
-
-
-def have_same_meaning(term_uri1, term_uri2, uris_annotated):
-    """
-    Checks if two term uris have the same meaning. It makes use of a file with mappings
-    :param term_uri1: 
-    :param term_uri2: 
-    """
-    if term_uri1 == term_uri2:
-        return True
-    else:
-        if term_uri1 not in uris_annotated:
-            raise Exception('Could not find URI in annotations file: ' + term_uri1)
-        elif term_uri2 not in uris_annotated:
-            raise Exception('Could not find URI in annotations file: ' + term_uri2)
-        else:
-            term_uri1_annotations = uris_annotated[term_uri1]
-            term_uri2_annotations = uris_annotated[term_uri2]
-
-            if term_uri2 in term_uri1_annotations['class_uris']:
-                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
-                return True
-            elif term_uri1 in term_uri2_annotations['class_uris']:
-                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
-                return True
-            elif term_uri1_annotations['pref_class_label'] == term_uri2_annotations['pref_class_label']:
-                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
-                return True
-            elif term_uri2_annotations['pref_class_label'] in term_uri1_annotations['class_labels']:
-                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
-                return True
-            elif term_uri1_annotations['pref_class_label'] in term_uri2_annotations['class_labels']:
-                #print('Found two uris for the same concept: ' + term_uri1 + ' = ' + term_uri2)
-                return True
-            else:  # Try to find the correspondence using labels
-                return False
-
-
 def generate_mappings(unique_values_annotated):
     """
     Using the generated annotations it generates a file with mappings from all preferred URIS found in the annotations to any other equivalent URIS
     """
-    uris_annotated = to_uris_annotated(unique_values_annotated)
-
     mappings = {}
-
     count = 0
-    for uri1 in uris_annotated:
-        mappings[uri1] = []
-        for uri2 in uris_annotated:
-            if uri1 != uri2 and have_same_meaning(uri1, uri2, uris_annotated):
-                if uri2 not in mappings[uri1]:
-                    mappings[uri1].append(uri2)
-        count = count + 1
-        print('No. uris processed: ' + str(count) + "/" + str(len(uris_annotated)))
+    for value in unique_values_annotated:
+        pref_uri = unique_values_annotated[value]['pref_class_uri']
+        equivalent_uris = unique_values_annotated[value]['class_uris']
 
+        if pref_uri not in mappings:
+            mappings[pref_uri] = []
+
+        for equivalent_uri in equivalent_uris:
+            if equivalent_uri not in mappings[pref_uri] and equivalent_uri != pref_uri:
+                mappings[pref_uri].append(equivalent_uri)
+
+        count = count + 1
+    print('No. values processed: ' + str(count) + "/" + str(len(unique_values_annotated)))
+    print('Total no. of uri keys in file: ' + str(len(mappings)))
     return mappings
+
+
+#     uris_annotated = {}
+#     for value in unique_values_annotated:
+#         uri = unique_values_annotated[value]['pref_class_uri']
+#         uris_annotated[uri] = unique_values_annotated[value]
 
 
 def main():
@@ -199,6 +166,7 @@ def main():
     # Test data
     # all_values = ['m', 'male']
     # all_values = ['peripheral blood']
+    # all_values = ['organism part']
 
     # Load file with normalized values
     if USE_NORMALIZED_VALUES:
@@ -227,7 +195,8 @@ def main():
     if len(keywords) > 0:
         input_keywords_lists.append(keywords)
 
-    unique_values_annotated = {}
+    unique_values_annotated_1 = {}
+    unique_values_annotated_2 = {}
 
     total_count = 0
     print('Annotation process started...')
@@ -238,33 +207,50 @@ def main():
 
         ontologies = []
         if LIMIT_ANNOTATOR_TO_PREFERRED_ONTOLOGIES:
-            ontologies = PREFERRED_ONTOLOGIES
+            ontologies = PREFERRED_ONTOLOGIES_1
 
         annotations = bioportal_util.annotate(BIOPORTAL_API_KEY, ",".join(keywords_list), ontologies, longest_only=True,
                                               expand_mappings=True, include=['prefLabel'])
-        keyword_annotations = extract_keyword_annotations(keywords_list, annotations)
 
-        for ann in keyword_annotations:
+        # Extract annotations using PREFERRED_ONTOLOGIES_1
+        keyword_annotations_1 = extract_keyword_annotations(keywords_list, annotations, PREFERRED_ONTOLOGIES_1)
+        for ann in keyword_annotations_1:
             annotation_key = ann.keyword
 
-            if annotation_key not in unique_values_annotated:
-                unique_values_annotated[annotation_key] = KeywordAnnotation.obj_dict(ann)
+            if annotation_key not in unique_values_annotated_1:
+                unique_values_annotated_1[annotation_key] = KeywordAnnotation.obj_dict(ann)
+            else:
+                print('Keyword already there: ' + annotation_key)
+
+        # Extract annotations using PREFERRED_ONTOLOGIES_2
+        keyword_annotations_2 = extract_keyword_annotations(keywords_list, annotations, PREFERRED_ONTOLOGIES_2)
+        for ann in keyword_annotations_2:
+            annotation_key = ann.keyword
+
+            if annotation_key not in unique_values_annotated_2:
+                unique_values_annotated_2[annotation_key] = KeywordAnnotation.obj_dict(ann)
             else:
                 print('Keyword already there: ' + annotation_key)
 
         total_count = total_count + 1
         print('Total lists of keywords processed: ' + str(total_count) + '/' + str(len(input_keywords_lists)))
 
-    # Write to file
-    with open(UNIQUE_VALUES_ANNOTATED_FILE_PATH, 'w') as outfile:
-        json.dump(unique_values_annotated, outfile)
+    # Write to files
+    with open(UNIQUE_VALUES_ANNOTATED_FILE_PATH_1, 'w') as outfile:
+        json.dump(unique_values_annotated_1, outfile)
+    with open(UNIQUE_VALUES_ANNOTATED_FILE_PATH_2, 'w') as outfile:
+        json.dump(unique_values_annotated_2, outfile)
 
     # Generate mappings and write them to file
-    mappings = generate_mappings(unique_values_annotated)
-    with open(MAPPINGS_FILE_PATH, 'w') as outfile:
-        json.dump(mappings, outfile)
+    mappings_1 = generate_mappings(unique_values_annotated_1)
+    with open(MAPPINGS_FILE_PATH_1, 'w') as outfile:
+        json.dump(mappings_1, outfile)
+    mappings_2 = generate_mappings(unique_values_annotated_2)
+    with open(MAPPINGS_FILE_PATH_2, 'w') as outfile:
+        json.dump(mappings_2, outfile)
 
-# used to generate the mappings from the annotations file without regenerating the annotations file
+
+# #used to generate the mappings from the annotations file without regenerating the annotations file
 # def main2():
 #     unique_values_annotated = json.load(open(UNIQUE_VALUES_ANNOTATED_FILE_PATH))
 #     # Generate mappings and write them to file
