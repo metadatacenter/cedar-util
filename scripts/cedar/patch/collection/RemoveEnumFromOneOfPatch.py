@@ -7,11 +7,12 @@ class RemoveEnumFromOneOfPatch(object):
 
     def __init__(self):
         self.description = "Fixes the schema definition of the @type object for the non-static template field"
-        self.from_version = None
+        self.from_version = "1.0.0"
         self.to_version = "1.1.0"
 
-    @staticmethod
-    def is_applied(error_message, doc=None):
+    def is_applied(self, error_message, doc=None):
+        if not utils.is_compatible(doc, self.from_version):
+            return False
         pattern = re.compile(
             "array is too long: must have at most 2 elements but instance has 3 elements " \
             "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties/@type/oneOf$")

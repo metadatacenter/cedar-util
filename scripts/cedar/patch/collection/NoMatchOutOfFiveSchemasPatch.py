@@ -12,8 +12,9 @@ class NoMatchOutOfFiveSchemasPatch(object):
         self.from_version = "1.1.0"
         self.to_version = "1.2.0"
 
-    @staticmethod
-    def is_applied(error_message, doc=None):
+    def is_applied(self, error_message, doc=None):
+        if not utils.is_compatible(doc, self.from_version):
+            return False
         pattern = re.compile(
             "instance failed to match exactly one schema \(matched 0 out of 5\) " \
             "at ((/properties/[^/]+/items)?(/properties/[^/]+)?)*/properties/[^/]+$")
