@@ -14,21 +14,36 @@ color1 <- "#DB6D00"
 color2 <- "#070092"
 color3 <- "#ffff99" # yellow
   
+# Results data (free text)
+file_NCBItoNCBI <- paste(workspace, "/1_free_text/results_trainNCBI_testNCBI_2018-04-16_08_57_20.csv", sep="")
+file_NCBItoEBI <- paste(workspace, "/1_free_text/results_trainNCBI_testEBI_2018-04-16_19_11_51.csv", sep="")
+file_EBItoEBI <- paste(workspace, "/1_free_text/results_trainEBI_testEBI_2018-04-16_23_59_03.csv", sep="")
+file_EBItoNCBI <- paste(workspace, "/1_free_text/results_trainEBI_testNCBI_2018-04-17_06_53_04.csv", sep="")
 
-file_NCBItoNCBI <- paste(workspace, "/free_text/results_trainNCBI_testNCBI_2018-04-16_08_57_20.csv", sep="")
-file_NCBItoEBI <- paste(workspace, "/free_text/results_trainNCBI_testEBI_2018-04-16_19_11_51.csv", sep="")
-file_EBItoEBI <- paste(workspace, "/free_text/results_trainEBI_testEBI_2018-04-16_23_59_03.csv", sep="")
-file_EBItoNCBI <- paste(workspace, "/free_text/results_trainEBI_testNCBI_2018-04-17_06_53_04.csv", sep="")
- 
-file_NCBItoNCBI_annotated <- paste(workspace, "/annotated/results_trainNCBI_testNCBI_annotated_2018-04-17_09_13_57.csv", sep="")
-file_NCBItoEBI_annotated <- paste(workspace, "/annotated/results_trainNCBI_testEBI_annotated_2018-04-17_18_06_15.csv", sep="")
-file_EBItoEBI_annotated <- paste(workspace, "/annotated/results_trainEBI_testEBI_annotated_2018-04-17_20_37_23.csv", sep="")
-file_EBItoNCBI_annotated <- paste(workspace, "/annotated/results_trainEBI_testNCBI_annotated_2018-04-17_22_43_26.csv", sep="")
+# Results data (annotated, using the same ontologies for NCBI and EBI datasets)
+file_NCBItoNCBI_annotated_same_ontologies_no_mappings <- paste(workspace, "/2_annotated_same_ontologies_no_mappings/results_trainNCBI_testNCBI_annotated_2018-04-17_09_13_57.csv", sep="")
+file_NCBItoEBI_annotated_same_ontologies_no_mappings <- paste(workspace, "/2_annotated_same_ontologies_no_mappings/results_trainNCBI_testEBI_annotated_2018-04-17_18_06_15.csv", sep="")
+file_EBItoEBI_annotated_same_ontologies_no_mappings <- paste(workspace, "/2_annotated_same_ontologies_no_mappings/results_trainEBI_testEBI_annotated_2018-04-17_20_37_23.csv", sep="")
+file_EBItoNCBI_annotated_same_ontologies_no_mappings <- paste(workspace, "/2_annotated_same_ontologies_no_mappings/results_trainEBI_testNCBI_annotated_2018-04-17_22_43_26.csv", sep="")
 
-# file_NCBItoNCBI_annotated_mappings <- paste(workspace, "/annotated_mappings/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
-# file_NCBItoEBI_annotated_mappings <- paste(workspace, "/annotated_mappings/results_trainNCBI_testEBI_annotated_mappings_2018-04-18_07_40_04.csv", sep="")
-# file_EBItoEBI_annotated_mappings <- paste(workspace, "/annotated_mappings/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
-# file_EBItoNCBI_annotated_mappings <- paste(workspace, "/annotated_mappings/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
+# Results data (annotated, using the same ontologies for NCBI and EBI datasets and using mappings)
+file_NCBItoNCBI_annotated_same_ontologies_mappings <- paste(workspace, "/3_annotated_same_ontologies_mappings/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
+file_NCBItoEBI_annotated_same_ontologies_mappings <- paste(workspace, "/3_annotated_same_ontologies_mappings/results_trainNCBI_testEBI_annotated_mappings_2018-04-18_07_40_04.csv", sep="")
+file_EBItoEBI_annotated_same_ontologies_mappings <- paste(workspace, "/3_annotated_same_ontologies_mappings/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
+file_EBItoNCBI_annotated_same_ontologies_mappings <- paste(workspace, "/3_annotated_same_ontologies_mappings/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
+
+# Results data (annotated, using different ontologies)
+file_NCBItoNCBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainNCBI_testNCBI_annotated_2018-04-17_09_13_57_COPIED.csv", sep="")
+file_NCBItoEBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainNCBI_testEBI_annotated_2018-04-22_17_57_46.csv", sep="")
+file_EBItoEBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainEBI_testEBI_annotated_2018-04-22_07_25_04.csv", sep="")
+file_EBItoNCBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainEBI_testNCBI_annotated_2018-04-22_20_20_07.csv", sep="")
+
+
+# Results data (annotated, using different ontologies and mappings)
+file_NCBItoNCBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainNCBI_testNCBI_annotated_mappings_2018-04-23_22_22_03.csv", sep="")
+file_NCBItoEBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainNCBI_testEBI_annotated_mappings_2018-04-23_19_34_06.csv", sep="")
+file_EBItoEBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainEBI_testEBI_annotated_mappings_2018-04-23_03_27_25.csv", sep="")
+file_EBItoNCBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainEBI_testNCBI_annotated_mappings_2018-04-22_23_31_28.csv", sep="")
 
 ### The following inputs are just for testing
 
@@ -42,10 +57,10 @@ file_EBItoNCBI_annotated <- paste(workspace, "/annotated/results_trainEBI_testNC
 # file_EBItoEBI_annotated <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_2018-04-17_20_37_23.csv", sep="")
 # file_EBItoNCBI_annotated <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_2018-04-17_22_43_26.csv", sep="")
 # 
-file_NCBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
-file_NCBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
-file_EBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
-file_EBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
+# file_NCBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
+# file_NCBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
+# file_EBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
+# file_EBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
 
 ### FUNCTION DEFINITIONS ###
 
@@ -288,14 +303,16 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, eval
 ### MAIN BODY ###
 
 evaluation_set_1 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI, file_NCBItoEBI, file_EBItoEBI, file_EBItoNCBI), description="free text")
-evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated, file_NCBItoEBI_annotated, file_EBItoEBI_annotated, file_EBItoNCBI_annotated), description="annotated")
-evaluation_set_3 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_mappings, file_NCBItoEBI_annotated_mappings, file_EBItoEBI_annotated_mappings, file_EBItoNCBI_annotated_mappings), description="annotated-mappings")
+evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_no_mappings, file_NCBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoNCBI_annotated_same_ontologies_no_mappings), description="annotated; same ontologies; no mappings")
+evaluation_set_3 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_mappings, file_NCBItoEBI_annotated_same_ontologies_mappings, file_EBItoEBI_annotated_same_ontologies_mappings, file_EBItoNCBI_annotated_same_ontologies_mappings), description="annotated; same ontologies; with mappings")
+evaluation_set_4 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_no_mappings, file_NCBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoNCBI_annotated_different_ontologies_no_mappings), description="annotated; diff ontologies; no mappings")
+evaluation_set_5 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_mappings, file_NCBItoEBI_annotated_different_ontologies_mappings, file_EBItoEBI_annotated_different_ontologies_mappings, file_EBItoNCBI_annotated_different_ontologies_mappings), description="annotated; diff ontologies; with mappings")
 
-evaluation_sets = c(evaluation_set_1, evaluation_set_2, evaluation_set_3)
+evaluation_sets = c(evaluation_set_1, evaluation_set_2, evaluation_set_3, evaluation_set_4, evaluation_set_5)
 
-# for (evaluation_set in evaluation_sets){
-#   generate_all_plots(evaluation_set, 'RR_top5_vr', 'RR_top5_baseline')
-# }
+for (evaluation_set in evaluation_sets){
+  generate_all_plots(evaluation_set, 'RR_top5_vr', 'RR_top5_baseline')
+}
 
 generate_all_plots_overlapped(evaluation_set_1, evaluation_set_2, evaluation_set_3, 'RR_top5_vr', 'RR_top5_baseline')
 
