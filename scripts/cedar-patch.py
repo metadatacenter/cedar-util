@@ -208,6 +208,9 @@ def build_patch_engine_v130():
     patch_engine.add_patch(RemoveUiFromPropertiesPatch())
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
     patch_engine.add_patch(RestructureMultiValuedFieldPatch())
+    patch_engine.add_patch(AddBiboToContextPatch())
+    patch_engine.add_patch(AddBiboStatusPatch())
+    patch_engine.add_patch(AddPavVersionPatch())
     return patch_engine
 
 
