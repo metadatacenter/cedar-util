@@ -1,7 +1,7 @@
 import jsonpatch
 import re
 from cedar.patch import utils
-
+import dpath
 
 class AddVersioningInNestedElementPatch(object):
 
@@ -19,13 +19,12 @@ class AddVersioningInNestedElementPatch(object):
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
-        patch = self.get_patch(error_message)
+        patch = self.get_patch(error_message, doc)
         patched_doc = patch.apply(doc)
         return patched_doc
 
-    @staticmethod
-    def get_patch(error_message, doc=None):
-        path = utils.get_error_location(error_message)
+    def get_patch(self, error_message, doc=None):
+        path = self.get_path(error_message, doc)
         patches = [{
             "op": "add",
             "value": "http://purl.org/ontology/bibo/",
@@ -42,3 +41,11 @@ class AddVersioningInNestedElementPatch(object):
             "path": path + "/bibo:status"
         }]
         return jsonpatch.JsonPatch(patches)
+
+    @staticmethod
+    def get_path(error_message, doc):
+        path = utils.get_error_location(error_message)
+        element_node = utils.get_json_node(doc, path)
+        if element_node.get("type") == "array":
+            path = path + "/items"
+        return path
