@@ -59,6 +59,8 @@ from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureM
 from cedar.patch.collection.AddBiboToContextPatch import AddBiboToContextPatch
 from cedar.patch.collection.AddBiboStatusPatch import AddBiboStatusPatch
 from cedar.patch.collection.AddPavVersionPatch import AddPavVersionPatch
+from cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
+from cedar.patch.collection.AddVersioningInNestedMultiElementPatch import AddVersioningInNestedMultiElementPatch
 
 
 __all__ = [
@@ -122,4 +124,6 @@ __all__ = [
     "RestructureStaticTemplateFieldPatch",
     "AddBiboToContextPatch",
     "AddBiboStatusPatch",
-    "AddPavVersionPatch"]
+    "AddPavVersionPatch",
+    "AddVersioningInNestedElementPatch",
+    "AddVersioningInNestedMultiElementPatch"]
