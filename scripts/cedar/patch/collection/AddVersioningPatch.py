@@ -3,10 +3,10 @@ import re
 from cedar.patch import utils
 
 
-class AddPavVersionPatch(object):
+class AddVersioningPatch(object):
 
     def __init__(self):
-        self.description = "Add the missing pav:version field in a template, element or field"
+        self.description = "Add versioning in templates and elements"
         self.from_version = "1.3.0"
         self.to_version = "1.4.0"
 
@@ -15,7 +15,7 @@ class AddPavVersionPatch(object):
             return False
         pattern = re.compile(
             "object has missing required properties " \
-            "\(\[('.+',)*'pav:version'(,'.+')*\]\) " \
+            "\(\['bibo:status','pav:version']\) " \
             "at (/?(/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         return pattern.match(error_message)
 
@@ -27,7 +27,13 @@ class AddPavVersionPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
+        print(error_message, path)
         patches = [{
+            "op": "add",
+            "value": "bibo:draft",
+            "path": path + "/bibo:status"
+        },
+        {
             "op": "add",
             "value": "0.0.1",
             "path": path + "/pav:version"

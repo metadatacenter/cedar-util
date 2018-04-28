@@ -57,8 +57,7 @@ from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueL
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
 from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureMultiValuedFieldPatch
 from cedar.patch.collection.AddBiboToContextPatch import AddBiboToContextPatch
-from cedar.patch.collection.AddBiboStatusPatch import AddBiboStatusPatch
-from cedar.patch.collection.AddPavVersionPatch import AddPavVersionPatch
+from cedar.patch.collection.AddVersioningPatch import AddVersioningPatch
 from cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
 from cedar.patch.collection.AddVersioningInNestedMultiElementPatch import AddVersioningInNestedMultiElementPatch
 
@@ -123,7 +122,6 @@ __all__ = [
     "RestructureMultiValuedFieldPatch",
     "RestructureStaticTemplateFieldPatch",
     "AddBiboToContextPatch",
-    "AddBiboStatusPatch",
-    "AddPavVersionPatch",
+    "AddVersioningPatch",
     "AddVersioningInNestedElementPatch",
     "AddVersioningInNestedMultiElementPatch"]

@@ -209,8 +209,7 @@ def build_patch_engine_v130():
     patch_engine.add_patch(RestructureStaticTemplateFieldPatch())
     patch_engine.add_patch(RestructureMultiValuedFieldPatch())
     patch_engine.add_patch(AddBiboToContextPatch())
-    patch_engine.add_patch(AddBiboStatusPatch())
-    patch_engine.add_patch(AddPavVersionPatch())
+    patch_engine.add_patch(AddVersioningPatch())
     patch_engine.add_patch(AddVersioningInNestedElementPatch())
     patch_engine.add_patch(AddVersioningInNestedMultiElementPatch())
     return patch_engine
