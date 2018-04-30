@@ -27,7 +27,6 @@ class AddVersioningPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
-        print(error_message, path)
         patches = [{
             "op": "add",
             "value": "bibo:draft",
