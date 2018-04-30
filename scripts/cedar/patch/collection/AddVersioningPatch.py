@@ -3,20 +3,20 @@ import re
 from cedar.patch import utils
 
 
-class AddIdToPropertiesPatch(object):
+class AddVersioningPatch(object):
 
     def __init__(self):
-        self.description = "Adds the missing @id in the properties object"
-        self.from_version = "1.0.0"
-        self.to_version = "1.1.0"
+        self.description = "Add versioning in templates and elements"
+        self.from_version = "1.3.0"
+        self.to_version = "1.4.0"
 
     def is_applied(self, error_message, doc=None):
         if not utils.is_compatible(doc, self.from_version):
             return False
         pattern = re.compile(
             "object has missing required properties " \
-            "\(\[('.+',)*'@id'(,'.+')*\]\) " \
-            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
+            "\(\['bibo:status','pav:version']\) " \
+            "at (/?(/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
@@ -27,12 +27,15 @@ class AddIdToPropertiesPatch(object):
     @staticmethod
     def get_patch(error_message, doc=None):
         path = utils.get_error_location(error_message)
+        print(error_message, path)
         patches = [{
             "op": "add",
-            "value": {
-                "type": "string",
-                "format": "uri"
-            },
-            "path": path + "/@id"
+            "value": "bibo:draft",
+            "path": path + "/bibo:status"
+        },
+        {
+            "op": "add",
+            "value": "0.0.1",
+            "path": path + "/pav:version"
         }]
         return jsonpatch.JsonPatch(patches)

@@ -56,6 +56,10 @@ from cedar.patch.collection.RemoveUiFromPropertiesPatch import RemoveUiFromPrope
 from cedar.patch.collection.RenameValueLabelToRdfsLabelPatch import RenameValueLabelToRdfsLabelPatch
 from cedar.patch.collection.RestructureStaticTemplateFieldPatch import RestructureStaticTemplateFieldPatch
 from cedar.patch.collection.RestructureMultiValuedFieldPatch import RestructureMultiValuedFieldPatch
+from cedar.patch.collection.AddBiboToContextPatch import AddBiboToContextPatch
+from cedar.patch.collection.AddVersioningPatch import AddVersioningPatch
+from cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
+from cedar.patch.collection.AddVersioningInNestedMultiElementPatch import AddVersioningInNestedMultiElementPatch
 
 
 __all__ = [
@@ -116,4 +120,8 @@ __all__ = [
     "RemoveUiFromPropertiesPatch",
     "RenameValueLabelToRdfsLabelPatch",
     "RestructureMultiValuedFieldPatch",
-    "RestructureStaticTemplateFieldPatch"]
+    "RestructureStaticTemplateFieldPatch",
+    "AddBiboToContextPatch",
+    "AddVersioningPatch",
+    "AddVersioningInNestedElementPatch",
+    "AddVersioningInNestedMultiElementPatch"]
