@@ -7,11 +7,12 @@ class MoveContentToUiPatch(object):
 
     def __init__(self):
         self.description = "Move _content object to the _ui field"
-        self.from_version = None
+        self.from_version = "1.0.0"
         self.to_version = "1.1.0"
 
-    @staticmethod
-    def is_applied(error_message, doc=None):
+    def is_applied(self, error_message, doc=None):
+        if not utils.is_compatible(doc, self.from_version):
+            return False
         pattern = re.compile(
             "object instance has properties which are not allowed by the schema: " \
             "\['_content'\] " \

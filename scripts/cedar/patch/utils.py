@@ -3,6 +3,11 @@ import dpath
 import json
 
 
+def is_compatible(resource, required_version):
+    current_schema_version = resource.get("schema:schemaVersion")
+    return current_schema_version == required_version
+
+
 def is_template(resource, at=None):
     if at:
         resource = dpath.util.get(resource, at)

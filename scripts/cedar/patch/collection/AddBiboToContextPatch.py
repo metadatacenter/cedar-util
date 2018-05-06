@@ -3,20 +3,20 @@ import re
 from cedar.patch import utils
 
 
-class AddIdToPropertiesPatch(object):
+class AddBiboToContextPatch(object):
 
     def __init__(self):
-        self.description = "Adds the missing @id in the properties object"
-        self.from_version = "1.0.0"
-        self.to_version = "1.1.0"
+        self.description = "Fixes the missing bibo prefix label in the @context object of a template"
+        self.from_version = "1.3.0"
+        self.to_version = "1.4.0"
 
     def is_applied(self, error_message, doc=None):
         if not utils.is_compatible(doc, self.from_version):
             return False
         pattern = re.compile(
             "object has missing required properties " \
-            "\(\[('.+',)*'@id'(,'.+')*\]\) " \
-            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/properties$")
+            "\(\[('.+',)*'bibo'(,'.+')*\]\) " \
+            "at ((/properties/[^/]+/items)*(/properties/[^/]+)*)*/@context$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
@@ -29,10 +29,7 @@ class AddIdToPropertiesPatch(object):
         path = utils.get_error_location(error_message)
         patches = [{
             "op": "add",
-            "value": {
-                "type": "string",
-                "format": "uri"
-            },
-            "path": path + "/@id"
+            "value": "http://purl.org/ontology/bibo/",
+            "path": path + "/bibo"
         }]
         return jsonpatch.JsonPatch(patches)
