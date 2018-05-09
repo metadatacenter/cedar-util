@@ -220,12 +220,10 @@ def patch_template_file(patch_engine, source_file_name, model_version, output_di
         template = get_template_from_file(source_file_name)
         template_id = template["@id"]
         is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
-
-        if model_version:
-            set_model_version(patched_template, model_version)
-
         if is_success:
             if patched_template is not None:
+                if model_version:
+                    set_model_version(patched_template, model_version)
                 create_report("resolved", template_id)
                 if output_dir is not None:
                     filename = create_filename_from_id(template_id, prefix="template-patched-")
@@ -254,12 +252,10 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
         try:
             template = get_template_from_mongodb(source_database, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
-
-            if model_version:
-                set_model_version(patched_template, model_version)
-
             if is_success:
                 if patched_template is not None:
+                    if model_version:
+                        set_model_version(patched_template, model_version)
                     create_report("resolved", template_id)
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-patched-")
@@ -297,12 +293,10 @@ def patch_element_file(patch_engine, source_file_name, model_version, output_dir
         element = get_element_from_file(source_file_name)
         element_id = element["@id"]
         is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
-
-        if model_version:
-            set_model_version(patched_element, model_version)
-
         if is_success:
             if patched_element is not None:
+                if model_version:
+                    set_model_version(patched_element, model_version)
                 create_report("resolved", element_id)
                 if output_dir is not None:
                     filename = create_filename_from_id(element_id, prefix="element-patched-")
@@ -330,12 +324,10 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
         try:
             element = get_element_from_mongodb(source_database, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
-
-            if model_version:
-                set_model_version(patched_element, model_version)
-
             if is_success:
                 if patched_element is not None:
+                    if model_version:
+                        set_model_version(patched_element, model_version)
                     create_report("resolved", element_id)
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-patched-")
