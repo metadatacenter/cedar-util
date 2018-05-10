@@ -19,7 +19,7 @@ class AddVersioningInNestedMultiElementPatch(object):
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
-        patch = self.get_patch(error_message)
+        patch = self.get_patch(error_message, doc)
         patched_doc = patch.apply(doc)
         return patched_doc
 
