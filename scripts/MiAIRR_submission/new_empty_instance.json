@@ -1,0 +1,326 @@
+{
+  "@context": {
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "pav": "http://purl.org/pav/",
+    "schema": "http://schema.org/",
+    "oslc": "http://open-services.net/ns/core#",
+    "rdfs:label": {
+      "@type": "xsd:string"
+    },
+    "schema:isBasedOn": {
+      "@type": "@id"
+    },
+    "schema:name": {
+      "@type": "xsd:string"
+    },
+    "schema:description": {
+      "@type": "xsd:string"
+    },
+    "pav:createdOn": {
+      "@type": "xsd:dateTime"
+    },
+    "pav:createdBy": {
+      "@type": "@id"
+    },
+    "pav:lastUpdatedOn": {
+      "@type": "xsd:dateTime"
+    },
+    "oslc:modifiedBy": {
+      "@type": "@id"
+    },
+    "BioProject for AIRR NCBI": "https://schema.staging.metadatacenter.org/properties/84d77774-b685-462e-a6b3-b47fea8b21cf",
+    "Sequence Read Archive for AIRR NCBI": "https://schema.staging.metadatacenter.org/properties/49815922-ead0-42c4-88f1-0ddf1d4d4c9e",
+    "BioSample for AIRR NCBI": "https://schema.staging.metadatacenter.org/properties/55996c02-1636-41ba-bf10-f5aaf3733708"
+  },
+  "BioProject for AIRR NCBI": {
+    "@context": {
+      "Study Criteria": "http://scdontology.h3abionet.org/ontology/SCDO_0001033",
+      "Study ID": "http://semantic-dicom.org/dcm#StudyID",
+      "Funding Agency": "http://purl.org/net/OCRe/OCRe.owl#OCRE850077",
+      "Lab Name": "http://www.w3.org/2000/01/rdf-schema#label",
+      "Study Title": "http://purl.org/dc/elements/1.1/title",
+      "Study Type": "http://purl.org/dc/elements/1.1/type",
+      "Relevant Publications": "http://xmlns.com/foaf/0.1/publications",
+      "Lab Address": "https://schema.staging.metadatacenter.net/properties/25427e1c-7d44-4d93-b7f9-913c28e91333",
+      "Contact Information (data collection)": "https://schema.staging.metadatacenter.org/properties/d4210479-a917-4af6-aee4-c51ee39ec8fd"
+    },
+    "Study Criteria": {
+      "@value": null
+    },
+    "Study ID": {
+      "@value": null
+    },
+    "Funding Agency": {
+      "@value": null
+    },
+    "Lab Name": {
+      "@value": null
+    },
+    "Study Title": {
+      "@value": null
+    },
+    "Study Type": {},
+    "Relevant Publications": {
+      "@value": null
+    },
+    "Lab Address": {
+      "@value": null
+    },
+    "Contact Information (data collection)": {
+      "@value": null
+    },
+    "@id": "https://repo.staging.metadatacenter.org/template-element-instances/c491fef9-cff9-4147-a329-bc3c073ee60a"
+  },
+  "Sequence Read Archive for AIRR NCBI": [
+    {
+      "@context": {
+        "Read Lengths": "https://schema.staging.metadatacenter.net/properties/readLength",
+        "Template Amount": "https://schema.staging.metadatacenter.net/properties/nGTemplate",
+        "Target Locus for PCR": "https://schema.staging.metadatacenter.net/properties/targetLocusPCR",
+        "Date of Sequencing Run": "https://schema.staging.metadatacenter.org/properties/7e1a52f9-6782-47bb-bb04-23ca22576da2",
+        "File Type": "https://schema.staging.metadatacenter.org/properties/0cfb3ace-ddd3-4e7d-87ed-4dc33eb21c80",
+        "Sequencing Platform": "https://schema.staging.metadatacenter.net/properties/sequencingPlatform",
+        "Sequencing Facility": "https://schema.staging.metadatacenter.net/properties/sequencingFacility",
+        "Library Generation Protocol": "https://schema.staging.metadatacenter.net/properties/libraryGenerationProtocol",
+        "Target Substrate Quality": "https://schema.staging.metadatacenter.net/properties/targetSubstrateQuality",
+        "Forward PCR Primer Target Location": "https://schema.staging.metadatacenter.net/properties/forwardPCRPrimerTargetLocation",
+        "Reverse PCR Primer Target Location": "https://schema.staging.metadatacenter.net/properties/reversePCRPrimerTargetLocation",
+        "Batch Number": "https://schema.staging.metadatacenter.net/properties/batchNumber",
+        "Total Reads Passing QC Filter": "https://schema.staging.metadatacenter.net/properties/totalReadsPassingQCFilter",
+        "Sequencing Kit": "https://schema.staging.metadatacenter.net/properties/sequencingKit",
+        "Target Substrate": "https://schema.staging.metadatacenter.org/properties/06f0942e-dd2a-40b4-8654-e19ccf18e362",
+        "Library Generation Method": "https://schema.staging.metadatacenter.org/properties/53a17c41-2350-4b4a-9cd7-9d83ed2f2479",
+        "Protocol IDs": "https://schema.staging.metadatacenter.net/properties/protocolID",
+        "Complete Sequences": "https://schema.staging.metadatacenter.org/properties/c2cc02a0-285f-42ee-b978-3c7c97fe1409",
+        "Physical Linkage of Different Loci": "https://schema.staging.metadatacenter.org/properties/a86df8b6-a6fb-4f59-9c24-c84b980eae2f",
+        "Sample ID": "https://schema.staging.metadatacenter.org/properties/a9245679-8b2f-4c49-8783-b3a321b47e45",
+        "Nucleic Acid Processing ID": "https://schema.staging.metadatacenter.org/properties/e3457b17-8b51-4924-89c8-d00d4f32a92e"
+      },
+      "Read Lengths": {
+        "@value": null
+      },
+      "Template Amount": {
+        "@value": null
+      },
+      "Target Locus for PCR": {
+        "@value": null
+      },
+      "Date of Sequencing Run": {
+        "@value": null,
+        "@type": "xsd:date"
+      },
+      "File Type": {
+        "@value": null
+      },
+      "Sequencing Platform": {
+        "@value": null
+      },
+      "Sequencing Facility": {
+        "@value": null
+      },
+      "Library Generation Protocol": {
+        "@value": null
+      },
+      "Target Substrate Quality": {
+        "@value": null
+      },
+      "Forward PCR Primer Target Location": {
+        "@value": null
+      },
+      "Reverse PCR Primer Target Location": {
+        "@value": null
+      },
+      "Batch Number": {
+        "@value": null
+      },
+      "Total Reads Passing QC Filter": {
+        "@value": null
+      },
+      "Sequencing Kit": {
+        "@value": null
+      },
+      "filename": [],
+      "Target Substrate": {
+        "@value": null
+      },
+      "Library Generation Method": {
+        "@value": null
+      },
+      "Protocol IDs": {
+        "@value": null
+      },
+      "Complete Sequences": {
+        "@value": null
+      },
+      "Physical Linkage of Different Loci": {
+        "@value": null
+      },
+      "Sample ID": {
+        "@value": null
+      },
+      "Nucleic Acid Processing ID": {
+        "@value": null
+      },
+      "@id": "https://repo.staging.metadatacenter.org/template-element-instances/8386627f-270c-4171-938c-1f8748328ea3"
+    }
+  ],
+  "BioSample for AIRR NCBI": [
+    {
+      "@context": {
+        "Age": "http://xmlns.com/foaf/0.1/age",
+        "Biomaterial Provider": "https://schema.staging.metadatacenter.net/properties/biomaterialProvider",
+        "Cell Quality": "https://schema.staging.metadatacenter.net/properties/cellQuality",
+        "Sex": "http://www.loria.fr/~coulet/sopharm/SOPHARM_05103",
+        "Age Event": "https://schema.staging.metadatacenter.net/properties/ageEvent",
+        "Cell Subset": "https://schema.staging.metadatacenter.net/properties/cellType",
+        "Cell Isolation": "https://schema.staging.metadatacenter.net/properties/cellIsolation",
+        "Ethnicity": "https://schema.staging.metadatacenter.net/properties/ethnicity",
+        "Length of Disease": "https://schema.staging.metadatacenter.net/properties/diseaseLength",
+        "Tissue": "http://chem2bio2rdf.org/chem2bio2rdf.owl#tissue",
+        "Tissue Processing": "https://schema.staging.metadatacenter.net/properties/tissueProcessing",
+        "Sample Type": "https://schema.staging.metadatacenter.net/properties/bioSample",
+        "Other Relevant Medical History": "https://schema.staging.metadatacenter.net/properties/medicalHistory",
+        "Organism": "http://chem2bio2rdf.org/chem2bio2rdf.owl#organism",
+        "Anatomic Site": "https://schema.staging.metadatacenter.net/properties/anatomicSite",
+        "Race": "https://schema.staging.metadatacenter.net/properties/race",
+        "Prior Therapies for Primary Disease under Study": "https://schema.staging.metadatacenter.net/properties/priorTherapies",
+        "Intervention Definition": "https://schema.staging.metadatacenter.net/properties/interventionDefinition",
+        "Ancestry Population": "https://schema.staging.metadatacenter.net/properties/ancestryPopulation",
+        "Study Group Description": "https://schema.staging.metadatacenter.net/properties/studyGroupDescription",
+        "Cell Subset Phenotype": "https://schema.staging.metadatacenter.net/properties/phenotype",
+        "Immunogen": "https://schema.staging.metadatacenter.net/properties/immunogen",
+        "Relation Type": "https://schema.staging.metadatacenter.net/properties/linkType",
+        "Projected Release Date": "https://schema.staging.metadatacenter.net/properties/a9e4fd79-df27-4322-93b7-e1d7a017d978",
+        "Disease State of Sample": "https://schema.staging.metadatacenter.net/properties/diseaseStateSample",
+        "Number of Cells per Sequencing Reaction": "https://schema.staging.metadatacenter.net/properties/cellNumber",
+        "Number of Cells in Experiment": "https://schema.staging.metadatacenter.net/properties/cellSubtype",
+        "Sample Collection Time": "https://schema.staging.metadatacenter.org/properties/e7aef499-af43-4168-9a27-972b64faff72",
+        "Single-cell Sort": "https://schema.staging.metadatacenter.org/properties/2aed928b-0759-414f-a79d-e54768c099bd",
+        "Cell Storage": "https://schema.staging.metadatacenter.org/properties/cf694d08-4aaf-45e5-badc-d12f17991b40",
+        "Strain Name": "https://schema.staging.metadatacenter.net/properties/starinName",
+        "Related Subjects": "https://schema.staging.metadatacenter.net/properties/subjectLinked",
+        "Disease Stage": "https://schema.staging.metadatacenter.net/properties/diseaseStage",
+        "Sample ID": "http://www.geneontology.org/formats/oboInOwl#id",
+        "Collection Time Event": "https://schema.staging.metadatacenter.net/properties/collectionTimeEvent",
+        "Subject ID": "https://schema.staging.metadatacenter.net/properties/24f93b6d-8578-46db-a73a-b31b164ce8f4",
+        "Synthetic Library": "https://schema.staging.metadatacenter.org/properties/66383cde-b8a7-4843-8c19-91a1face7f38",
+        "Cell Processing Protocol": "https://schema.staging.metadatacenter.net/properties/processingProtocol",
+        "Diagnosis1": "https://schema.staging.metadatacenter.net/properties/f80c31ca-9b63-4a16-8efa-4d98a42613f7"
+      },
+      "Age": {
+        "@value": null
+      },
+      "Biomaterial Provider": {
+        "@value": null
+      },
+      "Cell Quality": {
+        "@value": null
+      },
+      "Sex": {},
+      "Age Event": {
+        "@value": null
+      },
+      "Cell Subset": {},
+      "Cell Isolation": {
+        "@value": null
+      },
+      "Ethnicity": {
+        "@value": null
+      },
+      "Length of Disease": {
+        "@value": null
+      },
+      "Tissue": {},
+      "Tissue Processing": {
+        "@value": null
+      },
+      "Sample Type": {
+        "@value": null
+      },
+      "Other Relevant Medical History": {
+        "@value": null
+      },
+      "Organism": {},
+      "Anatomic Site": {
+        "@value": null
+      },
+      "Race": {
+        "@value": null
+      },
+      "Prior Therapies for Primary Disease under Study": {
+        "@value": null
+      },
+      "Intervention Definition": {
+        "@value": null
+      },
+      "Ancestry Population": {
+        "@value": null
+      },
+      "Study Group Description": {
+        "@value": null
+      },
+      "Cell Subset Phenotype": {
+        "@value": null
+      },
+      "Immunogen": {
+        "@value": null
+      },
+      "Optional BioSample Attribute": [],
+      "Relation Type": {
+        "@value": null
+      },
+      "Projected Release Date": {
+        "@value": null,
+        "@type": "xsd:date"
+      },
+      "Disease State of Sample": {
+        "@value": null
+      },
+      "Number of Cells per Sequencing Reaction": {
+        "@value": null
+      },
+      "Number of Cells in Experiment": {
+        "@value": null
+      },
+      "Sample Collection Time": {
+        "@value": null
+      },
+      "Single-cell Sort": {
+        "@value": null
+      },
+      "Cell Storage": {
+        "@value": null
+      },
+      "Strain Name": {
+        "@value": null
+      },
+      "Related Subjects": {
+        "@value": null
+      },
+      "Disease Stage": {
+        "@value": null
+      },
+      "Sample ID": {
+        "@value": null
+      },
+      "Collection Time Event": {
+        "@value": null
+      },
+      "Subject ID": {
+        "@value": null
+      },
+      "Synthetic Library": {
+        "@value": null
+      },
+      "Cell Processing Protocol": {
+        "@value": null
+      },
+      "Diagnosis1": {},
+      "@id": "https://repo.staging.metadatacenter.org/template-element-instances/2d0d9864-c9e9-4bfb-b309-c35ee959d0c4"
+    }
+  ],
+  "schema:isBasedOn": "https://repo.staging.metadatacenter.org/templates/173c7641-e6fb-4433-9ad8-f516849d46e8",
+  "schema:name": "MiAIRR RC2-1 metadata",
+  "schema:description": "Enables AIRR-seq data submission to the NCBI through the CEDAR Workbench"
+}
