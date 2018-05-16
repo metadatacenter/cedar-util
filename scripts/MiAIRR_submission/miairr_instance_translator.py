@@ -4,9 +4,12 @@ from pprint import pprint
 import copy
 import random
 
-
 OUTPUT_FILE = "new_populated_instance.json"
-
+CONTACT_EMAIL = "marcosmr@stanford.edu"
+# If we use Star Wars identifiers (Chewbacca, Hans Solo, etc.) the NCBI team knows that a submission is a test
+# submission, and won't worry about it being approved/in the system
+USE_STAR_WARS_IDENTIFIERS = True
+STAR_WARS_PREFIX = 'STARWARS-'
 
 def generate_value_object(value):
     return {
@@ -21,27 +24,56 @@ def generate_ontology_term_object(uri, label):
     }
 
 
-def translate_bioproject(source_bioproject, destination_bioproject):
+# replaces a subjectId with a new generated one, to avoid duplication
+def replace_subject_id(json_data, subject_id, new_subject_id):
+    for field in json_data:
+        if json_data[field] and '@value' in json_data[field] and json_data[field][
+            '@value'] is not None and subject_id in json_data[field]['@value']:
+            json_data[field]['@value'] = json_data[field]['@value'].replace(subject_id, new_subject_id)
+
+    return json_data
+
+
+def translate_bioproject(source_bioproject, destination_bioproject, contact_email):
     not_available_term = generate_ontology_term_object(
         'http://data.bioontology.org/provisional_classes/732bcd70-3457-0136-3944-005056010073', 'not available')
 
-    destination_bioproject['Study Criteria'] = source_bioproject['Study Criteria']
+    if USE_STAR_WARS_IDENTIFIERS:
+        #destination_bioproject['Study ID']['@value'] = 'STAR_WARS_1'
+        destination_bioproject['Study Criteria']['@value'] = \
+            'Jedis were diagnosed according to the Dark Side criteria'
+        destination_bioproject['Funding Agency']['@value'] = 'The Force'
+        destination_bioproject['Lab Address']['@value'] = 'Department of the Universe'
+        destination_bioproject['Lab Name']['@value'] = 'Jedi Lab'
+        destination_bioproject['Study Title']['@value'] = \
+            'The Star Wars study: An analysis of cell types in Jedis'
+    else:
+        #destination_bioproject['Study ID'] = source_bioproject['Study ID']
+        destination_bioproject['Study Criteria'] = source_bioproject['Study Criteria']
+        destination_bioproject['Funding Agency'] = source_bioproject['Funding Agency']
+        destination_bioproject['Lab Address'] = source_bioproject['Department']
+        destination_bioproject['Lab Name'] = source_bioproject['Lab Name']
+        destination_bioproject['Study Title'] = source_bioproject['Study Title']
+
     destination_bioproject['Study ID'] = source_bioproject['Study ID']
-    destination_bioproject['Funding Agency'] = source_bioproject['Funding Agency']
-    destination_bioproject['Lab Name'] = source_bioproject['Lab Name']
-    destination_bioproject['Study Title'] = source_bioproject['Study Title']
-    destination_bioproject['Study Type'] = not_available_term
     destination_bioproject['Relevant Publications'] = source_bioproject['Relevant Publication']
-    destination_bioproject['Lab Address'] = source_bioproject['Department']
-    destination_bioproject['Contact Information (data collection)'] = source_bioproject[
-        'Contact Information (Corresponding author e-mail)']
+    destination_bioproject['Study Type'] = not_available_term
+
+    # destination_bioproject['Contact Information (data collection)'] = source_bioproject[
+    #     'Contact Information (Corresponding author e-mail)']
+    destination_bioproject['Contact Information (data collection)']['@value'] = contact_email
     return destination_bioproject
 
 
 def translate_biosample(source_biosample, destination_biosample, suffix):
-
     not_available_term = generate_ontology_term_object(
         'http://data.bioontology.org/provisional_classes/732bcd70-3457-0136-3944-005056010073', 'not available')
+
+    subject_id = source_biosample['Subject id']['@value']
+    if USE_STAR_WARS_IDENTIFIERS:
+        new_subject_id = STAR_WARS_PREFIX + subject_id + suffix
+    else:
+        new_subject_id = subject_id + suffix
 
     # Subject
     destination_biosample['Subject ID'] = source_biosample['Subject id']
@@ -79,8 +111,6 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     destination_biosample['Other Relevant Medical History'] = source_biosample['Other Relevant Medical History']
     # Biological Sample
     destination_biosample['Sample ID'] = source_biosample['Sample name']
-    destination_biosample['Sample ID']['@value'] = destination_biosample['Sample ID']['@value'] + '_' + suffix
-
     destination_biosample['Sample Type'] = source_biosample['Sample Type']
     destination_biosample['Tissue'] = source_biosample['Tissue']
     destination_biosample['Anatomic Site'] = source_biosample['Anatomic Site']
@@ -106,18 +136,36 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     for op in optional_attributes:
         destination_biosample[op] = source_biosample[op]
 
+    # Replace the subjectId with the new subjectId everywhere
+    destination_biosample = replace_subject_id(destination_biosample, subject_id, new_subject_id)
+
     return destination_biosample
 
 
 def translate_sra(source_sra, destination_sra, suffix):
     not_available_value = generate_value_object('NA')
 
-    destination_sra['Sample ID'] = source_sra['Sample Name']
-    destination_sra['Sample ID']['@value'] = source_sra['Sample Name']['@value'] + '_' + suffix
+    sample_id = source_sra['Sample Name']['@value']
+
+    if USE_STAR_WARS_IDENTIFIERS:
+        sample_id = STAR_WARS_PREFIX + sample_id
+
+    index = sample_id.find('_')
+    if index > 0:
+        subject_id = sample_id[:index]
+        new_sample_id = subject_id + suffix + sample_id[index:]
+        destination_sra['Sample ID']['@value'] = new_sample_id
+    else:
+        destination_sra['Sample ID']['@value'] = sample_id
+
     destination_sra['Target Substrate'] = source_sra['Target Substrate']
     destination_sra['Target Substrate Quality'] = source_sra['Target Substrate Quality']
     destination_sra['Template Amount'] = source_sra['Template Amount']
     destination_sra['Nucleic Acid Processing ID'] = not_available_value
+    destination_sra['Library Strategy'] = source_sra['Library Strategy']
+    destination_sra['Library Source'] = source_sra['Library Source']
+    destination_sra['Library Selection'] = source_sra['Library Selection']
+    destination_sra['Library Layout'] = source_sra['Library Layout']
     destination_sra['Library Generation Method'] = source_sra['Library Generation Method']
     destination_sra['Library Generation Protocol'] = source_sra['Library Generation Protocol']
     destination_sra['Protocol IDs'] = source_sra['Protocol ID']
@@ -144,21 +192,19 @@ def translate_sra(source_sra, destination_sra, suffix):
 
 
 def main():
-
     with open("source_instance.json", encoding='utf-8') as f:
         source_instance = json.load(f)
 
     with open("new_empty_instance.json", encoding='utf-8') as f:
         dest_instance = json.load(f)
 
-
     # random suffix used to generate different sample ids each time
-    suffix = str(random.randint(0, 999999999))
+    suffix = str(random.randint(0, 99999))
 
     # BioProject
     source_bioproject = source_instance['BioProject']
     dest_bioproject = dest_instance['BioProject for AIRR NCBI']
-    final_bioproject = translate_bioproject(source_bioproject, copy.copy(dest_bioproject))
+    final_bioproject = translate_bioproject(source_bioproject, copy.copy(dest_bioproject), CONTACT_EMAIL)
 
     # BioSample
     source_biosamples = source_instance['BioSample']
