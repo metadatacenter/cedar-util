@@ -50,43 +50,43 @@
       "First (given) name": "http://purl.obolibrary.org/obo/ERO_0000042"
     },
     "Study ID": {
-      "@value": "PRJNA429427"
+      "@value": ""
     },
     "Study Title": {
-      "@value": "DN B cells in Multiple Sclerosis (MS) patients and healthy controls (HC)"
+      "@value": ""
     },
     "Study Type": {
-      "@value": "AIRR-seq"
+      "@value": ""
     },
     "Study Criteria": {
-      "@value": "MS patients were recruited at the Revalidation & MS Center (Overpelt, Belgium) and were diagnosed according to the McDonald criteria. HC were recruited at the Biomedical Research Institute (Diepenbeek, Belgium)."
+      "@value": ""
     },
     "Funding Agency": {
-      "@value": "This work was supported by the National Multiple Sclerosis Society (PP-1509-06370), the Belgian Charcot Foundation and the National Institutes of Health (NIH) (R01AI104739)."
+      "@value": ""
     },
     "Lab Name": {
-      "@value": "Kleinstein Lab, Oconnor Lab, Sommers Lab"
+      "@value": ""
     },
     "Last (family) Name": {
-      "@value": "Marquez"
+      "@value": ""
     },
     "E-mail": {
-      "@value": "susanna.marquez@yale.edu"
+      "@value": ""
     },
     "Submitting Organization": {
-      "@value": "Yale University"
+      "@value": ""
     },
     "Contact Information (Corresponding author e-mail)": {
-      "@value": "steven.kleinstein@yale.edu"
+      "@value": ""
     },
     "Relevant Publication": {
       "@value": null
     },
     "Department": {
-      "@value": "Department of Pathology"
+      "@value": ""
     },
     "First (given) name": {
-      "@value": "Susanna"
+      "@value": ""
     },
     "@id": "https://repo.staging.metadatacenter.org/template-element-instances/2043bdd2-7742-4282-8b92-4e59a513ff3a"
   },
@@ -227,7 +227,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -407,7 +407,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -587,7 +587,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -767,7 +767,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -947,7 +947,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -1127,7 +1127,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -1307,7 +1307,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -1487,7 +1487,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -1667,7 +1667,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -1847,7 +1847,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -2027,7 +2027,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -2207,7 +2207,7 @@
         "@value": "NA"
       },
       "Biomaterial Provider": {
-        "@value": "Veerle Somers (Hasselt University) and Kevin O'Connor (Yale University)"
+        "@value": ""
       },
       "Geolocation Name": {
         "@value": "Belgium"
@@ -2355,7 +2355,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP626"
@@ -2487,7 +2487,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP626"
@@ -2619,7 +2619,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP626"
@@ -2751,7 +2751,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP626"
@@ -2883,7 +2883,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3015,7 +3015,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3147,7 +3147,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3279,7 +3279,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3411,7 +3411,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3543,7 +3543,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3675,7 +3675,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"
@@ -3807,7 +3807,7 @@
         "@value": "Read 1 326, Read 2 276"
       },
       "Sequencing Facility": {
-        "@value": "W.M. Keck Biotechnology Resource Laboratory (Yale University)"
+        "@value": ""
       },
       "Batch Number": {
         "@value": "AP4AC"

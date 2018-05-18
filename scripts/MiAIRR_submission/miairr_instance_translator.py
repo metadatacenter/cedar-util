@@ -8,8 +8,10 @@ OUTPUT_FILE = "new_populated_instance.json"
 CONTACT_EMAIL = "marcosmr@stanford.edu"
 # If we use Star Wars identifiers (Chewbacca, Hans Solo, etc.) the NCBI team knows that a submission is a test
 # submission, and won't worry about it being approved/in the system
-USE_STAR_WARS_IDENTIFIERS = True
+USE_STAR_WARS_DATA = True
 STAR_WARS_PREFIX = 'STARWARS-'
+TESTING_BIOPROJECT_ID = 'PRJNA471695'
+INCLUDE_BIOPROJECT_ID = True
 
 def generate_value_object(value):
     return {
@@ -38,7 +40,7 @@ def translate_bioproject(source_bioproject, destination_bioproject, contact_emai
     not_available_term = generate_ontology_term_object(
         'http://data.bioontology.org/provisional_classes/732bcd70-3457-0136-3944-005056010073', 'not available')
 
-    if USE_STAR_WARS_IDENTIFIERS:
+    if USE_STAR_WARS_DATA:
         #destination_bioproject['Study ID']['@value'] = 'STAR_WARS_1'
         destination_bioproject['Study Criteria']['@value'] = \
             'Jedis were diagnosed according to the Dark Side criteria'
@@ -55,7 +57,10 @@ def translate_bioproject(source_bioproject, destination_bioproject, contact_emai
         destination_bioproject['Lab Name'] = source_bioproject['Lab Name']
         destination_bioproject['Study Title'] = source_bioproject['Study Title']
 
-    destination_bioproject['Study ID'] = source_bioproject['Study ID']
+    if INCLUDE_BIOPROJECT_ID:
+        destination_bioproject['Study ID']['@value'] = TESTING_BIOPROJECT_ID
+    else:
+        destination_bioproject['Study ID']['@value'] = None
     destination_bioproject['Relevant Publications'] = source_bioproject['Relevant Publication']
     destination_bioproject['Study Type'] = not_available_term
 
@@ -70,7 +75,7 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
         'http://data.bioontology.org/provisional_classes/732bcd70-3457-0136-3944-005056010073', 'not available')
 
     subject_id = source_biosample['Subject id']['@value']
-    if USE_STAR_WARS_IDENTIFIERS:
+    if USE_STAR_WARS_DATA:
         new_subject_id = STAR_WARS_PREFIX + subject_id + suffix
     else:
         new_subject_id = subject_id + suffix
@@ -100,7 +105,10 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     destination_biosample['Projected Release Date'] = source_biosample[
         'Projected Release Date']  # TODO: format conversion
     # Diagnosis
-    destination_biosample['Study Group Description'] = source_biosample['Study Group Description']
+    if USE_STAR_WARS_DATA:
+        destination_biosample['Study Group Description']['@value'] = 'Cells from Jedis'
+    else:
+        destination_biosample['Study Group Description'] = source_biosample['Study Group Description']
     destination_biosample['Diagnosis1'] = not_available_term
     destination_biosample['Length of Disease'] = source_biosample['Length of Disease']
     destination_biosample['Disease Stage'] = source_biosample['Disease stage']
@@ -117,9 +125,19 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     destination_biosample['Disease State of Sample'] = source_biosample['Disease State of Sample']
     destination_biosample['Sample Collection Time'] = source_biosample['Sample Collection Time']
     destination_biosample['Collection Time Event'] = source_biosample['Collection Time Event T0']
-    destination_biosample['Biomaterial Provider'] = source_biosample['Biomaterial Provider']
+    if USE_STAR_WARS_DATA:
+        destination_biosample['Biomaterial Provider']['@value'] = 'Galaxy Provider'
+    else:
+        destination_biosample['Biomaterial Provider'] = source_biosample['Biomaterial Provider']
+
     # Processing
-    destination_biosample['Tissue Processing'] = source_biosample['Tissue Processing']
+    if USE_STAR_WARS_DATA:
+        destination_biosample['Tissue Processing']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus maximus et leo quis pretium. Cras quis dolor tellus. Fusce pellentesque sagittis ipsum, at cursus mauris commodo in. Etiam dictum elementum arcu. Pellentesque mattis mollis ultricies. Aliquam pellentesque arcu sit amet odio convallis fermentum. Proin blandit urna leo, non aliquam erat pellentesque ut. Aenean volutpat at lectus a cursus. Sed maximus nunc eu porta posuere. Nam et tellus et turpis efficitur iaculis. Maecenas varius sit amet leo at aliquet. Donec sagittis turpis quam, dapibus vestibulum justo lacinia at. Fusce volutpat sollicitudin dui, in malesuada nisi venenatis et. In eleifend ultrices volutpat.'
+        destination_biosample['Cell Processing Protocol']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus maximus et leo quis pretium. Cras quis dolor tellus. Fusce pellentesque sagittis ipsum, at cursus mauris commodo in. Etiam dictum elementum arcu. Pellentesque mattis mollis ultricies. Aliquam pellentesque arcu sit amet odio convallis fermentum. Proin blandit urna leo, non aliquam erat pellentesque ut. Aenean volutpat at lectus a cursus. Sed maximus nunc eu porta posuere. Nam et tellus et turpis efficitur iaculis. Maecenas varius sit amet leo at aliquet. Donec sagittis turpis quam, dapibus vestibulum justo lacinia at. Fusce volutpat sollicitudin dui, in malesuada nisi venenatis et. In eleifend ultrices volutpat.'
+    else:
+        destination_biosample['Tissue Processing'] = source_biosample['Tissue Processing']
+        destination_biosample['Cell Processing Protocol'] = source_biosample['Processing Protocol']
+
     destination_biosample['Cell Subset'] = source_biosample['Cell Subset']
     destination_biosample['Cell Subset Phenotype'] = source_biosample['Cell Subset Phenotype']
     destination_biosample['Single-cell Sort'] = source_biosample['Single-cell Sort']
@@ -129,7 +147,7 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     destination_biosample['Cell Storage'] = source_biosample['Cell Storage']
     destination_biosample['Cell Quality'] = source_biosample['Cell Quality']
     destination_biosample['Cell Isolation'] = source_biosample['Cell Isolation']
-    destination_biosample['Cell Processing Protocol'] = source_biosample['Processing Protocol']
+
     # optional attributes
     optional_attributes = source_biosample['Optional Attribute']
     destination_biosample['Optional BioSample Attribute'] = optional_attributes
@@ -147,7 +165,7 @@ def translate_sra(source_sra, destination_sra, suffix):
 
     sample_id = source_sra['Sample Name']['@value']
 
-    if USE_STAR_WARS_IDENTIFIERS:
+    if USE_STAR_WARS_DATA:
         sample_id = STAR_WARS_PREFIX + sample_id
 
     index = sample_id.find('_')
@@ -158,6 +176,13 @@ def translate_sra(source_sra, destination_sra, suffix):
     else:
         destination_sra['Sample ID']['@value'] = sample_id
 
+    if USE_STAR_WARS_DATA:
+        destination_sra['Library Generation Protocol']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla fermentum, metus nec viverra suscipit, sem nunc commodo risus, in mollis eros justo in sem. Morbi eget maximus nunc, sed luctus nisi. Proin sit amet ultrices libero. Nulla auctor at urna at pretium. Aenean vestibulum elit dui, nec blandit lectus tincidunt vel. Curabitur nibh nunc, varius sed odio eget, ornare commodo tellus. Nunc pulvinar justo diam, sed dictum neque condimentum ac. Integer at nisl eget lorem iaculis interdum. Nullam eget lorem eu magna malesuada tincidunt. Nulla et sem malesuada sapien vehicula laoreet ut nec ipsum. Vestibulum ipsum leo, sagittis vitae finibus vitae, volutpat non ligula. Nunc quis eros vitae lorem feugiat porta quis eu lorem.'
+        destination_sra['Sequencing Facility']['@value'] = 'Sequencing Facility from the Galaxy'
+    else:
+        destination_sra['Library Generation Protocol'] = source_sra['Library Generation Protocol']
+        destination_sra['Sequencing Facility'] = source_sra['Sequencing Facility']
+
     destination_sra['Target Substrate'] = source_sra['Target Substrate']
     destination_sra['Target Substrate Quality'] = source_sra['Target Substrate Quality']
     destination_sra['Template Amount'] = source_sra['Template Amount']
@@ -167,7 +192,6 @@ def translate_sra(source_sra, destination_sra, suffix):
     destination_sra['Library Selection'] = source_sra['Library Selection']
     destination_sra['Library Layout'] = source_sra['Library Layout']
     destination_sra['Library Generation Method'] = source_sra['Library Generation Method']
-    destination_sra['Library Generation Protocol'] = source_sra['Library Generation Protocol']
     destination_sra['Protocol IDs'] = source_sra['Protocol ID']
     destination_sra['Target Locus for PCR'] = source_sra['Target Locus for PCR']
     destination_sra['Forward PCR Primer Target Location'] = source_sra['Forward PCR Primer Target Location']
@@ -177,7 +201,6 @@ def translate_sra(source_sra, destination_sra, suffix):
     destination_sra['Total Reads Passing QC Filter'] = source_sra['Total Reads Passing QC Filter']
     destination_sra['Sequencing Platform'] = source_sra['Sequencing Platform']
     destination_sra['Read Lengths'] = source_sra['Read Lengths']
-    destination_sra['Sequencing Facility'] = source_sra['Sequencing Facility']
     destination_sra['Batch Number'] = source_sra['Batch Number']
     destination_sra['Date of Sequencing Run'] = source_sra['Date of Sequencing Run']
     destination_sra['Sequencing Kit'] = source_sra['Sequencing Kit']
