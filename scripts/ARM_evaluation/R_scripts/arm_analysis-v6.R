@@ -10,9 +10,10 @@ library("RColorBrewer")
 ### CONSTANTS ###
 workspace = "/Users/marcosmr/tmp/ARM_resources/EVALUATION/results"
 setwd(workspace)
-color1 <- "#DB6D00"
-color2 <- "#070092"
-color3 <- "#ffff99" # yellow
+color1 <- "#fdb863" # light orange
+color2 <- "#e66101" # dark orange
+color3 <- "#b2abd2" # light violet
+color4 <- "#5e3c99" # dark violet
   
 # Results data (free text)
 file_NCBItoNCBI <- paste(workspace, "/1_free_text/results_trainNCBI_testNCBI_2018-04-16_08_57_20.csv", sep="")
@@ -38,7 +39,6 @@ file_NCBItoEBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/
 file_EBItoEBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainEBI_testEBI_annotated_2018-04-22_07_25_04.csv", sep="")
 file_EBItoNCBI_annotated_different_ontologies_no_mappings <- paste(workspace, "/4_annotated_different_ontologies_no_mappings/results_trainEBI_testNCBI_annotated_2018-04-22_20_20_07.csv", sep="")
 
-
 # Results data (annotated, using different ontologies and mappings)
 file_NCBItoNCBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainNCBI_testNCBI_annotated_mappings_2018-04-23_22_22_03.csv", sep="")
 file_NCBItoEBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_annotated_different_ontologies_mappings/results_trainNCBI_testEBI_annotated_mappings_2018-04-23_19_34_06.csv", sep="")
@@ -57,12 +57,30 @@ file_EBItoNCBI_annotated_different_ontologies_mappings <- paste(workspace, "/5_a
 # file_EBItoEBI_annotated <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_2018-04-17_20_37_23.csv", sep="")
 # file_EBItoNCBI_annotated <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_2018-04-17_22_43_26.csv", sep="")
 # 
-# file_NCBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
-# file_NCBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
-# file_EBItoEBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
-# file_EBItoNCBI_annotated_mappings <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
+# file_NCBItoNCBI_annotated_same_ontologies_mappings <- paste(workspace, "/mini/results_trainNCBI_testNCBI_annotated_mappings_2018-04-18_05_30_09.csv", sep="")
+# file_NCBItoEBI_annotated_different_ontologies_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
+# file_EBItoEBI_annotated_same_ontologies_mappings <- paste(workspace, "/mini/results_trainEBI_testEBI_annotated_mappings_2018-04-18_03_31_33.csv", sep="")
+# file_EBItoNCBI_annotated_different_ontologies_mappings <- paste(workspace, "/mini/results_trainEBI_testNCBI_annotated_mappings_2018-04-18_01_11_03.csv", sep="")
 
 ### FUNCTION DEFINITIONS ###
+
+standardFieldName <- function(field_name) {
+  if (field_name == 'cell_line' | field_name == 'cellLine') {
+    return('cell line')
+  }
+  else if (field_name == 'cell_type' | field_name == 'cellType') {
+    return('cell type')
+  }
+  else if (field_name == 'diseaseState') {
+    return('disease')
+  }
+  else if (field_name == 'organismPart') {
+    return('tissue')
+  }
+  else {
+    return(field_name)
+  }
+}
 
 # Aggregation by no_populated_fields
 aggregate_data_1 <- function(df, reciprocal_rank_vr_column, reciprocal_rank_baseline_column) {
@@ -102,18 +120,39 @@ aggregate_data_1_2 <- function(df, reciprocal_rank_vr_column, reciprocal_rank_ba
 }
 
 # Aggregation by target_field and no_populated_fields
-aggregate_data_2 <- function(df, reciprocal_rank_vr_column, reciprocal_rank_baseline_column) {
+aggregate_data_2 <- function(df, reciprocal_rank_vr_column, reciprocal_rank_baseline_column, recom_method_name="recommender", baseline_method_name="baseline") {
   # aggregation for the 'recommender' method
   agg1 <- aggregate(list(mrr=df[[reciprocal_rank_vr_column]]), by=list(field = df$target_field, no_populated_fields = df$populated_fields_size), FUN=mean)
-  agg1$method <- "recommender"
+  agg1$method <- recom_method_name
   # aggregation for the 'baseline' method
   agg2 <- aggregate(list(mrr=df[[reciprocal_rank_baseline_column]]), by=list(field = df$target_field, no_populated_fields = df$populated_fields_size), FUN=mean)
-  agg2$method <- "baseline"
+  agg2$method <- baseline_method_name
   # final aggregation
   agg_final <- rbind(agg1, agg2)
+  # convert from factors to characters to be able to modify them
+  agg_final$field <- as.character(agg_final$field)
+  
   # Limit it to no_populated_fields <5
   agg_final <- agg_final[agg_final$no_populated_fields < 5,]
   agg_final$experiment <- df$experiment[1]
+  
+  # Generate the right field name
+  for(i in 1:length(agg_final$field)){
+    s <- agg_final$field[i]
+    if (startsWith(s, '[')) {
+      separator <- '\\]\\('
+      pos_separator <- regexpr(pattern = separator, s)
+      var_name <- substr(s, pos_separator + 2, nchar(s) - 1)
+    }
+    else {
+      var_name <- s
+    }
+    var_name <- standardFieldName(var_name)
+    agg_final$field[i] <- var_name
+  }
+  
+  agg_final$field <- as.factor(agg_final$field)
+    
   return(agg_final)
 }
 
@@ -138,15 +177,15 @@ generate_plot <- function(df, title="title"){
   return(plot)
 }
 
-generate_plot_2 <- function(df, title="title"){
+generate_plot_2 <- function(df, title="title") {
   plot <- ggplot(data=df, aes(x=no_populated_fields, y=mrr, group=method, colour=method)) + 
-    geom_line(aes(linetype=method), size=0.7) + 
-    scale_linetype_manual(values=c("dashed", "solid", "dashed", "solid")) +
-    scale_color_manual(values=c(color1, color1, color2, color2)) +
+    theme_bw(base_size = 9)  +
+    geom_line(aes(linetype=method), size=0.5) + 
+    scale_linetype_manual(values=c("dashed", "dashed", "solid", "solid")) +
+    scale_color_manual(values=c(color4, color2, color4, color2)) +
     geom_point() + 
-    geom_text(size=2.5, aes(label=sprintf("%0.2f", round(mrr, digits = 2))), vjust=2, show.legend = FALSE) +
-    ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank") +
-    theme(text = element_text(size=8))
+    #geom_text(size=2.5, aes(label=sprintf("%0.2f", round(mrr, digits = 2))), vjust=2, show.legend = FALSE) +
+    ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank") 
   # + scale_color_brewer(palette="Dark2")
   return(plot)
 }
@@ -159,8 +198,10 @@ generate_plot_2 <- function(df, title="title"){
 # }
 
 generate_plot_field <- function(df, title="title"){
+  # Custom order for the factors
+  df$method <- factor(df$method, c("baseline (text)","recommender (text)", "baseline (ontology terms)", "recommender (ontology terms)"))
   plot <- ggplot(data=df, aes(x=field, y=mrr, fill=method)) + geom_bar(stat="identity", position=position_dodge()) +
-    scale_fill_manual(values=c(color1, color2)) +
+    scale_fill_manual(values=c(color1, color2, color3, color4)) +
     ylim(0,1) + ggtitle(title) + xlab("Field") + ylab("Mean Reciprocal Rank") +
     theme(text = element_text(size=8))
   return(plot)
@@ -219,7 +260,7 @@ generate_all_plots <- function(evaluation_set, reciprocal_rank_vr_column, recipr
   
 }
 
-generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, evaluation_set3, reciprocal_rank_vr_column, reciprocal_rank_baseline_column) {
+generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, reciprocal_rank_vr_column, reciprocal_rank_baseline_column) {
   
   data_NCBItoNCBI1 <- read.csv(evaluation_set1@datasets[1])
   data_NCBItoEBI1 <- read.csv(evaluation_set1@datasets[2])
@@ -233,12 +274,6 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, eval
   data_EBItoNCBI2 <- read.csv(evaluation_set2@datasets[4])
   description2 <- evaluation_set2@description
   
-  data_NCBItoNCBI3 <- read.csv(evaluation_set3@datasets[1])
-  data_NCBItoEBI3 <- read.csv(evaluation_set3@datasets[2])
-  data_EBItoEBI3 <- read.csv(evaluation_set3@datasets[3])
-  data_EBItoNCBI3 <- read.csv(evaluation_set3@datasets[4])
-  description3 <- evaluation_set3@description
-  
   data_NCBItoNCBI1$experiment <- "NCBItoNCBI"
   data_NCBItoEBI1$experiment <- "NCBItoEBI"
   data_EBItoEBI1$experiment <- "EBItoEBI"
@@ -249,74 +284,104 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, eval
   data_EBItoEBI2$experiment <- "EBItoEBI"
   data_EBItoNCBI2$experiment <- "EBItoNCBI"
   
-  data_NCBItoNCBI3$experiment <- "NCBItoNCBI"
-  data_NCBItoEBI3$experiment <- "NCBItoEBI"
-  data_EBItoEBI3$experiment <- "EBItoEBI"
-  data_EBItoNCBI3$experiment <- "EBItoNCBI"
-  
   # Used to include or exclude the baseline from the evaluation
   baseline_col = reciprocal_rank_baseline_column
   #baseline_col = NULL
   
-  data_p1_1 <- aggregate_data_1_2(data_NCBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender", baseline_method_name="baseline")
-  data_p1_2 <- aggregate_data_1_2(data_NCBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated", baseline_method_name="baseline_annotated")
-  data_p1_3 <- aggregate_data_1_2(data_NCBItoNCBI3, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated_mappings", baseline_method_name="baseline_annotated_mappings")
-  #data_p1 <- rbind(data_p1_1, data_p1_2, data_p1_3)
+  # 1) Recommender vs Baseline 2x2 plots
+  
+  data_p1_1 <- aggregate_data_1_2(data_NCBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p1_2 <- aggregate_data_1_2(data_NCBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
   data_p1 <- rbind(data_p1_1, data_p1_2)
   
-  data_p2_1 <- aggregate_data_1_2(data_NCBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender", baseline_method_name="baseline")
-  data_p2_2 <- aggregate_data_1_2(data_NCBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated", baseline_method_name="baseline_annotated")
-  data_p2_3 <- aggregate_data_1_2(data_NCBItoEBI3, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated_mappings", baseline_method_name="baseline_annotated_mappings")
-  #data_p2 <- rbind(data_p2_1, data_p2_2, data_p2_3)
+  data_p2_1 <- aggregate_data_1_2(data_NCBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p2_2 <- aggregate_data_1_2(data_NCBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
   data_p2 <- rbind(data_p2_1, data_p2_2)
   
-  data_p3_1 <- aggregate_data_1_2(data_EBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender", baseline_method_name="baseline")
-  data_p3_2 <- aggregate_data_1_2(data_EBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated", baseline_method_name="baseline_annotated")
-  data_p3_3 <- aggregate_data_1_2(data_EBItoEBI3, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated_mappings", baseline_method_name="baseline_annotated_mappings")
-  #data_p3 <- rbind(data_p3_1, data_p3_2, data_p3_3)
+  data_p3_1 <- aggregate_data_1_2(data_EBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p3_2 <- aggregate_data_1_2(data_EBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
   data_p3 <- rbind(data_p3_1, data_p3_2)
   
-  data_p4_1 <- aggregate_data_1_2(data_EBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender", baseline_method_name="baseline")
-  data_p4_2 <- aggregate_data_1_2(data_EBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated", baseline_method_name="baseline_annotated")
-  data_p4_3 <- aggregate_data_1_2(data_EBItoNCBI3, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender_annotated_mappings", baseline_method_name="baseline_annotated_mappings")
-  #data_p4 <- rbind(data_p4_1, data_p4_2, data_p4_3)
+  data_p4_1 <- aggregate_data_1_2(data_EBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p4_2 <- aggregate_data_1_2(data_EBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
   data_p4 <- rbind(data_p4_1, data_p4_2)
 
-  # 1) Recommender vs Baseline 2x2 plots
   p1 <- generate_plot_2(data_p1, "Training: NCBI; Testing: NCBI")
-  p2 <- generate_plot_2(data_p2, "Training: NCBI; Testing: EBI")
-  p3 <- generate_plot_2(data_p3, "Training: EBI; Testing: EBI")
+  p2 <- generate_plot_2(data_p3, "Training: EBI; Testing: EBI")
+  p3 <- generate_plot_2(data_p2, "Training: NCBI; Testing: EBI")
   p4 <- generate_plot_2(data_p4, "Training: EBI; Testing: NCBI")
   fig1 <- ggarrange(p1, p2, p3, p4, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
   description = paste(description1, " vs ", description2, sep = "")
-  #desc_text <- paste("Metadata Recommender (text vs annotated vs annotated_mappings)", sep = "")
-  desc_text <- paste("Metadata Recommender (text vs ontology terms)", sep = "")
+  #desc_text <- paste("Results", sep = "")
+  desc_text <- ""
   fig1_annotated <- annotate_figure(fig1, top = text_grob(label=desc_text, color = "black", face = "bold", size = 11))
   print(fig1_annotated)
 
   # Export plot
   dev.copy(pdf, paste("plot3_", gsub(" ", "_", description), "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"), ".pdf", sep=""))
   dev.off()
-
+  
+  # 2) Recommender vs Baseline (per target field)
+  data_p5_1 <- aggregate_data_2(data_NCBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p5_2 <- aggregate_data_2(data_NCBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
+  data_p5 <- rbind(data_p5_1, data_p5_2)
+  
+  data_p6_1 <- aggregate_data_2(data_NCBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p6_2 <- aggregate_data_2(data_NCBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
+  data_p6 <- rbind(data_p6_1, data_p6_2)
+  
+  data_p7_1 <- aggregate_data_2(data_EBItoEBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p7_2 <- aggregate_data_2(data_EBItoEBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
+  data_p7 <- rbind(data_p7_1, data_p7_2)
+  
+  data_p8_1 <- aggregate_data_2(data_EBItoNCBI1, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (text)", baseline_method_name="baseline (text)")
+  data_p8_2 <- aggregate_data_2(data_EBItoNCBI2, reciprocal_rank_vr_column, baseline_col, recom_method_name="recommender (ontology terms)", baseline_method_name="baseline (ontology terms)")
+  data_p8 <- rbind(data_p8_1, data_p8_2)
+  
+  p5 <- generate_plot_field(data_p5, "Training: NCBI; Testing: NCBI")
+  p6 <- generate_plot_field(data_p6, "Training: NCBI; Testing: EBI")
+  p7 <- generate_plot_field(data_p7, "Training: EBI; Testing: EBI")
+  p8 <- generate_plot_field(data_p8, "Training: EBI; Testing: NCBI")
+  
+  fig2 <- ggarrange(p5, p6, p7, p8, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
+  #desc_text <- paste("Results", sep = "")
+  desc_text <- ""
+  fig2_annotated <- annotate_figure(fig2, top = text_grob(label=desc_text, color = "black", face = "bold", size = 11))
+  print(fig2_annotated)
+  
+  # Export plot
+  dev.copy(pdf, paste("plot2_", gsub(" ", "_", description), "_", format(Sys.time(), "%Y_%m_%d_%H_%M_%S"), ".pdf", sep=""))
+  dev.off()
+  
 }
 
 ### MAIN BODY ###
 
-evaluation_set_1 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI, file_NCBItoEBI, file_EBItoEBI, file_EBItoNCBI), description="free text")
-evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_no_mappings, file_NCBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoNCBI_annotated_same_ontologies_no_mappings), description="annotated; same ontologies; no mappings")
-evaluation_set_3 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_mappings, file_NCBItoEBI_annotated_same_ontologies_mappings, file_EBItoEBI_annotated_same_ontologies_mappings, file_EBItoNCBI_annotated_same_ontologies_mappings), description="annotated; same ontologies; with mappings")
-evaluation_set_4 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_no_mappings, file_NCBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoNCBI_annotated_different_ontologies_no_mappings), description="annotated; diff ontologies; no mappings")
-evaluation_set_5 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_mappings, file_NCBItoEBI_annotated_different_ontologies_mappings, file_EBItoEBI_annotated_different_ontologies_mappings, file_EBItoNCBI_annotated_different_ontologies_mappings), description="annotated; diff ontologies; with mappings")
-
-evaluation_sets = c(evaluation_set_1, evaluation_set_2, evaluation_set_3, evaluation_set_4, evaluation_set_5)
-
-for (evaluation_set in evaluation_sets){
-  generate_all_plots(evaluation_set, 'RR_top5_vr', 'RR_top5_baseline')
-}
-
-generate_all_plots_overlapped(evaluation_set_1, evaluation_set_2, evaluation_set_3, 'RR_top5_vr', 'RR_top5_baseline')
+# evaluation_set_1 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI, file_NCBItoEBI, file_EBItoEBI, file_EBItoNCBI), description="free text")
+# evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_no_mappings, file_NCBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoEBI_annotated_same_ontologies_no_mappings, file_EBItoNCBI_annotated_same_ontologies_no_mappings), description="annotated; same ontologies; no mappings")
+# evaluation_set_3 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_mappings, file_NCBItoEBI_annotated_same_ontologies_mappings, file_EBItoEBI_annotated_same_ontologies_mappings, file_EBItoNCBI_annotated_same_ontologies_mappings), description="annotated; same ontologies; with mappings")
+# evaluation_set_4 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_no_mappings, file_NCBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoEBI_annotated_different_ontologies_no_mappings, file_EBItoNCBI_annotated_different_ontologies_no_mappings), description="annotated; diff ontologies; no mappings")
+# evaluation_set_5 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_different_ontologies_mappings, file_NCBItoEBI_annotated_different_ontologies_mappings, file_EBItoEBI_annotated_different_ontologies_mappings, file_EBItoNCBI_annotated_different_ontologies_mappings), description="annotated; diff ontologies; with mappings")
+# 
+# evaluation_sets = c(evaluation_set_1, evaluation_set_2, evaluation_set_3, evaluation_set_4, evaluation_set_5)
+# 
+# for (evaluation_set in evaluation_sets){
+#   generate_all_plots(evaluation_set, 'RR_top5_vr', 'RR_top5_baseline')
+# }
+# 
+# generate_all_plots_overlapped(evaluation_set_1, evaluation_set_2, evaluation_set_3, 'RR_top5_vr', 'RR_top5_baseline')
 
 ################################
 
-# hist(data_NCBItoNCBI$populated_fields_size)
-# hist(data_NCBItoEBI$populated_fields_size)
+### PLOTS FOR PAPER ###
+
+# First figure
+evaluation_set_1 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI, file_NCBItoEBI, file_EBItoEBI, file_EBItoNCBI), description="free text")
+evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_mappings, file_NCBItoEBI_annotated_different_ontologies_mappings, file_EBItoEBI_annotated_same_ontologies_mappings, file_EBItoNCBI_annotated_different_ontologies_mappings), description="annotated; diff ontologies; with mappings")
+generate_all_plots_overlapped(evaluation_set_1, evaluation_set_2, 'RR_top5_vr', 'RR_top5_baseline')
+
+# Second figure
+
+
+
+
