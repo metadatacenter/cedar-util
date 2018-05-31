@@ -28,7 +28,7 @@ EBI_DOWNLOAD_OUTPUT_FOLDER = BASE_PATH + "/samples/ebi_samples/original"
 # Input parameters for 'ncbi_biosamples_2_filter.py'
 NCBI_FILTER_INPUT_FILE = BASE_PATH + '/samples/ncbi_samples/original/2018-03-09-biosample_set.xml'
 NCBI_FILTER_OUTPUT_FILE = BASE_PATH + '/samples/ncbi_samples/filtered/biosample_result_filtered.xml'
-NCBI_FILTER_RELEVANT_ATTS = ['sex', 'tissue', 'disease', 'cell_type', 'cell type' 'cell_line', 'cell line', 'ethnicity']
+NCBI_FILTER_RELEVANT_ATTS = ['sex', 'tissue', 'disease', 'cell_type', 'cell type', 'cell_line', 'cell line', 'ethnicity']
 NCBI_FILTER_MIN_RELEVANT_ATTS = 3
 
 # Input parameters for 'ebi_biosamples_2_filter.py'
