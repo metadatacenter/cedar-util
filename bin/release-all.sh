@@ -247,6 +247,7 @@ release_docker_build_repo()
     git checkout develop
     git pull origin develop
     find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-microservice:.*$/FROM metadatacenter\/cedar-microservice:'${CEDAR_RELEASE_VERSION}'/' {} \; -print
+    find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-java:.*$/FROM metadatacenter\/cedar-java:'${CEDAR_RELEASE_VERSION}'/' {} \; -print
     find . -name Dockerfile -exec sed -i '' 's/^ENV CEDAR_VERSION=.*$/ENV CEDAR_VERSION='${CEDAR_RELEASE_VERSION}'/' {} \; -print
     git commit -a -m "Set the release version in the Dockerfiles"
     git push origin develop
@@ -258,6 +259,7 @@ release_docker_build_repo()
     # Return to develop branch 
     git checkout develop
     find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-microservice:.*$/FROM metadatacenter\/cedar-microservice:'${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
+    find . -name Dockerfile -exec sed -i '' 's/^FROM metadatacenter\/cedar-java:.*$/FROM metadatacenter\/cedar-java:'${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
     find . -name Dockerfile -exec sed -i '' 's/^ENV CEDAR_VERSION=.*$/ENV CEDAR_VERSION='${CEDAR_NEXT_DEVELOPMENT_VERSION}'/' {} \; -print
     git commit -a -m "Updated to next development version"
     git push origin develop

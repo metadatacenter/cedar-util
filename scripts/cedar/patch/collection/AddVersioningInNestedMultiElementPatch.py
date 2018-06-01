@@ -19,14 +19,14 @@ class AddVersioningInNestedMultiElementPatch(object):
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
-        patch = self.get_patch(error_message)
+        patch = self.get_patch(error_message, doc)
         patched_doc = patch.apply(doc)
         return patched_doc
 
     def get_patch(self, error_message, doc=None):
         path = utils.get_error_location(error_message)
 
-        user_property_paths = [path]
+        user_property_paths = []
         self.collect_user_property_paths(user_property_paths, doc, path)
 
         patches = []
