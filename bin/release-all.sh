@@ -51,6 +51,8 @@ CEDAR_SERVER_REPOS=(
 
 CEDAR_FRONTEND_REPOS=( "cedar-template-editor" )
 
+CEDAR_CONFIGURATION_REPOS=( "cedar-conf" )
+
 CEDAR_DOCUMENTATION_REPOS=( "cedar-docs" "cedar-swagger-ui" )
 
 CEDAR_CLIENT_REPOS=(
@@ -71,6 +73,7 @@ CEDAR_ALL_REPOS=(
     "${CEDAR_PARENT_REPOS[@]}"
     "${CEDAR_SERVER_REPOS[@]}"
     "${CEDAR_FRONTEND_REPOS[@]}"
+    "${CEDAR_CONFIGURATION_REPOS[@]}"
     "${CEDAR_DOCUMENTATION_REPOS[@]}"
     "${CEDAR_CLIENT_REPOS[@]}"
     "${CEDAR_PROJECT_REPOS[@]}"
@@ -401,6 +404,15 @@ release_all_frontend_repos()
     done
 }
 
+release_all_configuration_repos()
+{
+    echo "Releasing configuration repos..."
+    for r in "${CEDAR_CONFIGURATION_REPOS[@]}"
+    do
+        release_mavenless_repo $r
+    done
+}
+
 release_all_documentation_repos()
 {
     echo "Releasing documentation repos..."
@@ -463,7 +475,10 @@ build_all_project_repos
 release_all_parent_repos
 release_all_server_repos
 release_all_project_repos
+release_all_configuration_repos
+
 release_all_frontend_repos
+
 release_all_documentation_repos
 
 release_all_client_repos
