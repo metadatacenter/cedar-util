@@ -70,8 +70,9 @@ def get_total_count(api_key, request_url):
 
 def get_identifiers(search_result):
     identifiers = []
-    for resource in search_result["resources"]:
-        identifiers.append(resource["@id"])
+    if "resources" in search_result:
+        for resource in search_result["resources"]:
+            identifiers.append(resource["@id"])
     return identifiers
 
 
