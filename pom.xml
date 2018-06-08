@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.metadatacenter</groupId>
     <artifactId>cedar-parent</artifactId>
-    <version>1.8.3-SNAPSHOT</version>
+    <version>1.8.4-SNAPSHOT</version>
   </parent>
 
   <groupId>org.metadatacenter</groupId>
   <artifactId>cedar-util</artifactId>
-  <version>1.8.3-SNAPSHOT</version>
+  <version>1.8.4-SNAPSHOT</version>
   <name>CEDAR Utilities</name>
   <packaging>pom</packaging>
 
