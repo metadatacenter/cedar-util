@@ -54,7 +54,7 @@ def search_instances(server_address, api_key, query='*', max_count=None, limit_p
 
 
 def search_instances_of(server_address, api_key, template_id, max_count=None, limit_per_page=500):
-    request_url = server_address + "/search-deep?derived_from_id=" + template_id + "&q=*"
+    request_url = server_address + "/search-deep?is_based_on=" + template_id
     return search_resources(api_key, request_url, max_count, limit_per_page)
 
 
