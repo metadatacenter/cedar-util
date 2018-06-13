@@ -1,28 +1,28 @@
 from cedar.utils import getter, updater
 
 
-def add_group_permission_to_template(api_key, server_address, template_id, group_id, permission_type):
-    template_permissions = getter.get_template_permissions(api_key, server_address, template_id)
+def add_group_permission_to_template(server_address, api_key, template_id, group_id, permission_type):
+    template_permissions = getter.get_template_permissions(server_address, api_key, template_id)
     template_permissions['groupPermissions'].append(create_group_permission(group_id, permission_type))
-    updater.update_template_permission(api_key, server_address, template_id, template_permissions)
+    updater.update_template_permission(server_address, api_key, template_id, template_permissions)
 
 
-def add_group_permission_to_element(api_key, server_address, element_id, group_id, permission_type):
-    element_permissions = getter.get_element_permissions(api_key, server_address, element_id)
+def add_group_permission_to_element(server_address, api_key, element_id, group_id, permission_type):
+    element_permissions = getter.get_element_permissions(server_address, api_key, element_id)
     element_permissions['groupPermissions'].append(create_group_permission(group_id, permission_type))
-    updater.update_element_permission(api_key, server_address, element_id, element_permissions)
+    updater.update_element_permission(server_address, api_key, element_id, element_permissions)
 
 
-def add_group_permission_to_field(api_key, server_address, field_id, group_id, permission_type):
-    field_permissions = getter.get_instance_permissions(api_key, server_address, field_id)
+def add_group_permission_to_field(server_address, api_key, field_id, group_id, permission_type):
+    field_permissions = getter.get_instance_permissions(server_address, api_key, field_id)
     field_permissions['groupPermissions'].append(create_group_permission(group_id, permission_type))
-    updater.update_field_permission(api_key, server_address, field_id, field_permissions)
+    updater.update_field_permission(server_address, api_key, field_id, field_permissions)
 
 
-def add_group_permission_to_instance(api_key, server_address, instance_id, group_id, permission_type):
-    instance_permissions = getter.get_instance_permissions(api_key, server_address, instance_id)
+def add_group_permission_to_instance(server_address, api_key, instance_id, group_id, permission_type):
+    instance_permissions = getter.get_instance_permissions(server_address, api_key, instance_id)
     instance_permissions['groupPermissions'].append(create_group_permission(group_id, permission_type))
-    updater.update_instance_permission(api_key, server_address, instance_id, instance_permissions)
+    updater.update_instance_permission(server_address, api_key, instance_id, instance_permissions)
 
 
 def create_group_permission(group_id, permission_type):
