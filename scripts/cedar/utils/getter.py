@@ -38,6 +38,26 @@ def get_instance(server_address, api_key, instance_id):
     return get_resource(api_key, request_url)
 
 
+def get_template_permissions(server_address, api_key, template_id):
+    request_url = server_address + "/templates/" + escape(template_id) + "/permissions"
+    return get_resource(api_key, request_url)
+
+
+def get_element_permissions(server_address, api_key, element_id):
+    request_url = server_address + "/template-elements/" + escape(element_id) + "/permissions"
+    return get_resource(api_key, request_url)
+
+
+def get_field_permissions(server_address, api_key, field_id):
+    request_url = server_address + "/template-fields/" + escape(field_id) + "/permissions"
+    return get_resource(api_key, request_url)
+
+
+def get_instance_permissions(server_address, api_key, instance_id):
+    request_url = server_address + "/template-instances/" + escape(instance_id) + "/permissions"
+    return get_resource(api_key, request_url)
+
+
 def send_get_request(api_key, request_url):
     headers = {
         'Content-Type': "application/json",

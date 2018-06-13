@@ -38,6 +38,26 @@ def update_instance(server_address, api_key, instance_id, instance):
     return update_resource(api_key, request_url, instance)
 
 
+def update_template_permission(api_key, server_address, instance_id, permission):
+    request_url = server_address + "/templates/" + escape(instance_id) + "/permissions"
+    return update_resource(api_key, request_url, permission)
+
+
+def update_element_permission(api_key, server_address, instance_id, permission):
+    request_url = server_address + "/template-elements/" + escape(instance_id) + "/permissions"
+    return update_resource(api_key, request_url, permission)
+
+
+def update_field_permission(api_key, server_address, instance_id, permission):
+    request_url = server_address + "/template-fields/" + escape(instance_id) + "/permissions"
+    return update_resource(api_key, request_url, permission)
+
+
+def update_instance_permission(api_key, server_address, instance_id, permission):
+    request_url = server_address + "/template-instances/" + escape(instance_id) + "/permissions"
+    return update_resource(api_key, request_url, permission)
+
+
 def send_put_request(api_key, request_url, resource):
     headers = {
         'Content-Type': "application/json",
