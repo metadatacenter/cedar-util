@@ -5,13 +5,13 @@ import copy
 import random
 
 OUTPUT_FILE = "new_populated_instance.json"
-CONTACT_EMAIL = "marcosmr@stanford.edu"
 # If we use Star Wars identifiers (Chewbacca, Hans Solo, etc.) the NCBI team knows that a submission is a test
 # submission, and won't worry about it being approved/in the system
-USE_STAR_WARS_DATA = True
+USE_STAR_WARS_DATA = False
+CONTACT_EMAIL = "marcosmr@stanford.edu" # Only used when using STAR WARS data
 STAR_WARS_PREFIX = 'STARWARS-'
-TESTING_BIOPROJECT_ID = 'PRJNA471695'
 INCLUDE_BIOPROJECT_ID = True
+APPEND_SUFFIX_TO_IDS = False # random suffix used to generate different sample ids each time
 
 def generate_value_object(value):
     return {
@@ -41,7 +41,6 @@ def translate_bioproject(source_bioproject, destination_bioproject, contact_emai
         'http://data.bioontology.org/provisional_classes/732bcd70-3457-0136-3944-005056010073', 'not available')
 
     if USE_STAR_WARS_DATA:
-        #destination_bioproject['Study ID']['@value'] = 'STAR_WARS_1'
         destination_bioproject['Study Criteria']['@value'] = \
             'Jedis were diagnosed according to the Dark Side criteria'
         destination_bioproject['Funding Agency']['@value'] = 'The Force'
@@ -49,24 +48,28 @@ def translate_bioproject(source_bioproject, destination_bioproject, contact_emai
         destination_bioproject['Lab Name']['@value'] = 'Jedi Lab'
         destination_bioproject['Study Title']['@value'] = \
             'The Star Wars study: An analysis of cell types in Jedis'
+        destination_bioproject['Contact Information (data collection)']['@value'] = contact_email
     else:
-        #destination_bioproject['Study ID'] = source_bioproject['Study ID']
         destination_bioproject['Study Criteria'] = source_bioproject['Study Criteria']
         destination_bioproject['Funding Agency'] = source_bioproject['Funding Agency']
         destination_bioproject['Lab Address'] = source_bioproject['Department']
         destination_bioproject['Lab Name'] = source_bioproject['Lab Name']
         destination_bioproject['Study Title'] = source_bioproject['Study Title']
+        destination_bioproject['Contact Information (data collection)']['@value'] = source_bioproject['E-mail']['@value']
+
+    bioproject_id = source_bioproject['Study ID']['@value']
 
     if INCLUDE_BIOPROJECT_ID:
-        destination_bioproject['Study ID']['@value'] = TESTING_BIOPROJECT_ID
+        destination_bioproject['Study ID']['@value'] = bioproject_id
     else:
         destination_bioproject['Study ID']['@value'] = None
+
     destination_bioproject['Relevant Publications'] = source_bioproject['Relevant Publication']
     destination_bioproject['Study Type'] = not_available_term
 
     # destination_bioproject['Contact Information (data collection)'] = source_bioproject[
     #     'Contact Information (Corresponding author e-mail)']
-    destination_bioproject['Contact Information (data collection)']['@value'] = contact_email
+
     return destination_bioproject
 
 
@@ -221,8 +224,11 @@ def main():
     with open("new_empty_instance.json", encoding='utf-8') as f:
         dest_instance = json.load(f)
 
-    # random suffix used to generate different sample ids each time
-    suffix = str(random.randint(0, 99999))
+    if APPEND_SUFFIX_TO_IDS:
+        # random suffix used to generate different sample ids each time
+        suffix = str(random.randint(0, 99999))
+    else:
+        suffix = ''
 
     # BioProject
     source_bioproject = source_instance['BioProject']

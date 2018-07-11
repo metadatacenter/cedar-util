@@ -70,7 +70,7 @@
     "Contact Information (data collection)": {
       "@value": null
     },
-    "@id": "https://repo.staging.metadatacenter.org/template-element-instances/1312dd39-75c6-4bd0-9726-9d1d942786d2"
+    "@id": "https://repo.metadatacenter.org/template-element-instances/84151284-2b5f-43a3-a263-c1247e37033d"
   },
   "BioSample for AIRR NCBI": [
     {
@@ -224,7 +224,7 @@
         "@value": null
       },
       "Diagnosis1": {},
-      "@id": "https://repo.staging.metadatacenter.org/template-element-instances/b4cb1399-f2ae-402c-86f8-b00b37032648"
+      "@id": "https://repo.metadatacenter.org/template-element-instances/cdde46e6-7cd3-4c58-9e8b-6b1f5cf085d3"
     }
   ],
   "Sequence Read Archive for AIRR NCBI": [
@@ -333,10 +333,10 @@
       "Library Layout": {
         "@value": null
       },
-      "@id": "https://repo.staging.metadatacenter.org/template-element-instances/2ecd0e7c-ae70-4c0b-827b-b414feb13c5f"
+      "@id": "https://repo.metadatacenter.org/template-element-instances/55af613f-b9bc-4393-93ec-8b583d97c99d"
     }
   ],
-  "schema:isBasedOn": "https://repo.staging.metadatacenter.org/templates/0e8d261c-b1ce-4e42-b043-845a15084a33",
-  "schema:name": "MiAIRR RC2 metadata",
+  "schema:isBasedOn": "https://repo.metadatacenter.org/templates/ea716306-5263-4f7a-9155-b7958f566933",
+  "schema:name": "MiAIRR RC metadata",
   "schema:description": "Enables AIRR-seq data submission to the NCBI through the CEDAR Workbench"
 }
