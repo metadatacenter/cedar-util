@@ -25,7 +25,7 @@ def add_group_permission_to_instance(server_address, api_key, instance_id, group
 
 def has_no_group_id(group_permissions, group_id):
     for group_permission in group_permissions:
-        current_group_id = group_permission['group']['id']
+        current_group_id = group_permission['group']['@id']
         if current_group_id == group_id:
             return False
     return True
@@ -34,7 +34,7 @@ def has_no_group_id(group_permissions, group_id):
 def create_group_permission(group_id, permission_type):
     return {
         'group': {
-            'id': group_id
+            '@id': group_id
         },
         'permission': permission_type
     }
