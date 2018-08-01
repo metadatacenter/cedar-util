@@ -7,11 +7,13 @@ import random
 OUTPUT_FILE = "new_populated_instance.json"
 # If we use Star Wars identifiers (Chewbacca, Hans Solo, etc.) the NCBI team knows that a submission is a test
 # submission, and won't worry about it being approved/in the system
-USE_STAR_WARS_DATA = False
+USE_STAR_WARS_DATA = True
 CONTACT_EMAIL = "marcosmr@stanford.edu" # Only used when using STAR WARS data
 STAR_WARS_PREFIX = 'STARWARS-'
-INCLUDE_BIOPROJECT_ID = True
+MY_BIOPROJECT_ID = 'PRJNA471695'
+SUBMISSIONS_RELEASE_DATE = '07/07/2020'
 APPEND_SUFFIX_TO_IDS = False # random suffix used to generate different sample ids each time
+
 
 def generate_value_object(value):
     return {
@@ -59,10 +61,10 @@ def translate_bioproject(source_bioproject, destination_bioproject, contact_emai
 
     bioproject_id = source_bioproject['Study ID']['@value']
 
-    if INCLUDE_BIOPROJECT_ID:
-        destination_bioproject['Study ID']['@value'] = bioproject_id
+    if USE_STAR_WARS_DATA:
+        destination_bioproject['Study ID']['@value'] = MY_BIOPROJECT_ID
     else:
-        destination_bioproject['Study ID']['@value'] = None
+        destination_bioproject['Study ID']['@value'] = bioproject_id
 
     destination_bioproject['Relevant Publications'] = source_bioproject['Relevant Publication']
     destination_bioproject['Study Type'] = not_available_term
@@ -85,17 +87,18 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
 
     # Subject
     destination_biosample['Subject ID'] = source_biosample['Subject id']
-    destination_biosample['Synthetic Library'] = generate_value_object(None)
+    destination_biosample['Synthetic Library'] = [generate_value_object(None)]
     destination_biosample['Organism'] = source_biosample['Organism']
-    source_sex = source_biosample['Sex']['@value']
-    if source_sex == 'male':
-        destination_biosample['Sex'] = generate_ontology_term_object(
-            'http://purl.bioontology.org/ontology/SNOMEDCT/248153007', 'Male')
-    elif source_sex == 'female':
-        destination_biosample['Sex'] = generate_ontology_term_object(
-            'http://purl.bioontology.org/ontology/SNOMEDCT/248152002', 'Female')
-    else:
-        destination_biosample['Sex'] = not_available_term
+    #source_sex = source_biosample['Sex']['@value']
+    # if source_sex == 'male':
+    #     destination_biosample['Sex'] = generate_ontology_term_object(
+    #         'http://purl.bioontology.org/ontology/SNOMEDCT/248153007', 'Male')
+    # elif source_sex == 'female':
+    #     destination_biosample['Sex'] = generate_ontology_term_object(
+    #         'http://purl.bioontology.org/ontology/SNOMEDCT/248152002', 'Female')
+    # else:
+    #     destination_biosample['Sex'] = not_available_term
+    destination_biosample['Sex'] = source_biosample['Sex']
 
     destination_biosample['Age'] = source_biosample['Age']
     destination_biosample['Age Event'] = source_biosample['Age Event']
@@ -103,10 +106,9 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     destination_biosample['Ethnicity'] = source_biosample['Ethnicity']
     destination_biosample['Race'] = source_biosample['Race']
     destination_biosample['Strain Name'] = source_biosample['Strain Name']
-    destination_biosample['Related Subjects'] = source_biosample['Relation to other Subject']
+    destination_biosample['Relation to Other Subjects'] = source_biosample['Relation to other Subject']
     destination_biosample['Relation Type'] = source_biosample['Relation Type']
-    destination_biosample['Projected Release Date'] = source_biosample[
-        'Projected Release Date']  # TODO: format conversion
+    destination_biosample['Estimated Release Date'] = source_biosample['Projected Release Date']  # TODO: format conversion
     # Diagnosis
     if USE_STAR_WARS_DATA:
         destination_biosample['Study Group Description']['@value'] = 'Cells from Jedis'
@@ -136,17 +138,17 @@ def translate_biosample(source_biosample, destination_biosample, suffix):
     # Processing
     if USE_STAR_WARS_DATA:
         destination_biosample['Tissue Processing']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus maximus et leo quis pretium. Cras quis dolor tellus. Fusce pellentesque sagittis ipsum, at cursus mauris commodo in. Etiam dictum elementum arcu. Pellentesque mattis mollis ultricies. Aliquam pellentesque arcu sit amet odio convallis fermentum. Proin blandit urna leo, non aliquam erat pellentesque ut. Aenean volutpat at lectus a cursus. Sed maximus nunc eu porta posuere. Nam et tellus et turpis efficitur iaculis. Maecenas varius sit amet leo at aliquet. Donec sagittis turpis quam, dapibus vestibulum justo lacinia at. Fusce volutpat sollicitudin dui, in malesuada nisi venenatis et. In eleifend ultrices volutpat.'
-        destination_biosample['Cell Processing Protocol']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus maximus et leo quis pretium. Cras quis dolor tellus. Fusce pellentesque sagittis ipsum, at cursus mauris commodo in. Etiam dictum elementum arcu. Pellentesque mattis mollis ultricies. Aliquam pellentesque arcu sit amet odio convallis fermentum. Proin blandit urna leo, non aliquam erat pellentesque ut. Aenean volutpat at lectus a cursus. Sed maximus nunc eu porta posuere. Nam et tellus et turpis efficitur iaculis. Maecenas varius sit amet leo at aliquet. Donec sagittis turpis quam, dapibus vestibulum justo lacinia at. Fusce volutpat sollicitudin dui, in malesuada nisi venenatis et. In eleifend ultrices volutpat.'
+        destination_biosample['Processing Protocol']['@value'] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus maximus et leo quis pretium. Cras quis dolor tellus. Fusce pellentesque sagittis ipsum, at cursus mauris commodo in. Etiam dictum elementum arcu. Pellentesque mattis mollis ultricies. Aliquam pellentesque arcu sit amet odio convallis fermentum. Proin blandit urna leo, non aliquam erat pellentesque ut. Aenean volutpat at lectus a cursus. Sed maximus nunc eu porta posuere. Nam et tellus et turpis efficitur iaculis. Maecenas varius sit amet leo at aliquet. Donec sagittis turpis quam, dapibus vestibulum justo lacinia at. Fusce volutpat sollicitudin dui, in malesuada nisi venenatis et. In eleifend ultrices volutpat.'
     else:
         destination_biosample['Tissue Processing'] = source_biosample['Tissue Processing']
-        destination_biosample['Cell Processing Protocol'] = source_biosample['Processing Protocol']
+        destination_biosample['Processing Protocol'] = source_biosample['Processing Protocol']
 
     destination_biosample['Cell Subset'] = source_biosample['Cell Subset']
     destination_biosample['Cell Subset Phenotype'] = source_biosample['Cell Subset Phenotype']
     destination_biosample['Single-cell Sort'] = source_biosample['Single-cell Sort']
     destination_biosample['Number of Cells in Experiment'] = source_biosample['Number of Cells in Experiment']
-    destination_biosample['Number of Cells per Sequencing Reaction'] = source_biosample[
-        'Number of Cells per Sequencing Reaction']
+    destination_biosample['Number of Cells per Sequencing Reaction']['@value'] = source_biosample[
+        'Number of Cells per Sequencing Reaction']['@value']
     destination_biosample['Cell Storage'] = source_biosample['Cell Storage']
     destination_biosample['Cell Quality'] = source_biosample['Cell Quality']
     destination_biosample['Cell Isolation'] = source_biosample['Cell Isolation']
@@ -248,6 +250,12 @@ def main():
     final_sras = []
     for source_sra in source_sras:
         final_sras.append(translate_sra(source_sra, copy.copy(dest_sra), suffix))
+
+    # Set the release date
+    if USE_STAR_WARS_DATA:
+        dest_instance['Submissions Release Date'] = generate_value_object(SUBMISSIONS_RELEASE_DATE)
+    else:
+        dest_instance['Submissions Release Date'] = source_instance['Submissions Release Date']
 
     dest_instance['BioProject for AIRR NCBI'] = final_bioproject
     dest_instance['BioSample for AIRR NCBI'] = final_biosamples
