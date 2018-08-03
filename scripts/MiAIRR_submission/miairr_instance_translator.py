@@ -11,7 +11,7 @@ USE_STAR_WARS_DATA = True
 CONTACT_EMAIL = "marcosmr@stanford.edu" # Only used when using STAR WARS data
 STAR_WARS_PREFIX = 'STARWARS-'
 MY_BIOPROJECT_ID = 'PRJNA471695'
-SUBMISSIONS_RELEASE_DATE = '07/07/2020'
+SUBMISSIONS_RELEASE_DATE = '2023-07-07'
 APPEND_SUFFIX_TO_IDS = False # random suffix used to generate different sample ids each time
 
 

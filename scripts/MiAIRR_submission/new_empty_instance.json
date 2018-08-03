@@ -30,9 +30,9 @@
       "@type": "@id"
     },
     "Submissions Release Date": "https://schema.metadatacenter.org/properties/f65fb1b5-f8b5-4b25-969e-5889cb8d41f7",
-    "BioProject for AIRR NCBI": "https://schema.metadatacenter.org/properties/5eff1a1f-530c-4b28-8b7f-1bb974c26b6d",
-    "BioSample for AIRR NCBI": "https://schema.metadatacenter.org/properties/9f8d2925-9212-4b7c-ada3-7b16c9e5925c",
-    "Sequence Read Archive for AIRR NCBI": "https://schema.metadatacenter.org/properties/5e0c381d-738b-42bc-94ec-d3f712dd0e0c"
+    "BioProject for AIRR NCBI": "https://schema.metadatacenter.org/properties/52eb57af-e488-424d-a570-cbddd249d060",
+    "BioSample for AIRR NCBI": "https://schema.metadatacenter.org/properties/7f3eee3f-d0fb-419b-aae2-13b218266efd",
+    "Sequence Read Archive for AIRR NCBI": "https://schema.metadatacenter.org/properties/b3d82524-a07d-4363-ad11-b1428f79db6f"
   },
   "Submissions Release Date": {
     "@value": null
@@ -74,7 +74,7 @@
     "Contact Information (data collection)": {
       "@value": null
     },
-    "@id": "https://repo.metadatacenter.orgx/template-element-instances/242e1d03-d7bb-44c8-9825-448de06332fe"
+    "@id": "https://repo.metadatacenter.orgx/template-element-instances/35a621ca-3909-4f40-9f42-1c977cc1d234"
   },
   "BioSample for AIRR NCBI": [
     {
@@ -194,7 +194,9 @@
       "Disease State of Sample": {
         "@value": null
       },
-      "Number of Cells per Sequencing Reaction": {},
+      "Number of Cells per Sequencing Reaction": {
+        "@value": null
+      },
       "Number of Cells in Experiment": {
         "@value": null
       },
@@ -230,7 +232,7 @@
       "Relation to Other Subjects": {
         "@value": null
       },
-      "@id": "https://repo.metadatacenter.orgx/template-element-instances/56181955-a551-4ae2-bde8-ae98beedb6da"
+      "@id": "https://repo.metadatacenter.orgx/template-element-instances/b11d7c21-7f8f-4a5d-bf60-5faca1cedc35"
     }
   ],
   "Sequence Read Archive for AIRR NCBI": [
@@ -339,10 +341,10 @@
       "Library Layout": {
         "@value": null
       },
-      "@id": "https://repo.metadatacenter.orgx/template-element-instances/77bcc16b-c84d-42a5-a1f0-5da616e471b5"
+      "@id": "https://repo.metadatacenter.orgx/template-element-instances/cc5edafe-e163-4762-9a01-8b20be48c5e3"
     }
   ],
-  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/b6d85141-220c-47a8-9518-70d7d89c3c5d",
+  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/feb08c3e-7a7e-48a5-8ae8-fe0fd008b09e",
   "schema:name": "MiAIRR metadata",
   "schema:description": "AIRR-seq data submission to the NCBI via the CEDAR Workbench"
 }
