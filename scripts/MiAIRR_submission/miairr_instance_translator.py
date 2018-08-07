@@ -9,10 +9,10 @@ OUTPUT_FILE = "new_populated_instance.json"
 # submission, and won't worry about it being approved/in the system
 USE_STAR_WARS_DATA = True
 CONTACT_EMAIL = "marcosmr@stanford.edu" # Only used when using STAR WARS data
-STAR_WARS_PREFIX = 'STARWARS-'
+STAR_WARS_PREFIX = 'STARWARS_'
 MY_BIOPROJECT_ID = 'PRJNA471695'
 SUBMISSIONS_RELEASE_DATE = '2023-07-07'
-APPEND_SUFFIX_TO_IDS = False # random suffix used to generate different sample ids each time
+APPEND_SUFFIX_TO_IDS = True # random suffix used to generate different sample ids each time
 
 
 def generate_value_object(value):
@@ -253,7 +253,7 @@ def main():
 
     # Set the release date
     if USE_STAR_WARS_DATA:
-        dest_instance['Submissions Release Date'] = generate_value_object(SUBMISSIONS_RELEASE_DATE)
+        dest_instance['Submissions Release Date'] = generate_value_object(SUBMISSIONS_RELEASE_DATE) #TODO add "@type": "xsd:date"
     else:
         dest_instance['Submissions Release Date'] = source_instance['Submissions Release Date']
 
