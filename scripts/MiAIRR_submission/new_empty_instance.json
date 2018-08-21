@@ -344,7 +344,7 @@
       "@id": "https://repo.metadatacenter.orgx/template-element-instances/cc5edafe-e163-4762-9a01-8b20be48c5e3"
     }
   ],
-  "schema:isBasedOn": "https://repo.metadatacenter.orgx/templates/feb08c3e-7a7e-48a5-8ae8-fe0fd008b09e",
+  "schema:isBasedOn": "https://repo.metadatacenter.org/templates/ea716306-5263-4f7a-9155-b7958f566933",
   "schema:name": "MiAIRR metadata",
   "schema:description": "AIRR-seq data submission to the NCBI via the CEDAR Workbench"
 }
