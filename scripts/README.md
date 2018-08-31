@@ -29,45 +29,41 @@ from cedar.utils import getter, storer, validator
 ### Validate Resources
 
 ```buildoutcfg
-usage: cedar-validator.py [-h] [-s {local,staging,production}]
-                          [-t {template,element,field,instance}]
-                          [--lookup FILENAME] [--limit LIMIT]
-                          [--validation-apikey CEDAR-API-KEY]
-                          [--mongodb-connection DBCONN]
-                          [--input-mongodb DBNAME] [--input-file FILENAME]
+usage: cedar-validator.py [-h] [-t {template,element,field,instance}]
+                          [--input-list FILENAME] [--input-json FILENAME]
+                          [--input-mongodb DBNAME] [--limit LIMIT]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s {local,staging,production}, --server {local,staging,production}
-                        the type of CEDAR server
   -t {template,element,field,instance}, --type {template,element,field,instance}
                         the type of CEDAR resource
-  --lookup FILENAME     an input file containing a list of resource
+  --input-list FILENAME
+                        an input file containing a list of resource
                         identifiers to validate
-  --limit LIMIT         the maximum number of resources to validate
-  --validation-apikey CEDAR-API-KEY
-                        the API key used to access the CEDAR validation
-                        service
-  --mongodb-connection DBCONN
-                        set the MongoDB admin connection URI to perform
-                        administration operations
-  --input-mongodb DBNAME
-                        set the MongoDB database name to get the resources to
-                        validate
-  --input-file FILENAME
+  --input-json FILENAME
                         an input file containing the JSON document to validate
+  --input-mongodb DBNAME
+                        the name of MongoDB database where resources are
+                        located
+  --limit LIMIT         the maximum number of resources to validate (useful
+                        when --input-mongodb is used)
 ```
 
 **Example usage**:
 
-Validate all the templates in the staging server by giving the script the access to the MongoDB storage
+Validate all the templates stored in a MongoDB database
 ```buildoutcfg
-$ python cedar-validator.py -s staging -t template --validation-apikey="apiKey 1234567890" --mongodb-connection="mongodb://[username]:[password]@localhost:27017/admin" --input-mongodb=cedar
+$ python cedar-validator.py -t template --input-mongodb=cedar
 ```
 
-Validate all the templates in the staging server that are listed in the text file. You need to list the complete template id, e.g., https://repo.metadatacenter.org/templates/dbb6450b-4c5e-5290-9420-fcc624b457b4
+Validate all the elements where their ids are listed in a text file
 ```buildoutcfg
-$ python cedar-validator.py -s staging -t template --validation-apikey="apiKey 1234567890" --lookup=templates.txt
+$ python cedar-validator.py -t element --input-list=elements.txt
+```
+
+Validate a field specified in a JSON file
+```buildoutcfg
+$ python cedar-validator.py -t instance --input-list=field.json
 ```
 
 ### Patch Resources
