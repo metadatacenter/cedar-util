@@ -22,7 +22,7 @@ report = {
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--type",
-                        choices=['template', 'element', 'field', 'instance'],
+                        choices=['template', 'element', 'field'],
                         default="template",
                         help="the type of CEDAR resource")
     parser.add_argument("--input-json",
@@ -79,9 +79,6 @@ def main():
             patch_element_from_json(patch_engine, element, model_version, output_dir, debug)
         elif resource_type == 'field':
             pass
-        elif resource_type == 'instance':
-            instance = read_json(input_file)
-            patch_instance_from_json(instance, output_dir, debug)
     elif input_mongodb is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, input_mongodb)
@@ -94,9 +91,6 @@ def main():
             patch_element(patch_engine, element_ids, source_database, model_version, output_dir, target_database, debug)
         elif resource_type == 'field':
             pass
-        elif resource_type == 'instance':
-            instance_ids = read_list(filter_list) if filter_list is not None else get_instance_ids(source_database, limit)
-            patch_instance(instance_ids, source_database, output_dir, target_database, debug)
 
     if not debug:
         show_report()
@@ -304,82 +298,6 @@ def validate_element_callback(element):
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
-
-
-def patch_instance_from_json(instance, output_dir, debug=False):
-    print(" WARNING  | Patching the instances might still leave some errors. Please run the validator manually to check thoroughly")
-    try:
-        instance_id = instance["@id"]
-        patched_instance = fix_context(instance)
-        patched_instance = rename(patched_instance, replace_valuelabel)
-
-        create_report("resolved", instance_id)
-
-        if output_dir is not None:
-            filename = create_filename_from_id(instance_id, prefix="instance-patched-")
-            write_to_file(patched_instance, filename, output_dir)
-    except (HTTPError, KeyError) as error:
-        create_report("error", [instance_id, "Error details: " + str(error)])
-    print()  # console printing separator
-
-
-def patch_instance(instance_ids, source_database, output_dir=None, target_database=None, debug=False):
-    total_instances = len(instance_ids)
-    print(" WARNING  | Patching the instances might still leave some errors. Please run the validator manually to check thoroughly")
-    for counter, instance_id in enumerate(instance_ids, start=1):
-        if not debug:
-            print_progressbar(instance_id, counter, total_instances)
-        try:
-            instance = get_instance_from_mongodb(source_database, instance_id)
-            patched_instance = fix_context(instance)
-            patched_instance = rename(patched_instance, replace_valuelabel)
-
-            create_report("resolved", instance_id)
-
-            if output_dir is not None:
-                filename = create_filename_from_id(instance_id, prefix="instance-patched-")
-                write_to_file(patched_instance, filename, output_dir)
-            if target_database is not None:
-                write_to_mongodb(target_database, "template-instances", patched_instance)
-        except (HTTPError, KeyError) as error:
-            create_report("error", [instance_id, "Error details: " + str(error)])
-    print()  # console printing separator
-
-
-def fix_context(instance):
-    context = instance["@context"]
-    context["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#"
-    context["xsd"] = "http://www.w3.org/2001/XMLSchema#"
-    context["pav"] = "http://purl.org/pav/"
-    context["schema"] = "http://schema.org/"
-    context["oslc"] = "http://open-services.net/ns/core#"
-    context["rdfs:label"] = {"@type": "xsd:string"}
-    context["schema:isBasedOn"] = {"@type": "@id"}
-    context["schema:name"] = {"@type": "xsd:string"}
-    context["schema:description"] = {"@type": "xsd:string"}
-    context["pav:createdOn"] = {"@type": "xsd:dateTime"}
-    context["pav:createdBy"] = {"@type": "@id"}
-    context["pav:lastUpdatedOn"] = {"@type": "xsd:dateTime"}
-    context["oslc:modifiedBy"] = {"@type": "@id"}
-    return instance
-
-
-def rename(obj, replace_function):
-    if isinstance(obj, (str, int, float)):
-        return obj
-    if isinstance(obj, dict):
-        new = obj.__class__()
-        for k, v in obj.items():
-            new[replace_function(k)] = rename(v, replace_function)
-    elif isinstance(obj, (list, set, tuple)):
-        new = obj.__class__(rename(v, replace_function) for v in obj)
-    else:
-        return obj
-    return new
-
-
-def replace_valuelabel(k):
-    return k.replace('_valueLabel', 'rdfs:label')
 
 
 def set_model_version(resource, model_version):
