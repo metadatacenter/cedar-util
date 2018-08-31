@@ -1,105 +1,91 @@
 import argparse
+import os
 import json
 import requests
 from pymongo import MongoClient
 from cedar.utils import validator, getter, get_server_address, to_json_string
 
 
-cedar_server_address = None
-cedar_api_key = None
+cedar_server_address = "https://resource." + os.environ['CEDAR_HOST']
+cedar_api_key = "apiKey " + os.environ['CEDAR_ADMIN_USER_API_KEY']
+mongodb_conn = "mongodb://" + os.environ['CEDAR_MONGO_ROOT_USER_NAME'] + ":" + os.environ['CEDAR_MONGO_ROOT_USER_PASSWORD'] + "@localhost:27017/admin"
 report = {}
 error_messages = []
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--server",
-                        choices=['local', 'staging', 'production'],
-                        default="staging",
-                        help="the type of CEDAR server")
     parser.add_argument("-t", "--type",
                         choices=['template', 'element', 'field', 'instance'],
                         default="template",
                         help="the type of CEDAR resource")
-    parser.add_argument("--lookup",
+    parser.add_argument("--input-list",
                         required=False,
                         metavar="FILENAME",
                         help="an input file containing a list of resource identifiers to validate")
-    parser.add_argument("--limit",
-                        required=False,
-                        type=int,
-                        help="the maximum number of resources to validate")
-    parser.add_argument("--validation-apikey",
-                        required=False,
-                        metavar="CEDAR-API-KEY",
-                        help="the API key used to access the CEDAR validation service")
-    parser.add_argument("--mongodb-connection",
-                        required=False,
-                        metavar="DBCONN",
-                        help="set the MongoDB admin connection URI to perform administration operations")
-    parser.add_argument("--input-mongodb",
-                        required=False,
-                        default="cedar",
-                        metavar="DBNAME",
-                        help="set the MongoDB database name to get the resources to validate")
-    parser.add_argument("--input-file",
+    parser.add_argument("--input-json",
                         required=False,
                         metavar="FILENAME",
                         help="an input file containing the JSON document to validate")
+    parser.add_argument("--input-mongodb",
+                        required=False,
+                        metavar="DBNAME",
+                        help="the name of MongoDB database where resources are located")
+    parser.add_argument("--limit",
+                        required=False,
+                        type=int,
+                        help="the maximum number of resources to validate (useful when --input-mongodb is used)")
     args = parser.parse_args()
     resource_type = args.type
-    lookup_file = args.lookup
+    input_file = args.input_json
+    input_list = args.input_list
+    input_mongodb = args.input_mongodb
     limit = args.limit
 
-    global cedar_server_address, cedar_api_key
-    cedar_server_address = get_server_address(args.server)
-    cedar_api_key = args.validation_apikey
-    mongodb_conn = args.mongodb_connection
-    source_db_name = args.input_mongodb
-    source_file_name = args.input_file
-
-    if source_file_name is not None:
+    if input_file is not None:
         if resource_type == 'template':
-            validate_template_file(source_file_name)
+            template = read_json(input_file)
+            validate_template_from_json(template)
         elif resource_type == 'element':
-            validate_element_file(source_file_name)
+            element = read_json(input_file)
+            validate_element_from_json(element)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
-            validate_instance_file(source_file_name)
-    elif lookup_file is not None:
+            instance = read_json(input_file)
+            validate_instance_from_json(instance)
+    elif input_list is not None:
         if resource_type == 'template':
-            template_ids = get_ids_from_file(lookup_file)
-            validate_template(template_ids)
+            template_ids = read_list(input_list)
+            validate_template_from_list(template_ids)
         elif resource_type == 'element':
-            element_ids = get_ids_from_file(lookup_file)
-            validate_element(element_ids)
+            element_ids = read_list(input_list)
+            validate_element_from_list(element_ids)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
-            instance_ids = get_ids_from_file(lookup_file)
-            validate_instance(instance_ids)
-    elif mongodb_conn is not None and source_db_name is not None:
+            instance_ids = read_list(input_list)
+            validate_instance_from_list(instance_ids)
+    elif input_mongodb is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
-        source_database = setup_source_database(mongodb_client, source_db_name)
+        source_database = setup_source_database(mongodb_client, input_mongodb)
         if resource_type == 'template':
-            template_ids = get_template_ids(lookup_file, source_database, limit)
-            validate_template(template_ids, source_database)
+            template_ids = get_template_ids(input_list, source_database, limit)
+            validate_template_from_mongodb(template_ids, source_database)
         elif resource_type == 'element':
-            element_ids = get_element_ids(lookup_file, source_database, limit)
-            validate_element(element_ids, source_database)
+            element_ids = get_element_ids(input_list, source_database, limit)
+            validate_element_from_mongodb(element_ids, source_database)
         elif resource_type == 'field':
             pass
         elif resource_type == 'instance':
-            instance_ids = get_instance_ids(lookup_file, source_database, limit)
-            validate_instance(instance_ids, source_database)
+            instance_ids = get_instance_ids(input_list, source_database, limit)
+            validate_instance_from_mongodb(instance_ids, source_database)
 
     show_report()
 
 
-def validate_template_file(source_file_name):
+def validate_template_from_json(template):
     try:
-        template = get_template_from_file(source_file_name)
         template_id = template["@id"]
         is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
         reporting(template_id, is_valid, validation_message)
@@ -108,7 +94,7 @@ def validate_template_file(source_file_name):
         error_messages.append(error_obj["message"])
 
 
-def validate_template(template_ids):
+def validate_template_from_list(template_ids):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         print_progressbar(template_id, counter, total_templates)
@@ -122,7 +108,7 @@ def validate_template(template_ids):
             pass
 
 
-def validate_template(template_ids, source_database):
+def validate_template_from_mongodb(template_ids, source_database):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         print_progressbar(template_id, counter, total_templates)
@@ -136,9 +122,8 @@ def validate_template(template_ids, source_database):
             pass
 
 
-def validate_element_file(source_file_name):
+def validate_element_from_json(element):
     try:
-        element = get_element_from_file(source_file_name)
         element_id = element["@id"]
         is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
         reporting(element_id, is_valid, validation_message)
@@ -147,7 +132,7 @@ def validate_element_file(source_file_name):
         error_messages.append(error_obj["message"])
 
 
-def validate_element(element_ids):
+def validate_element_from_list(element_ids):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         print_progressbar(element_id, counter, total_elements)
@@ -161,7 +146,7 @@ def validate_element(element_ids):
             pass
 
 
-def validate_element(element_ids, source_database):
+def validate_element_from_mongodb(element_ids, source_database):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         print_progressbar(element_id, counter, total_elements)
@@ -175,9 +160,8 @@ def validate_element(element_ids, source_database):
             pass
 
 
-def validate_instance_file(source_file_name):
+def validate_instance_from_json(instance):
     try:
-        instance = get_instance_from_file(source_file_name)
         instance_id = instance["@id"]
         is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
         reporting(instance_id, is_valid, validation_message)
@@ -186,7 +170,7 @@ def validate_instance_file(source_file_name):
         error_messages.append(error_obj["message"])
 
 
-def validate_instance(instance_ids):
+def validate_instance_from_list(instance_ids):
     total_instances = len(instance_ids)
     for counter, instance_id in enumerate(instance_ids, start=1):
         print_progressbar(instance_id, counter, total_instances)
@@ -200,7 +184,7 @@ def validate_instance(instance_ids):
             pass
 
 
-def validate_instance(instance_ids, source_database):
+def validate_instance_from_mongodb(instance_ids, source_database):
     total_instances = len(instance_ids)
     for counter, instance_id in enumerate(instance_ids, start=1):
         print_progressbar(instance_id, counter, total_instances)
@@ -217,7 +201,7 @@ def validate_instance(instance_ids, source_database):
 def get_template_ids(lookup_file, source_database, limit):
     template_ids = []
     if lookup_file is not None:
-        template_ids.extend(get_ids_from_file(lookup_file))
+        template_ids.extend(read_list(lookup_file))
     else:
         if limit:
             template_ids = source_database['templates'].distinct("@id").limit(limit)
@@ -230,7 +214,7 @@ def get_template_ids(lookup_file, source_database, limit):
 def get_element_ids(lookup_file, source_database, limit):
     element_ids = []
     if lookup_file is not None:
-        element_ids.extend(get_ids_from_file(lookup_file))
+        element_ids.extend(read_list(lookup_file))
     else:
         if limit:
             element_ids = source_database['template-elements'].distinct("@id").limit(limit)
@@ -243,7 +227,7 @@ def get_element_ids(lookup_file, source_database, limit):
 def get_instance_ids(lookup_file, source_database, limit):
     instance_ids = []
     if lookup_file is not None:
-        instance_ids.extend(get_ids_from_file(lookup_file))
+        instance_ids.extend(read_list(lookup_file))
     else:
         if limit:
             instance_ids = source_database['template-instances'].distinct("@id").limit(limit)
@@ -253,25 +237,13 @@ def get_instance_ids(lookup_file, source_database, limit):
     return list(filtered_ids)
 
 
-def get_ids_from_file(filename):
+def read_list(filename):
     with open(filename) as infile:
         resource_ids = infile.readlines()
         return [id.strip() for id in resource_ids]
 
 
-def get_template_from_file(filename):
-    return read_file(filename)
-
-
-def get_element_from_file(filename):
-    return read_file(filename)
-
-
-def get_instance_from_file(filename):
-    return read_file(filename)
-
-
-def read_file(filename):
+def read_json(filename):
     with open(filename) as infile:
         content = json.load(infile)
         return content
