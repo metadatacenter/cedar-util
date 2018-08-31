@@ -78,7 +78,8 @@ def main():
             element = read_json(input_file)
             patch_element_from_json(patch_engine, element, model_version, output_dir, debug)
         elif resource_type == 'field':
-            pass
+            field = read_json(input_file)
+            patch_field_from_json(patch_engine, field, model_version, output_dir, debug)
     elif input_mongodb is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, input_mongodb)
@@ -90,7 +91,8 @@ def main():
             element_ids = read_list(filter_list) if filter_list is not None else get_element_ids(source_database, limit)
             patch_element(patch_engine, element_ids, source_database, model_version, output_dir, target_database, debug)
         elif resource_type == 'field':
-            pass
+            field_ids = read_list(filter_list) if filter_list is not None else get_field_ids(source_database, limit)
+            patch_element(patch_engine, field_ids, source_database, model_version, output_dir, target_database, debug)
 
     if not debug:
         show_report()
@@ -300,6 +302,72 @@ def validate_element_callback(element):
                       if not is_valid]
 
 
+def patch_field_from_json(patch_engine, field, model_version, output_dir, debug):
+    try:
+        field_id = field["@id"]
+        if model_version:
+            set_model_version(field, model_version)
+        is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
+        if is_success:
+            if patched_field is not None:
+                create_report("resolved", field_id)
+                if output_dir is not None:
+                    filename = create_filename_from_id(field_id, prefix="field-patched-")
+                    write_to_file(patched_field, filename, output_dir)
+        else:
+            create_report("unresolved", field_id)
+            if output_dir is not None:
+                filename = create_filename_from_id(field_id, prefix="field-partially-patched-")
+                write_to_file(patched_field, filename, output_dir)
+    except (HTTPError, KeyError, TypeError) as error:
+        create_report("error", [field_id, "Error details: " + str(error)])
+
+
+def patch_field(patch_engine, field_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+    total_fields = len(field_ids)
+    for counter, field_id in enumerate(field_ids, start=1):
+        if not debug:
+            print_progressbar(field_id, counter, total_fields)
+        try:
+            field = get_field_from_mongodb(source_database, field_id)
+            if model_version:
+                set_model_version(field, model_version)
+            is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
+            if is_success:
+                if patched_field is not None:
+                    create_report("resolved", field_id)
+                    if output_dir is not None:
+                        filename = create_filename_from_id(field_id, prefix="field-patched-")
+                        write_to_file(patched_field, filename, output_dir)
+                    if target_database is not None:
+                        write_to_mongodb(target_database, "template-fields", patched_field)
+                else:
+                    if output_dir is not None:
+                        filename = create_filename_from_id(field_id, prefix="field-")
+                        write_to_file(field, filename, output_dir)
+                    if target_database is not None:
+                        write_to_mongodb(target_database, "template-fields", field)
+            else:
+                create_report("unresolved", field_id)
+                if output_dir is not None:
+                    if patched_field is None:
+                        patched_field = field
+                    filename = create_filename_from_id(field_id, prefix="field-partially-patched-")
+                    write_to_file(patched_field, filename, output_dir)
+                if target_database is not None: # Save the original to the database
+                    write_to_mongodb(target_database, "template-fields", field)
+        except (HTTPError, KeyError, TypeError) as error:
+            create_report("error", [field_id, "Error details: " + str(error)])
+    print()  # console printing separator
+
+
+def validate_field_callback(field):
+    is_valid, message = validator.validate_field(cedar_server_address, cedar_api_key, field)
+    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
+                      for error_detail in message["errors"]
+                      if not is_valid]
+
+
 def set_model_version(resource, model_version):
     if resource is None:
         return
@@ -407,15 +475,15 @@ def get_element_ids(source_database, limit):
     return list(filtered_ids)
 
 
-def get_instance_ids(source_database, limit):
-    instance_ids = []
+def get_field_ids(source_database, limit):
+    field_ids = []
     if limit:
-        found_ids = source_database['template-instances'].distinct("@id").limit(limit)
-        instance_ids.extend(found_ids)
+        found_ids = source_database['template-fields'].distinct("@id").limit(limit)
+        field_ids.extend(found_ids)
     else:
-        found_ids = source_database['template-instances'].distinct("@id")
-        instance_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, instance_ids)
+        found_ids = source_database['template-fields'].distinct("@id")
+        field_ids.extend(found_ids)
+    filtered_ids = filter(lambda x: x is not None, field_ids)
     return list(filtered_ids)
 
 
@@ -441,9 +509,9 @@ def get_element_from_mongodb(source_database, element_id):
     return post_read(element)
 
 
-def get_instance_from_mongodb(source_database, instance_id):
-    instance = source_database['template-instances'].find_one({'@id': instance_id})
-    return post_read(instance)
+def get_field_from_mongodb(source_database, field_id):
+    field = source_database['template-fields'].find_one({'@id': field_id})
+    return post_read(field)
 
 
 def post_read(resource):
