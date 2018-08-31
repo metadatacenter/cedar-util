@@ -55,7 +55,7 @@ optional arguments:
                         set the MongoDB database name to get the resources to
                         validate
   --input-file FILENAME
-                        an input file containing the resource to patch
+                        an input file containing the JSON document to validate
 ```
 
 **Example usage**:
@@ -69,8 +69,6 @@ Validate all the templates in the staging server that are listed in the text fil
 ```buildoutcfg
 $ python cedar-validator.py -s staging -t template --validation-apikey="apiKey 1234567890" --lookup=templates.txt
 ```
-
-
 
 ### Patch Resources
 
