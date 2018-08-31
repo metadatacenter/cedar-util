@@ -3,7 +3,7 @@ import os
 import json
 import requests
 from pymongo import MongoClient
-from cedar.utils import validator, getter, get_server_address, to_json_string
+from cedar.utils import validator, getter, to_json_string
 
 
 cedar_server_address = "https://resource." + os.environ['CEDAR_HOST']
