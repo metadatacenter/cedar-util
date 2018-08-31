@@ -2,10 +2,10 @@ import argparse
 import json
 import requests
 from pymongo import MongoClient
-from cedar.utils import validator, get_server_address, to_json_string
+from cedar.utils import validator, getter, get_server_address, to_json_string
 
 
-server_address = None
+cedar_server_address = None
 cedar_api_key = None
 report = {}
 error_messages = []
@@ -45,14 +45,14 @@ def main():
     parser.add_argument("--input-file",
                         required=False,
                         metavar="FILENAME",
-                        help="an input file containing the resource to patch")
+                        help="an input file containing the JSON document to validate")
     args = parser.parse_args()
     resource_type = args.type
     lookup_file = args.lookup
     limit = args.limit
 
-    global server_address, cedar_api_key
-    server_address = get_server_address(args.server)
+    global cedar_server_address, cedar_api_key
+    cedar_server_address = get_server_address(args.server)
     cedar_api_key = args.validation_apikey
     mongodb_conn = args.mongodb_connection
     source_db_name = args.input_mongodb
@@ -67,6 +67,18 @@ def main():
             pass
         elif resource_type == 'instance':
             validate_instance_file(source_file_name)
+    elif lookup_file is not None:
+        if resource_type == 'template':
+            template_ids = get_ids_from_file(lookup_file)
+            validate_template(template_ids)
+        elif resource_type == 'element':
+            element_ids = get_ids_from_file(lookup_file)
+            validate_element(element_ids)
+        elif resource_type == 'field':
+            pass
+        elif resource_type == 'instance':
+            instance_ids = get_ids_from_file(lookup_file)
+            validate_instance(instance_ids)
     elif mongodb_conn is not None and source_db_name is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, source_db_name)
@@ -89,11 +101,25 @@ def validate_template_file(source_file_name):
     try:
         template = get_template_from_file(source_file_name)
         template_id = template["@id"]
-        is_valid, validation_message = validator.validate_template(server_address, cedar_api_key, template)
+        is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
         reporting(template_id, is_valid, validation_message)
     except requests.exceptions.HTTPError as error:
         error_obj = json.loads(error.response.text)
         error_messages.append(error_obj["message"])
+
+
+def validate_template(template_ids):
+    total_templates = len(template_ids)
+    for counter, template_id in enumerate(template_ids, start=1):
+        print_progressbar(template_id, counter, total_templates)
+        try:
+            template = get_template_from_server(cedar_server_address, cedar_api_key, template_id)
+            is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
+            reporting(template_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def validate_template(template_ids, source_database):
@@ -102,7 +128,7 @@ def validate_template(template_ids, source_database):
         print_progressbar(template_id, counter, total_templates)
         try:
             template = get_template_from_mongodb(source_database, template_id)
-            is_valid, validation_message = validator.validate_template(server_address, cedar_api_key, template)
+            is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
             reporting(template_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
             error_obj = json.loads(error.response.text)
@@ -114,11 +140,25 @@ def validate_element_file(source_file_name):
     try:
         element = get_element_from_file(source_file_name)
         element_id = element["@id"]
-        is_valid, validation_message = validator.validate_element(server_address, cedar_api_key, element)
+        is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
         reporting(element_id, is_valid, validation_message)
     except requests.exceptions.HTTPError as error:
         error_obj = json.loads(error.response.text)
         error_messages.append(error_obj["message"])
+
+
+def validate_element(element_ids):
+    total_elements = len(element_ids)
+    for counter, element_id in enumerate(element_ids, start=1):
+        print_progressbar(element_id, counter, total_elements)
+        try:
+            element = get_element_from_server(cedar_server_address, cedar_api_key, element_id)
+            is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
+            reporting(element_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def validate_element(element_ids, source_database):
@@ -127,7 +167,7 @@ def validate_element(element_ids, source_database):
         print_progressbar(element_id, counter, total_elements)
         try:
             element = get_element_from_mongodb(source_database, element_id)
-            is_valid, validation_message = validator.validate_element(server_address, cedar_api_key, element)
+            is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
             reporting(element_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
             error_obj = json.loads(error.response.text)
@@ -139,11 +179,25 @@ def validate_instance_file(source_file_name):
     try:
         instance = get_instance_from_file(source_file_name)
         instance_id = instance["@id"]
-        is_valid, validation_message = validator.validate_instance(server_address, cedar_api_key, instance)
+        is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
         reporting(instance_id, is_valid, validation_message)
     except requests.exceptions.HTTPError as error:
         error_obj = json.loads(error.response.text)
         error_messages.append(error_obj["message"])
+
+
+def validate_instance(instance_ids):
+    total_instances = len(instance_ids)
+    for counter, instance_id in enumerate(instance_ids, start=1):
+        print_progressbar(instance_id, counter, total_instances)
+        try:
+            instance = get_instance_from_server(cedar_server_address, cedar_api_key, instance_id)
+            is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
+            reporting(instance_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
 
 
 def validate_instance(instance_ids, source_database):
@@ -152,7 +206,7 @@ def validate_instance(instance_ids, source_database):
         print_progressbar(instance_id, counter, total_instances)
         try:
             instance = get_instance_from_mongodb(source_database, instance_id)
-            is_valid, validation_message = validator.validate_instance(server_address, cedar_api_key, instance)
+            is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
             reporting(instance_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
             error_obj = json.loads(error.response.text)
@@ -221,6 +275,18 @@ def read_file(filename):
     with open(filename) as infile:
         content = json.load(infile)
         return content
+
+
+def get_template_from_server(server_address, api_key, template_id):
+    return getter.get_template(server_address, api_key, template_id)
+
+
+def get_element_from_server(server_address, api_key, element_id):
+    return getter.get_element(server_address, api_key, element_id)
+
+
+def get_instance_from_server(server_address, api_key, instance_id):
+    return getter.get_instance(server_address, api_key, instance_id)
 
 
 def get_template_from_mongodb(source_database, template_id):
