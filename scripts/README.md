@@ -32,25 +32,45 @@ from cedar.utils import getter, storer, validator
 usage: cedar-validator.py [-h] [-s {local,staging,production}]
                           [-t {template,element,field,instance}]
                           [--lookup FILENAME] [--limit LIMIT]
-                          CEDAR-API-KEY
-
-positional arguments:
-  CEDAR-API-KEY         the API key used to access the CEDAR resource server
+                          [--validation-apikey CEDAR-API-KEY]
+                          [--mongodb-connection DBCONN]
+                          [--input-mongodb DBNAME] [--input-file FILENAME]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s, --server          the type of CEDAR server. The options are {local,staging,production}
-  -t, --type            the type of CEDAR resource. The options are {template,element,field,instance}
-  --lookup FILENAME     an input file containing a list of resource identifiers to validate
+  -s {local,staging,production}, --server {local,staging,production}
+                        the type of CEDAR server
+  -t {template,element,field,instance}, --type {template,element,field,instance}
+                        the type of CEDAR resource
+  --lookup FILENAME     an input file containing a list of resource
+                        identifiers to validate
   --limit LIMIT         the maximum number of resources to validate
+  --validation-apikey CEDAR-API-KEY
+                        the API key used to access the CEDAR validation
+                        service
+  --mongodb-connection DBCONN
+                        set the MongoDB admin connection URI to perform
+                        administration operations
+  --input-mongodb DBNAME
+                        set the MongoDB database name to get the resources to
+                        validate
+  --input-file FILENAME
+                        an input file containing the resource to patch
 ```
 
 **Example usage**:
 
-Validate all the templates in the staging server
+Validate all the templates in the staging server by giving the script the access to the MongoDB storage
 ```buildoutcfg
-$ python cedar-validator.py --server staging --type template "apiKey 1234567890"
+$ python cedar-validator.py -s staging -t template --validation-apikey="apiKey 1234567890" --mongodb-connection="mongodb://[username]:[password]@localhost:27017/admin" --input-mongodb=cedar
 ```
+
+Validate all the templates in the staging server that are listed in the text file. You need to list the complete template id, e.g., https://repo.metadatacenter.org/templates/dbb6450b-4c5e-5290-9420-fcc624b457b4
+```buildoutcfg
+$ python cedar-validator.py -s staging -t template --validation-apikey="apiKey 1234567890" --lookup=templates.txt
+```
+
+
 
 ### Patch Resources
 
