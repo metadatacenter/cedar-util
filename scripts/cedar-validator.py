@@ -50,7 +50,8 @@ def main():
             element = read_json(input_file)
             validate_element_from_json(element)
         elif resource_type == 'field':
-            pass
+            field = read_json(input_file)
+            validate_field_from_json(field)
         elif resource_type == 'instance':
             instance = read_json(input_file)
             validate_instance_from_json(instance)
@@ -62,7 +63,8 @@ def main():
             element_ids = read_list(input_list)
             validate_element_from_list(element_ids)
         elif resource_type == 'field':
-            pass
+            field_ids = read_list(input_list)
+            validate_field_from_list(field_ids)
         elif resource_type == 'instance':
             instance_ids = read_list(input_list)
             validate_instance_from_list(instance_ids)
@@ -76,7 +78,8 @@ def main():
             element_ids = get_element_ids(input_list, source_database, limit)
             validate_element_from_mongodb(element_ids, source_database)
         elif resource_type == 'field':
-            pass
+            field_ids = get_field_ids(input_list, source_database, limit)
+            validate_field_from_mongodb(field_ids, source_database)
         elif resource_type == 'instance':
             instance_ids = get_instance_ids(input_list, source_database, limit)
             validate_instance_from_mongodb(instance_ids, source_database)
@@ -160,6 +163,44 @@ def validate_element_from_mongodb(element_ids, source_database):
             pass
 
 
+def validate_field_from_json(field):
+    try:
+        field_id = field["@id"]
+        is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
+        reporting(field_id, is_valid, validation_message)
+    except requests.exceptions.HTTPError as error:
+        error_obj = json.loads(error.response.text)
+        error_messages.append(error_obj["message"])
+
+
+def validate_field_from_list(field_ids):
+    total_fields = len(field_ids)
+    for counter, field_id in enumerate(field_ids, start=1):
+        print_progressbar(field_id, counter, total_fields)
+        try:
+            field = get_field_from_server(cedar_server_address, cedar_api_key, field_id)
+            is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
+            reporting(field_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
+
+
+def validate_field_from_mongodb(field_ids, source_database):
+    total_fields = len(field_ids)
+    for counter, field_id in enumerate(field_ids, start=1):
+        print_progressbar(field_id, counter, total_fields)
+        try:
+            field = get_field_from_mongodb(source_database, field_id)
+            is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
+            reporting(field_id, is_valid, validation_message)
+        except requests.exceptions.HTTPError as error:
+            error_obj = json.loads(error.response.text)
+            error_messages.append(error_obj["message"])
+            pass
+
+
 def validate_instance_from_json(instance):
     try:
         instance_id = instance["@id"]
@@ -224,6 +265,19 @@ def get_element_ids(lookup_file, source_database, limit):
     return list(filtered_ids)
 
 
+def get_field_ids(lookup_file, source_database, limit):
+    field_ids = []
+    if lookup_file is not None:
+        field_ids.extend(read_list(lookup_file))
+    else:
+        if limit:
+            field_ids = source_database['template-fields'].distinct("@id").limit(limit)
+        else:
+            field_ids = source_database['template-fields'].distinct("@id")
+    filtered_ids = filter(lambda x: x is not None, field_ids)
+    return list(filtered_ids)
+
+
 def get_instance_ids(lookup_file, source_database, limit):
     instance_ids = []
     if lookup_file is not None:
@@ -257,6 +311,10 @@ def get_element_from_server(server_address, api_key, element_id):
     return getter.get_element(server_address, api_key, element_id)
 
 
+def get_field_from_server(server_address, api_key, field_id):
+    return getter.get_field(server_address, api_key, field_id)
+
+
 def get_instance_from_server(server_address, api_key, instance_id):
     return getter.get_instance(server_address, api_key, instance_id)
 
@@ -268,6 +326,11 @@ def get_template_from_mongodb(source_database, template_id):
 
 def get_element_from_mongodb(source_database, element_id):
     element = source_database['template-elements'].find_one({'@id': element_id})
+    return post_read(element)
+
+
+def get_field_from_mongodb(source_database, field_id):
+    element = source_database['template-fields'].find_one({'@id': field_id})
     return post_read(element)
 
 
