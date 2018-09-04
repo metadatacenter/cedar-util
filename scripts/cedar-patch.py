@@ -9,6 +9,10 @@ from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
 
+cedar_template_collection = "templates"
+cedar_element_collection = "template-elements"
+cedar_field_collection = "template-fields"
+
 cedar_server_address = "https://resource." + os.environ['CEDAR_HOST']
 cedar_api_key = "apiKey " + os.environ['CEDAR_ADMIN_USER_API_KEY']
 mongodb_conn = "mongodb://" + os.environ['CEDAR_MONGO_ROOT_USER_NAME'] + ":" + os.environ['CEDAR_MONGO_ROOT_USER_PASSWORD'] + "@localhost:27017/admin"
@@ -454,10 +458,10 @@ def print_progressbar(resource_id, counter, total_count):
 def get_template_ids(source_database, limit):
     template_ids = []
     if limit:
-        found_ids = source_database['templates'].distinct("@id").limit(limit)
+        found_ids = source_database[cedar_template_collection].distinct("@id").limit(limit)
         template_ids.extend(found_ids)
     else:
-        found_ids = source_database['templates'].distinct("@id")
+        found_ids = source_database[cedar_template_collection].distinct("@id")
         template_ids.extend(found_ids)
     filtered_ids = filter(lambda x: x is not None, template_ids)
     return list(filtered_ids)
@@ -466,10 +470,10 @@ def get_template_ids(source_database, limit):
 def get_element_ids(source_database, limit):
     element_ids = []
     if limit:
-        found_ids = source_database['template-elements'].distinct("@id").limit(limit)
+        found_ids = source_database[cedar_element_collection].distinct("@id").limit(limit)
         element_ids.extend(found_ids)
     else:
-        found_ids = source_database['template-elements'].distinct("@id")
+        found_ids = source_database[cedar_element_collection].distinct("@id")
         element_ids.extend(found_ids)
     filtered_ids = filter(lambda x: x is not None, element_ids)
     return list(filtered_ids)
@@ -478,10 +482,10 @@ def get_element_ids(source_database, limit):
 def get_field_ids(source_database, limit):
     field_ids = []
     if limit:
-        found_ids = source_database['template-fields'].distinct("@id").limit(limit)
+        found_ids = source_database[cedar_field_collection].distinct("@id").limit(limit)
         field_ids.extend(found_ids)
     else:
-        found_ids = source_database['template-fields'].distinct("@id")
+        found_ids = source_database[cedar_field_collection].distinct("@id")
         field_ids.extend(found_ids)
     filtered_ids = filter(lambda x: x is not None, field_ids)
     return list(filtered_ids)
@@ -500,17 +504,17 @@ def read_json(filename):
 
 
 def get_template_from_mongodb(source_database, template_id):
-    template = source_database['templates'].find_one({'@id': template_id})
+    template = source_database[cedar_template_collection].find_one({'@id': template_id})
     return post_read(template)
 
 
 def get_element_from_mongodb(source_database, element_id):
-    element = source_database['template-elements'].find_one({'@id': element_id})
+    element = source_database[cedar_element_collection].find_one({'@id': element_id})
     return post_read(element)
 
 
 def get_field_from_mongodb(source_database, field_id):
-    field = source_database['template-fields'].find_one({'@id': field_id})
+    field = source_database[cedar_field_collection].find_one({'@id': field_id})
     return post_read(field)
 
 
