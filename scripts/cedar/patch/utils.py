@@ -1,11 +1,12 @@
 import re
 import dpath
 import json
+from distutils.version import StrictVersion
 
 
 def is_compatible(resource, required_version):
     current_schema_version = resource.get("schema:schemaVersion")
-    return current_schema_version == required_version
+    return StrictVersion(current_schema_version) >= StrictVersion(required_version)
 
 
 def is_template(resource, at=None):
