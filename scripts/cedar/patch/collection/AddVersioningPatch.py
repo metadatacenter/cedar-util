@@ -7,7 +7,7 @@ class AddVersioningPatch(object):
 
     def __init__(self):
         self.description = "Add versioning in templates and elements"
-        self.from_version = "1.3.0"
+        self.from_version = "1.1.0"
         self.to_version = "1.4.0"
 
     def is_applied(self, error_message, doc=None):
