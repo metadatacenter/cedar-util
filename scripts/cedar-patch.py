@@ -103,7 +103,22 @@ def main():
 
 
 def build_patch_engine():
-    return build_patch_engine_v130()
+    return build_patch_engine_v140()
+
+
+def build_patch_engine_v140():
+    patch_engine = Engine()
+    patch_engine.add_patch(AddSchemaPropsToPropertiesPatch())
+    patch_engine.add_patch(AddProvenanceToPropertiesPatch())
+    patch_engine.add_patch(RecreateTemplateRequiredPatch())
+    patch_engine.add_patch(RecreateAdditionalValuePatch())
+    patch_engine.add_patch(AddBiboToContextPatch())
+    patch_engine.add_patch(AddBiboStatusPatch())
+    patch_engine.add_patch(AddBiboVersionPatch())
+    patch_engine.add_patch(AddVersioningPatch())
+    patch_engine.add_patch(AddValueConstraintsToFieldOrElementPatch())
+    patch_engine.add_patch(FillEmptyPropertyDescriptionPatch())
+    return patch_engine
 
 
 def build_patch_engine_v130():
