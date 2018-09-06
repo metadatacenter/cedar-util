@@ -49,6 +49,16 @@ def is_static_template_field(resource, at=None):
         return False
 
 
+def is_instance(resource, at=None):
+    if at:
+        resource = dpath.util.get(resource, at)
+    resource_type = resource.get("@type")
+    if resource_type:  # if exists
+        return resource_type == "https://schema.metadatacenter.org/core/Template"
+    else:
+        return False
+
+
 def is_multivalued_field(resource, at=None):
     if at:
         resource = dpath.util.get(resource, at)
