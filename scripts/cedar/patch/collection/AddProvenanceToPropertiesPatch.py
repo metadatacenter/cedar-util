@@ -37,7 +37,7 @@ class AddProvenanceToPropertiesPatch(object):
                 ],
                 "format": "uri"
             },
-            "path": "/properties/oslc:modifiedBy"
+            "path": path + "/oslc:modifiedBy"
         },
         {
             "op": "add",
@@ -48,7 +48,7 @@ class AddProvenanceToPropertiesPatch(object):
                 ],
                 "format": "uri"
             },
-            "path": "/properties/pav:createdBy"
+            "path": path + "/pav:createdBy"
         },
         {
             "op": "add",
@@ -59,7 +59,7 @@ class AddProvenanceToPropertiesPatch(object):
                 ],
                 "format": "date-time"
             },
-            "path": "/properties/pav:createdOn"
+            "path": path + "/pav:createdOn"
         },
         {
             "op": "add",
@@ -70,6 +70,6 @@ class AddProvenanceToPropertiesPatch(object):
                 ],
                 "format": "date-time"
             },
-            "path": "/properties/pav:lastUpdatedOn"
+            "path": path + "/pav:lastUpdatedOn"
         }]
         return jsonpatch.JsonPatch(patches)
