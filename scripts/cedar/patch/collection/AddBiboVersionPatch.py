@@ -3,10 +3,10 @@ import re
 from cedar.patch import utils
 
 
-class AddVersioningPatch(object):
+class AddBiboVersionPatch(object):
 
     def __init__(self):
-        self.description = "Add versioning in templates and elements"
+        self.description = "Add bibo:version in templates and elements"
         self.from_version = "1.1.0"
         self.to_version = "1.4.0"
 
@@ -15,7 +15,7 @@ class AddVersioningPatch(object):
             return False
         pattern = re.compile(
             "object has missing required properties " \
-            "\(\['bibo:status','pav:version']\) " \
+            "\(\['bibo:version']\) " \
             "at (/?(/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
         return pattern.match(error_message)
 
@@ -29,12 +29,7 @@ class AddVersioningPatch(object):
         path = utils.get_error_location(error_message)
         patches = [{
             "op": "add",
-            "value": "bibo:draft",
-            "path": path + "/bibo:status"
-        },
-        {
-            "op": "add",
             "value": "0.0.1",
-            "path": path + "/pav:version"
+            "path": path + "/bibo:version"
         }]
         return jsonpatch.JsonPatch(patches)

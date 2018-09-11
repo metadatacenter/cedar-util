@@ -1,51 +1,55 @@
 import argparse
 import json
+import os
 from pymongo import MongoClient
+
+
+cedar_template_collection = "templates"
+cedar_element_collection = "template-elements"
+cedar_field_collection = "template-fields"
+
+mongodb_conn = "mongodb://" + os.environ['CEDAR_MONGO_ROOT_USER_NAME'] + ":" + os.environ['CEDAR_MONGO_ROOT_USER_PASSWORD'] + "@localhost:27017/admin"
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--type",
-                        choices=['template', 'element'],
+                        choices=['template', 'element', 'field'],
                         default="template",
                         help="the type of CEDAR resource")
     parser.add_argument("--patch-dir",
                         required=False,
                         metavar="DIRNAME",
                         help="set the input directory of the patched resources")
-    parser.add_argument("--lookup",
+    parser.add_argument("--patch-list",
                         required=False,
                         metavar="FILENAME",
                         help="an input file containing a list of patched resource identifiers")
-    parser.add_argument("--mongodb-connection",
-                        required=False,
-                        metavar="DBCONN",
-                        help="set the MongoDB admin connection URI to perform administration operations")
     parser.add_argument("--input-mongodb",
                         required=False,
                         default="cedar",
                         metavar="DBNAME",
                         help="set the MongoDB database name to get the resources to validate")
-    parser.add_argument("--patch-prefix",
+    parser.add_argument("--use-patches-with-prefix",
                         required=False,
                         default="",
                         help="set the prefix for the patch files")
     args = parser.parse_args()
     resource_type = args.type
     patch_dir = args.patch_dir
-    patch_list = get_ids_from_file(args.lookup)
-    patch_prefix = args.patch_prefix
-
-    mongodb_conn = args.mongodb_connection
-    source_db_name = args.input_mongodb
+    patch_list = get_ids_from_file(args.patch_list)
+    patch_prefix = args.use_patches_with_prefix
+    input_mongodb = args.input_mongodb
 
     mongodb_client = setup_mongodb_client(mongodb_conn)
-    source_database = setup_source_database(mongodb_client, source_db_name)
+    source_database = setup_source_database(mongodb_client, input_mongodb)
 
     if resource_type == 'template':
         commit_template_patch(patch_list, patch_prefix, patch_dir, source_database)
     elif resource_type == 'element':
         commit_element_patch(patch_list, patch_prefix, patch_dir, source_database)
+    elif resource_type == 'field':
+        commit_field_patch(patch_list, patch_prefix, patch_dir, source_database)
 
 
 def commit_template_patch(patch_list, patch_prefix, patch_dir, source_database):
@@ -54,9 +58,9 @@ def commit_template_patch(patch_list, patch_prefix, patch_dir, source_database):
         print("Commit the patch: " + patch_file + "\r", end="")
         patched_template = read_file(patch_file)
         try:
-            mongodb_index_id = get_mongodb_index_id(source_database, "templates", template_id)
+            mongodb_index_id = get_mongodb_index_id(source_database, cedar_template_collection, template_id)
             patched_template["_id"] = mongodb_index_id
-            write_to_mongodb(source_database, "templates", patched_template)
+            write_to_mongodb(source_database, cedar_template_collection, patched_template)
             print("Commit the patch: " + patch_file + " - Success")
         except ValueError as error:
             print("Commit the patch: " + patch_file + " - Failed")
@@ -70,9 +74,25 @@ def commit_element_patch(patch_list, patch_prefix, patch_dir, source_database):
         print("Commit the patch: " + patch_file + "\r", end="")
         patched_element = read_file(patch_file)
         try:
-            mongodb_index_id = get_mongodb_index_id(source_database, "template-elements", element_id)
+            mongodb_index_id = get_mongodb_index_id(source_database, cedar_element_collection, element_id)
             patched_element["_id"] = mongodb_index_id
-            write_to_mongodb(source_database, "template-elements", patched_element)
+            write_to_mongodb(source_database, cedar_element_collection, patched_element)
+            print("Commit the patch: " + patch_file + " - Success")
+        except ValueError as error:
+            print("Commit the patch: " + patch_file + " - Failed")
+            print(str(error))
+    print("Done.")
+
+
+def commit_field_patch(patch_list, patch_prefix, patch_dir, source_database):
+    for field_id in patch_list:
+        patch_file = get_patch_file(patch_prefix, patch_dir, field_id)
+        print("Commit the patch: " + patch_file + "\r", end="")
+        patched_field = read_file(patch_file)
+        try:
+            mongodb_index_id = get_mongodb_index_id(source_database, cedar_field_collection, field_id)
+            patched_field["_id"] = mongodb_index_id
+            write_to_mongodb(source_database, cedar_field_collection, patched_field)
             print("Commit the patch: " + patch_file + " - Success")
         except ValueError as error:
             print("Commit the patch: " + patch_file + " - Failed")
