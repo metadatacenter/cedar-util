@@ -33,6 +33,11 @@ def get_element(server_address, api_key, element_id):
     return get_resource(api_key, request_url)
 
 
+def get_field(server_address, api_key, field_id):
+    request_url = server_address + "/template-fields/" + escape(field_id)
+    return get_resource(api_key, request_url)
+
+
 def get_instance(server_address, api_key, instance_id):
     request_url = server_address + "/template-instances/" + escape(instance_id)
     return get_resource(api_key, request_url)

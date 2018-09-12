@@ -34,6 +34,11 @@ def validate_element(server_address, api_key, element):
     return validate_resource(api_key, request_url, element)
 
 
+def validate_field(server_address, api_key, field):
+    request_url = server_address + "/command/validate?resource_type=field"
+    return validate_resource(api_key, request_url, field)
+
+
 def validate_instance(server_address, api_key, instance):
     request_url = server_address + "/command/validate?resource_type=instance"
     return validate_resource(api_key, request_url, instance)

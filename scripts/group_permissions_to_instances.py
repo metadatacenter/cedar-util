@@ -1,13 +1,14 @@
+import os
 from cedar.utils import searcher, getter, updater
 
 
 def main():
     # Program parameters
-    server_address = ""
-    template_id = ""
-    group_id = ""
-    api_key = ""
-    permission_type = ""
+    server_address = "https://resource." + os.environ['CEDAR_HOST']
+    template_id = os.environ['CEDAR_DATAMED_TEMPLATE_ID']
+    group_id = os.environ['CEDAR_DATAMED_GROUP_ID']
+    api_key = "apiKey " + os.environ['CEDAR_ADMIN_USER_API_KEY']
+    permission_type = os.environ['CEDAR_DATAMED_PERMISSION_TYPE']
 
     instance_ids = searcher.search_instances_of(server_address, api_key, template_id)
     for instance_id in instance_ids:

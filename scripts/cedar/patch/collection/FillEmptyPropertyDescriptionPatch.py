@@ -3,20 +3,19 @@ import re
 from cedar.patch import utils
 
 
-class AddVersioningPatch(object):
+class FillEmptyPropertyDescriptionPatch(object):
 
     def __init__(self):
-        self.description = "Add versioning in templates and elements"
-        self.from_version = "1.1.0"
+        self.description = "Fills empty property description with a default string value"
+        self.from_version = "1.3.0"
         self.to_version = "1.4.0"
 
     def is_applied(self, error_message, doc=None):
         if not utils.is_compatible(doc, self.from_version):
             return False
         pattern = re.compile(
-            "object has missing required properties " \
-            "\(\['bibo:status','pav:version']\) " \
-            "at (/?(/properties/[^/]+/items)*(/properties/[^/@]+)*)*$")
+            "string '' is too short \(length: 0, required minimum: 1\) " \
+            "at /_ui/propertyDescriptions/.*$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
@@ -29,12 +28,7 @@ class AddVersioningPatch(object):
         path = utils.get_error_location(error_message)
         patches = [{
             "op": "add",
-            "value": "bibo:draft",
-            "path": path + "/bibo:status"
-        },
-        {
-            "op": "add",
-            "value": "0.0.1",
-            "path": path + "/pav:version"
+            "value": "Help Text",
+            "path": path
         }]
         return jsonpatch.JsonPatch(patches)

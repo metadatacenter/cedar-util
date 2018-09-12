@@ -60,6 +60,10 @@ from cedar.patch.collection.AddBiboToContextPatch import AddBiboToContextPatch
 from cedar.patch.collection.AddVersioningPatch import AddVersioningPatch
 from cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
 from cedar.patch.collection.AddVersioningInNestedMultiElementPatch import AddVersioningInNestedMultiElementPatch
+from cedar.patch.collection.AddBiboStatusPatch import AddBiboStatusPatch
+from cedar.patch.collection.AddBiboVersionPatch import AddBiboVersionPatch
+from cedar.patch.collection.FillEmptyPropertyDescriptionPatch import FillEmptyPropertyDescriptionPatch
+from cedar.patch.collection.RecreateAdditionalValuePatch import RecreateAdditionalValuePatch
 
 
 __all__ = [
@@ -124,4 +128,8 @@ __all__ = [
     "AddBiboToContextPatch",
     "AddVersioningPatch",
     "AddVersioningInNestedElementPatch",
-    "AddVersioningInNestedMultiElementPatch"]
+    "AddVersioningInNestedMultiElementPatch",
+    "AddBiboStatusPatch",
+    "AddBiboVersionPatch",
+    "FillEmptyPropertyDescriptionPatch",
+    "RecreateAdditionalValuePatch"]

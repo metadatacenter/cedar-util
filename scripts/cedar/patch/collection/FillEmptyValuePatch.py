@@ -28,7 +28,7 @@ class FillEmptyValuePatch(object):
         path = utils.get_error_location(error_message)
         patches = [{
             "op": "add",
-            "value": "blank",
+            "value": " ",
             "path": path
         }]
         return jsonpatch.JsonPatch(patches)

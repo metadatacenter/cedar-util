@@ -29,116 +29,91 @@ from cedar.utils import getter, storer, validator
 ### Validate Resources
 
 ```buildoutcfg
-usage: cedar-validator.py [-h] [-s {local,staging,production}]
-                          [-t {template,element,field,instance}]
-                          [--lookup FILENAME] [--limit LIMIT]
-                          CEDAR-API-KEY
-
-positional arguments:
-  CEDAR-API-KEY         the API key used to access the CEDAR resource server
+usage: cedar-validator.py [-h] [-t {template,element,field,instance}]
+                          [--input-list FILENAME] [--input-json FILENAME]
+                          [--input-mongodb DBNAME] [--limit LIMIT]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s, --server          the type of CEDAR server. The options are {local,staging,production}
-  -t, --type            the type of CEDAR resource. The options are {template,element,field,instance}
-  --lookup FILENAME     an input file containing a list of resource identifiers to validate
-  --limit LIMIT         the maximum number of resources to validate
+  -t {template,element,field,instance}, --type {template,element,field,instance}
+                        the type of CEDAR resource
+  --input-list FILENAME
+                        an input file containing a list of resource
+                        identifiers to validate
+  --input-json FILENAME
+                        an input file containing the JSON document to validate
+  --input-mongodb DBNAME
+                        the name of MongoDB database where resources are
+                        located
+  --limit LIMIT         the maximum number of resources to validate (useful
+                        when --input-mongodb is used)
 ```
 
 **Example usage**:
 
-Validate all the templates in the staging server
+Validate all the templates stored in a MongoDB database
 ```buildoutcfg
-$ python cedar-validator.py --server staging --type template "apiKey 1234567890"
+$ python cedar-validator.py -t template --input-mongodb=cedar
+```
+
+Validate all the elements where their ids are listed in a text file
+```buildoutcfg
+$ python cedar-validator.py -t element --input-list=elements.txt
+```
+
+Validate a field specified in a JSON file
+```buildoutcfg
+$ python cedar-validator.py -t instance --input-list=field.json
 ```
 
 ### Patch Resources
 
 ```buildoutcfg
-usage: cedar-patch.py [-h] [-s {local,staging,production}]
-                      [-t {all,template,element,field,instance}]
-                      [--lookup FILENAME] [--limit LIMIT]
-                      [--output-dir DIRNAME] [--mongodb-connection DBCONN]
-                      [--output-mongodb DBNAME] [--commit] [--revert]
-                      [--model-version VERSION] [--keep-unresolved] [--debug]
-                      [--apikey CEDAR-API-KEY]
+usage: cedar-patch.py [-h] [-t {template,element,field}]
+                      [--input-json FILENAME] [--input-mongodb DBNAME]
+                      [--filter FILENAME] [--limit LIMIT]
+                      [--output-dir DIRNAME] [--output-mongodb DBNAME]
+                      [--set-model-version VERSION] [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s {local,staging,production}, --server {local,staging,production}
-                        the type of CEDAR server
-  -t {all,template,element,field,instance}, --type {all,template,element,field,instance}
+  -t {template,element,field}, --type {template,element,field}
                         the type of CEDAR resource
-  --lookup FILENAME     an input file containing a list of resource
+  --input-json FILENAME
+                        an input file containing the resource to patch
+  --input-mongodb DBNAME
+                        set the MongoDB database where resources are located
+  --filter FILENAME     an input file containing a list of resource
                         identifiers to patch
   --limit LIMIT         the maximum number of resources to patch
   --output-dir DIRNAME  set the output directory to store the patched
                         resources
-  --mongodb-connection DBCONN
-                        set the MongoDB admin connection URI to perform
-                        administration operations
   --output-mongodb DBNAME
                         set the MongoDB database name to store the patched
                         resources
-  --commit              commit the integration of the patched resources to the
-                        CEDAR system
-  --revert              revert the integration of the patched resources from
-                        the CEDAR system
-  --model-version VERSION
+  --set-model-version VERSION
                         set the CEDAR model version of the patched resources
-  --keep-unresolved     include the unresolved resources as part of the output
   --debug               print the debugging messages
-  --apikey CEDAR-API-KEY
 ```
 
 **Example usage**:
 
-Patch all the templates in the production server and set the output to the `/tmp` directory
+Patch all the templates and set the output to the `/tmp` directory
 ```buildoutcfg
-$ python cedar-patch.py --server production --type template --apikey="apiKey 1234567890" --output-dir="/tmp"
+$ python cedar-patch.py -t template --input-mongodb=cedar --output-dir=/tmp
 ```
 
-Patch all the templates in the production server and set the output to a MongoDB database called `cedar-patch`. Additionally, we would like also to update the model version to "1.3.0"
+Patch all the templates and set the output to a MongoDB database called `cedar-patch`. Additionally, we would like also to update the model version to "1.3.0"
 ```buildoutcfg
-$ python cedar-patch.py --server production --type template --apikey="apiKey 1234567890" --mongodb-connection="mongodb://admin:adminpass@localhost:27017/admin" --output-mongodb="cedar-patch" --model-version="1.3.0" 
+$ python cedar-patch.py -t template --input-mongodb=cedar --output-mongodb=cedar-patch --set-model-version="1.3.0" 
 ```
 
-Patch the first 100 elements in the staging server
+Patch the first 100 elements and set the output to both a MongoDB database and the `/tmp` directory
 ```buildoutcfg
-$ python cedar-patch.py --server staging --type element --apikey="apiKey 1234567890" --output-dir="/tmp" --limit 100 
+$ python cedar-patch.py -t element --input-mongodb=cedar --output-dir=/tmp --output-mongodb=cedar-patch --limit 100 
 ```
 
-Patch all the templates specified by the `template.txt`
+Patch all the fields filtered by the `fields.txt`
 ```buildoutcfg
-$ python cedar-patch.py --server staging --type element --apikey="apiKey 1234567890" --output-dir="/tmp" --lookup="template.txt" 
-```
-
-Patch all the resources in the production server and commit the changes to the real production database
-```buildoutcfg
-$ python cedar-patch.py --server production --type all --apikey="apiKey 1234567890" --mongodb-connection="mongodb://admin:mypass@localhost:27017/admin" --output-mongodb="cedar-patch" --model-version="1.3.0" --commit
-```
-
-Revert all the patched results from the production database
-```buildoutcfg
-$ python cedar-patch.py --server production --mongodb-connection="mongodb://admin:mypass@localhost:27017/admin" --output-mongodb="cedar-patch" --revert
-```
-
-### Copy Resources
-
-```buildoutcfg
-usage: cedar-migrate.py [-h] --from SERVER-ADDRESS CEDAR-API-KEY --to
-                        SERVER-ADDRESS CEDAR-API-KEY [--include-instances]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --from                the source server
-  --to                  the destination server
-  --include-instances   copy all the template instances as well
-```
-
-**Example usage**:
-
-Copy all the resources from the CEDAR staging server to a local server (Note: use the *resource.** sub-domain of the server)
-```buildoutcfg
-python cedar-migrate.py --from https://resource.staging.metadatacenter.org "apiKey 1234567890" --to https://resource.metadatacenter.orgx "apiKey abcdefghij" --include-instances
+$ python cedar-patch.py -t field --input-mongodb=cedar --filter=fields.txt --output-dir=/tmp
 ```
