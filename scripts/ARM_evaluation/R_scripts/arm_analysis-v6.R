@@ -165,27 +165,30 @@ aggregate_data_2 <- function(df, reciprocal_rank_vr_column, reciprocal_rank_base
 #   return(plot)
 # }
 
-generate_plot <- function(df, title="title"){
-  plot <- ggplot(data=df, aes(x=no_populated_fields, y=mrr, group=method, colour=method)) + 
-    geom_line(aes(linetype=method), size=0.7) + 
-    scale_linetype_manual(values=c("solid", "solid")) +
-    scale_color_manual(values=c(color1, color2)) +
-    geom_point() + geom_text(size=2.5, aes(label=sprintf("%0.2f", round(mrr, digits = 2))), vjust=2, show.legend = FALSE) +
-    ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank") +
-    theme(text = element_text(size=8))
-  # + scale_color_brewer(palette="Dark2")
-  return(plot)
-}
+# generate_plot <- function(df, title="title"){
+#   plot <- ggplot(data=df, aes(x=no_populated_fields, y=mrr, group=method, colour=method)) + 
+#     geom_line(aes(linetype=method), size=0.7) + 
+#     scale_linetype_manual(values=c("solid", "solid")) +
+#     scale_color_manual(values=c(color1, color2)) +
+#     geom_point() + geom_text(size=2.5, aes(label=sprintf("%0.2f", round(mrr, digits = 2))), vjust=2, show.legend = FALSE) +
+#     ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank") +
+#     theme(text = element_text(size=8))
+#   # + scale_color_brewer(palette="Dark2")
+#   return(plot)
+# }
 
 generate_plot_2 <- function(df, title="title") {
-  plot <- ggplot(data=df, aes(x=no_populated_fields, y=mrr, group=method, colour=method)) + 
+  # Custom order for the factors
+  df$method <- factor(df$method, c("baseline (text)", "baseline (ontology terms)","recommender (text)", "recommender (ontology terms)"))
+  
+  plot <- ggplot(data=df, aes(x=no_populated_fields, y=mrr, group=method, colour=method)) +
     theme_bw(base_size = 9)  +
-    geom_line(aes(linetype=method), size=0.5) + 
-    scale_linetype_manual(values=c("dashed", "dashed", "solid", "solid")) +
-    scale_color_manual(values=c(color4, color2, color4, color2)) +
-    geom_point() + 
+    geom_line(aes(linetype=method), size=0.5) +
+    scale_linetype_manual(values=c("dotted", "dotted", "solid", "solid")) +
+    scale_color_manual(values=c(color2, color4, color2, color4)) +
+    geom_point() +
     #geom_text(size=2.5, aes(label=sprintf("%0.2f", round(mrr, digits = 2))), vjust=2, show.legend = FALSE) +
-    ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank") 
+    ylim(0,1) + ggtitle(title) + xlab("No. populated fields") + ylab("Mean Reciprocal Rank")
   # + scale_color_brewer(palette="Dark2")
   return(plot)
 }
@@ -197,11 +200,12 @@ generate_plot_2 <- function(df, title="title") {
 #   return(plot)
 # }
 
-generate_plot_field <- function(df, title="title"){
+generate_plot_field <- function(df, title="title") {
   # Custom order for the factors
-  df$method <- factor(df$method, c("baseline (text)","recommender (text)", "baseline (ontology terms)", "recommender (ontology terms)"))
+  df$method <- factor(df$method, c("baseline (text)", "baseline (ontology terms)","recommender (text)", "recommender (ontology terms)"))
+  
   plot <- ggplot(data=df, aes(x=field, y=mrr, fill=method)) + geom_bar(stat="identity", position=position_dodge()) +
-    scale_fill_manual(values=c(color1, color2, color3, color4)) +
+    scale_fill_manual(values=c(color1, color3, color2, color4)) +
     ylim(0,1) + ggtitle(title) + xlab("Field") + ylab("Mean Reciprocal Rank") +
     theme(text = element_text(size=8))
   return(plot)
@@ -344,7 +348,6 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, reci
   p8 <- generate_plot_field(data_p8, "Training: EBI; Testing: NCBI")
   
   fig2 <- ggarrange(p5, p6, p7, p8, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
-  #desc_text <- paste("Results", sep = "")
   desc_text <- ""
   fig2_annotated <- annotate_figure(fig2, top = text_grob(label=desc_text, color = "black", face = "bold", size = 11))
   print(fig2_annotated)
@@ -373,15 +376,9 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, reci
 
 ################################
 
-### PLOTS FOR PAPER ###
+### GENERATION OF PLOTS FOR PAPER ###
 
-# First figure
 evaluation_set_1 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI, file_NCBItoEBI, file_EBItoEBI, file_EBItoNCBI), description="free text")
 evaluation_set_2 <- new("EvaluationSet", datasets=c(file_NCBItoNCBI_annotated_same_ontologies_mappings, file_NCBItoEBI_annotated_different_ontologies_mappings, file_EBItoEBI_annotated_same_ontologies_mappings, file_EBItoNCBI_annotated_different_ontologies_mappings), description="annotated; diff ontologies; with mappings")
 generate_all_plots_overlapped(evaluation_set_1, evaluation_set_2, 'RR_top5_vr', 'RR_top5_baseline')
-
-# Second figure
-
-
-
 
