@@ -218,13 +218,13 @@ def patch_template(patch_engine, template_ids, source_database, output_dir=None,
                         filename = create_filename_from_id(template_id, prefix="template-patched-")
                         write_to_file(patched_template, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "templates", patched_template)
+                        write_to_mongodb(target_database, cedar_template_collection, patched_template)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-")
                         write_to_file(template, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "templates", template)
+                        write_to_mongodb(target_database, cedar_template_collection, template)
             else:
                 create_report("unresolved", template_id)
                 if output_dir is not None:
@@ -233,7 +233,7 @@ def patch_template(patch_engine, template_ids, source_database, output_dir=None,
                     filename = create_filename_from_id(template_id, prefix="template-partially-patched-")
                     write_to_file(patched_template, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "templates", template)
+                    write_to_mongodb(target_database, cedar_template_collection, template)
         except (HTTPError, KeyError) as error:
             create_report("error", [template_id, "Error details: " + str(error)])
     print()  # console printing separator
@@ -280,13 +280,13 @@ def patch_element(patch_engine, element_ids, source_database, output_dir=None, t
                         filename = create_filename_from_id(element_id, prefix="element-patched-")
                         write_to_file(patched_element, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-elements", patched_element)
+                        write_to_mongodb(target_database, cedar_element_collection, patched_element)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-")
                         write_to_file(element, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-elements", element)
+                        write_to_mongodb(target_database, cedar_element_collection, element)
             else:
                 create_report("unresolved", element_id)
                 if output_dir is not None:
@@ -295,7 +295,7 @@ def patch_element(patch_engine, element_ids, source_database, output_dir=None, t
                     filename = create_filename_from_id(element_id, prefix="element-partially-patched-")
                     write_to_file(patched_element, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "template-elements", element)
+                    write_to_mongodb(target_database, cedar_element_collection, element)
         except (HTTPError, KeyError, TypeError) as error:
             create_report("error", [element_id, "Error details: " + str(error)])
     print()  # console printing separator
@@ -342,13 +342,13 @@ def patch_field(patch_engine, field_ids, source_database, output_dir=None, targe
                         filename = create_filename_from_id(field_id, prefix="field-patched-")
                         write_to_file(patched_field, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-fields", patched_field)
+                        write_to_mongodb(target_database, cedar_field_collection, patched_field)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(field_id, prefix="field-")
                         write_to_file(field, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-fields", field)
+                        write_to_mongodb(target_database, cedar_field_collection, field)
             else:
                 create_report("unresolved", field_id)
                 if output_dir is not None:
@@ -357,7 +357,7 @@ def patch_field(patch_engine, field_ids, source_database, output_dir=None, targe
                     filename = create_filename_from_id(field_id, prefix="field-partially-patched-")
                     write_to_file(patched_field, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "template-fields", field)
+                    write_to_mongodb(target_database, cedar_field_collection, field)
         except (HTTPError, KeyError, TypeError) as error:
             create_report("error", [field_id, "Error details: " + str(error)])
     print()  # console printing separator
