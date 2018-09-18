@@ -54,10 +54,6 @@ def main():
                         required=False,
                         metavar="DBNAME",
                         help="set the MongoDB database name to store the patched resources")
-    parser.add_argument("--set-model-version",
-                        required=False,
-                        metavar="VERSION",
-                        help="set the CEDAR model version of the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -70,33 +66,32 @@ def main():
     limit = args.limit
     output_dir = args.output_dir
     output_mongodb = args.output_mongodb
-    model_version = args.set_model_version
     debug = args.debug
 
     patch_engine = build_patch_engine()
     if input_file is not None:
         if resource_type == 'template':
             template = read_json(input_file)
-            patch_template_from_json(patch_engine, template, model_version, output_dir, debug)
+            patch_template_from_json(patch_engine, template, output_dir, debug)
         elif resource_type == 'element':
             element = read_json(input_file)
-            patch_element_from_json(patch_engine, element, model_version, output_dir, debug)
+            patch_element_from_json(patch_engine, element, output_dir, debug)
         elif resource_type == 'field':
             field = read_json(input_file)
-            patch_field_from_json(patch_engine, field, model_version, output_dir, debug)
+            patch_field_from_json(patch_engine, field, output_dir, debug)
     elif input_mongodb is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, input_mongodb)
         target_database = setup_target_database(mongodb_client, output_mongodb)
         if resource_type == 'template':
             template_ids = read_list(filter_list) if filter_list is not None else get_template_ids(source_database, limit)
-            patch_template(patch_engine, template_ids, source_database, model_version, output_dir, target_database, debug)
+            patch_template(patch_engine, template_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'element':
             element_ids = read_list(filter_list) if filter_list is not None else get_element_ids(source_database, limit)
-            patch_element(patch_engine, element_ids, source_database, model_version, output_dir, target_database, debug)
+            patch_element(patch_engine, element_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'field':
             field_ids = read_list(filter_list) if filter_list is not None else get_field_ids(source_database, limit)
-            patch_element(patch_engine, field_ids, source_database, model_version, output_dir, target_database, debug)
+            patch_element(patch_engine, field_ids, source_database, output_dir, target_database, debug)
 
     if not debug:
         show_report()
@@ -188,11 +183,9 @@ def build_patch_engine_v130():
     return patch_engine
 
 
-def patch_template_from_json(patch_engine, template, model_version, output_dir, debug=False):
+def patch_template_from_json(patch_engine, template, output_dir, debug=False):
     try:
         template_id = template["@id"]
-        if model_version:
-            set_model_version(template, model_version)
         is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
         if is_success:
             if patched_template is not None:
@@ -210,15 +203,13 @@ def patch_template_from_json(patch_engine, template, model_version, output_dir, 
     print()  # console printing separator
 
 
-def patch_template(patch_engine, template_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_template(patch_engine, template_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
             template = get_template_from_mongodb(source_database, template_id)
-            if model_version:
-                set_model_version(template, model_version)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -255,11 +246,9 @@ def validate_template_callback(template):
                       if not is_valid]
 
 
-def patch_element_from_json(patch_engine, element, model_version, output_dir, debug):
+def patch_element_from_json(patch_engine, element, output_dir, debug):
     try:
         element_id = element["@id"]
-        if model_version:
-            set_model_version(element, model_version)
         is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
         if is_success:
             if patched_element is not None:
@@ -276,15 +265,13 @@ def patch_element_from_json(patch_engine, element, model_version, output_dir, de
         create_report("error", [element_id, "Error details: " + str(error)])
 
 
-def patch_element(patch_engine, element_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_element(patch_engine, element_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
             element = get_element_from_mongodb(source_database, element_id)
-            if model_version:
-                set_model_version(element, model_version)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
             if is_success:
                 if patched_element is not None:
@@ -321,11 +308,9 @@ def validate_element_callback(element):
                       if not is_valid]
 
 
-def patch_field_from_json(patch_engine, field, model_version, output_dir, debug):
+def patch_field_from_json(patch_engine, field, output_dir, debug):
     try:
         field_id = field["@id"]
-        if model_version:
-            set_model_version(field, model_version)
         is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
         if is_success:
             if patched_field is not None:
@@ -342,15 +327,13 @@ def patch_field_from_json(patch_engine, field, model_version, output_dir, debug)
         create_report("error", [field_id, "Error details: " + str(error)])
 
 
-def patch_field(patch_engine, field_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_field(patch_engine, field_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
         if not debug:
             print_progressbar(field_id, counter, total_fields)
         try:
             field = get_field_from_mongodb(source_database, field_id)
-            if model_version:
-                set_model_version(field, model_version)
             is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
             if is_success:
                 if patched_field is not None:
@@ -385,17 +368,6 @@ def validate_field_callback(field):
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
-
-
-def set_model_version(resource, model_version):
-    if resource is None:
-        return
-    for k, v in resource.items():
-        if isinstance(v, dict):
-            set_model_version(v, model_version)
-        elif isinstance(v, str):
-            if k == "schema:schemaVersion":
-                resource[k] = model_version
 
 
 def setup_mongodb_client(mongodb_conn):
