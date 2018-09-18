@@ -29,13 +29,13 @@ def main():
     mongodb_client = MongoClient(mongodb_conn)
     database = mongodb_client[cedar_database]
     if resource_type == 'template':
-        template_ids = get_template_ids(database)
+        template_ids = get_resource_ids(database, cedar_template_collection)
         update_template_model_version(template_ids, database, version_number)
     elif resource_type == 'element':
-        element_ids = get_element_ids(database)
+        element_ids = get_resource_ids(database, cedar_element_collection)
         update_element_model_version(element_ids, database, version_number)
     elif resource_type == 'field':
-        field_ids = get_field_ids(database)
+        field_ids = get_resource_ids(database, cedar_field_collection)
         update_field_model_version(field_ids, database, version_number)
 
 
@@ -80,35 +80,11 @@ def set_model_version(resource, model_version):
                 resource[k] = model_version
 
 
-def get_template_ids(source_database):
-    template_ids = []
-    found_ids = source_database[cedar_template_collection].distinct("@id")
-    template_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, template_ids)
-    return list(filtered_ids)
-
-
-def get_element_ids(source_database, limit):
-    element_ids = []
-    if limit:
-        found_ids = source_database[cedar_element_collection].distinct("@id").limit(limit)
-        element_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_element_collection].distinct("@id")
-        element_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, element_ids)
-    return list(filtered_ids)
-
-
-def get_field_ids(source_database, limit):
-    field_ids = []
-    if limit:
-        found_ids = source_database[cedar_field_collection].distinct("@id").limit(limit)
-        field_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_field_collection].distinct("@id")
-        field_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, field_ids)
+def get_resource_ids(database, collection_name):
+    resource_ids = []
+    found_ids = database[collection_name].distinct("@id")
+    resource_ids.extend(found_ids)
+    filtered_ids = filter(lambda x: x is not None, resource_ids)
     return list(filtered_ids)
 
 

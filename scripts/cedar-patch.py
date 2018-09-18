@@ -84,13 +84,13 @@ def main():
         source_database = setup_source_database(mongodb_client, input_mongodb)
         target_database = setup_target_database(mongodb_client, output_mongodb)
         if resource_type == 'template':
-            template_ids = read_list(filter_list) if filter_list is not None else get_template_ids(source_database, limit)
+            template_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_template_collection, limit)
             patch_template(patch_engine, template_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'element':
-            element_ids = read_list(filter_list) if filter_list is not None else get_element_ids(source_database, limit)
+            element_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_element_collection, limit)
             patch_element(patch_engine, element_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'field':
-            field_ids = read_list(filter_list) if filter_list is not None else get_field_ids(source_database, limit)
+            field_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_field_collection, limit)
             patch_element(patch_engine, field_ids, source_database, output_dir, target_database, debug)
 
     if not debug:
@@ -209,7 +209,7 @@ def patch_template(patch_engine, template_ids, source_database, output_dir=None,
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
-            template = get_template_from_mongodb(source_database, template_id)
+            template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -271,7 +271,7 @@ def patch_element(patch_engine, element_ids, source_database, output_dir=None, t
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
-            element = get_element_from_mongodb(source_database, element_id)
+            element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
             if is_success:
                 if patched_element is not None:
@@ -333,7 +333,7 @@ def patch_field(patch_engine, field_ids, source_database, output_dir=None, targe
         if not debug:
             print_progressbar(field_id, counter, total_fields)
         try:
-            field = get_field_from_mongodb(source_database, field_id)
+            field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
             if is_success:
                 if patched_field is not None:
@@ -442,39 +442,15 @@ def print_progressbar(resource_id, counter, total_count):
     print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
-def get_template_ids(source_database, limit):
-    template_ids = []
+def get_resource_ids(database, collection_name, limit):
+    resource_ids = []
     if limit:
-        found_ids = source_database[cedar_template_collection].distinct("@id").limit(limit)
-        template_ids.extend(found_ids)
+        found_ids = database[collection_name].distinct("@id").limit(limit)
+        resource_ids.extend(found_ids)
     else:
-        found_ids = source_database[cedar_template_collection].distinct("@id")
-        template_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, template_ids)
-    return list(filtered_ids)
-
-
-def get_element_ids(source_database, limit):
-    element_ids = []
-    if limit:
-        found_ids = source_database[cedar_element_collection].distinct("@id").limit(limit)
-        element_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_element_collection].distinct("@id")
-        element_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, element_ids)
-    return list(filtered_ids)
-
-
-def get_field_ids(source_database, limit):
-    field_ids = []
-    if limit:
-        found_ids = source_database[cedar_field_collection].distinct("@id").limit(limit)
-        field_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_field_collection].distinct("@id")
-        field_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, field_ids)
+        found_ids = database[collection_name].distinct("@id")
+        resource_ids.extend(found_ids)
+    filtered_ids = filter(lambda x: x is not None, resource_ids)
     return list(filtered_ids)
 
 
@@ -490,19 +466,9 @@ def read_json(filename):
         return content
 
 
-def get_template_from_mongodb(source_database, template_id):
-    template = source_database[cedar_template_collection].find_one({'@id': template_id})
-    return post_read(template)
-
-
-def get_element_from_mongodb(source_database, element_id):
-    element = source_database[cedar_element_collection].find_one({'@id': element_id})
-    return post_read(element)
-
-
-def get_field_from_mongodb(source_database, field_id):
-    field = source_database[cedar_field_collection].find_one({'@id': field_id})
-    return post_read(field)
+def read_from_mongodb(database, collection_name, resource_id):
+    resource = database[collection_name].find_one({'@id': resource_id})
+    return post_read(resource)
 
 
 def post_read(resource):
