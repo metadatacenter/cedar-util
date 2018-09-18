@@ -207,7 +207,7 @@ generate_plot_field <- function(df, title="title") {
   plot <- ggplot(data=df, aes(x=field, y=mrr, fill=method)) + geom_bar(stat="identity", position=position_dodge()) +
     scale_fill_manual(values=c(color1, color3, color2, color4)) +
     ylim(0,1) + ggtitle(title) + xlab("Field") + ylab("Mean Reciprocal Rank") +
-    theme(text = element_text(size=8))
+    theme_bw() + theme(text = element_text(size=8))
   return(plot)
 }
 
@@ -311,10 +311,10 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, reci
   data_p4 <- rbind(data_p4_1, data_p4_2)
 
   p1 <- generate_plot_2(data_p1, "Training: NCBI; Testing: NCBI")
-  p2 <- generate_plot_2(data_p3, "Training: EBI; Testing: EBI")
-  p3 <- generate_plot_2(data_p2, "Training: NCBI; Testing: EBI")
+  p2 <- generate_plot_2(data_p2, "Training: NCBI; Testing: EBI")
+  p3 <- generate_plot_2(data_p3, "Training: EBI; Testing: EBI")
   p4 <- generate_plot_2(data_p4, "Training: EBI; Testing: NCBI")
-  fig1 <- ggarrange(p1, p2, p3, p4, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
+  fig1 <- ggarrange(p1, p3, p2, p4, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
   description = paste(description1, " vs ", description2, sep = "")
   #desc_text <- paste("Results", sep = "")
   desc_text <- ""
@@ -347,7 +347,7 @@ generate_all_plots_overlapped <- function(evaluation_set1, evaluation_set2, reci
   p7 <- generate_plot_field(data_p7, "Training: EBI; Testing: EBI")
   p8 <- generate_plot_field(data_p8, "Training: EBI; Testing: NCBI")
   
-  fig2 <- ggarrange(p5, p6, p7, p8, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
+  fig2 <- ggarrange(p5, p7, p6, p8, ncol=2, nrow=2, common.legend = TRUE, legend="bottom")
   desc_text <- ""
   fig2_annotated <- annotate_figure(fig2, top = text_grob(label=desc_text, color = "black", face = "bold", size = 11))
   print(fig2_annotated)
