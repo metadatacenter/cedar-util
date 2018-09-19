@@ -52,9 +52,9 @@ def is_static_template_field(resource, at=None):
 def is_instance(resource, at=None):
     if at:
         resource = dpath.util.get(resource, at)
-    resource_type = resource.get("@type")
+    resource_type = resource.get("schema:isBasedOn")
     if resource_type:  # if exists
-        return resource_type == "https://schema.metadatacenter.org/core/Template"
+        return True
     else:
         return False
 

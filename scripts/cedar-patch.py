@@ -54,10 +54,6 @@ def main():
                         required=False,
                         metavar="DBNAME",
                         help="set the MongoDB database name to store the patched resources")
-    parser.add_argument("--set-model-version",
-                        required=False,
-                        metavar="VERSION",
-                        help="set the CEDAR model version of the patched resources")
     parser.add_argument("--debug",
                         required=False,
                         action="store_true",
@@ -70,40 +66,59 @@ def main():
     limit = args.limit
     output_dir = args.output_dir
     output_mongodb = args.output_mongodb
-    model_version = args.set_model_version
     debug = args.debug
 
     patch_engine = build_patch_engine()
     if input_file is not None:
         if resource_type == 'template':
             template = read_json(input_file)
-            patch_template_from_json(patch_engine, template, model_version, output_dir, debug)
+            patch_template_from_json(patch_engine, template, output_dir, debug)
         elif resource_type == 'element':
             element = read_json(input_file)
-            patch_element_from_json(patch_engine, element, model_version, output_dir, debug)
+            patch_element_from_json(patch_engine, element, output_dir, debug)
         elif resource_type == 'field':
             field = read_json(input_file)
-            patch_field_from_json(patch_engine, field, model_version, output_dir, debug)
+            patch_field_from_json(patch_engine, field, output_dir, debug)
     elif input_mongodb is not None:
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, input_mongodb)
         target_database = setup_target_database(mongodb_client, output_mongodb)
         if resource_type == 'template':
-            template_ids = read_list(filter_list) if filter_list is not None else get_template_ids(source_database, limit)
-            patch_template(patch_engine, template_ids, source_database, model_version, output_dir, target_database, debug)
+            template_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_template_collection, limit)
+            patch_template(patch_engine, template_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'element':
-            element_ids = read_list(filter_list) if filter_list is not None else get_element_ids(source_database, limit)
-            patch_element(patch_engine, element_ids, source_database, model_version, output_dir, target_database, debug)
+            element_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_element_collection, limit)
+            patch_element(patch_engine, element_ids, source_database, output_dir, target_database, debug)
         elif resource_type == 'field':
-            field_ids = read_list(filter_list) if filter_list is not None else get_field_ids(source_database, limit)
-            patch_element(patch_engine, field_ids, source_database, model_version, output_dir, target_database, debug)
+            field_ids = read_list(filter_list) if filter_list is not None else get_resource_ids(source_database, cedar_field_collection, limit)
+            patch_element(patch_engine, field_ids, source_database, output_dir, target_database, debug)
 
     if not debug:
         show_report()
 
 
 def build_patch_engine():
-    return build_patch_engine_v140()
+    return build_patch_engine_v150()
+
+
+def build_patch_engine_v150():
+    patch_engine = Engine()
+    patch_engine.add_patch(AddSchemaPropsToPropertiesPatch())
+    patch_engine.add_patch(AddProvenanceToPropertiesPatch())
+    patch_engine.add_patch(RecreateTemplateRequiredPatch())
+    patch_engine.add_patch(RecreateAdditionalValuePatch())
+    patch_engine.add_patch(AddBiboToContextPatch())
+    patch_engine.add_patch(AddBiboStatusPatch())
+    patch_engine.add_patch(AddBiboVersionPatch())
+    patch_engine.add_patch(AddVersioningPatch())
+    patch_engine.add_patch(AddValueConstraintsToFieldOrElementPatch())
+    patch_engine.add_patch(FillEmptyPropertyDescriptionPatch())
+    patch_engine.add_patch(AddSkosToContextPatch())
+    patch_engine.add_patch(AddSkosToContextPropertiesPatch())
+    patch_engine.add_patch(AddSkosNotationToContextPropertiesPatch())
+    patch_engine.add_patch(AddSkosPrefLabelToContextPatch())
+    patch_engine.add_patch(AddSkosAltLabelToContextPatch())
+    return patch_engine
 
 
 def build_patch_engine_v140():
@@ -188,11 +203,9 @@ def build_patch_engine_v130():
     return patch_engine
 
 
-def patch_template_from_json(patch_engine, template, model_version, output_dir, debug=False):
+def patch_template_from_json(patch_engine, template, output_dir, debug=False):
     try:
         template_id = template["@id"]
-        if model_version:
-            set_model_version(template, model_version)
         is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
         if is_success:
             if patched_template is not None:
@@ -210,15 +223,13 @@ def patch_template_from_json(patch_engine, template, model_version, output_dir, 
     print()  # console printing separator
 
 
-def patch_template(patch_engine, template_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_template(patch_engine, template_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
             print_progressbar(template_id, counter, total_templates)
         try:
-            template = get_template_from_mongodb(source_database, template_id)
-            if model_version:
-                set_model_version(template, model_version)
+            template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
             if is_success:
                 if patched_template is not None:
@@ -227,13 +238,13 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
                         filename = create_filename_from_id(template_id, prefix="template-patched-")
                         write_to_file(patched_template, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "templates", patched_template)
+                        write_to_mongodb(target_database, cedar_template_collection, patched_template)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(template_id, prefix="template-")
                         write_to_file(template, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "templates", template)
+                        write_to_mongodb(target_database, cedar_template_collection, template)
             else:
                 create_report("unresolved", template_id)
                 if output_dir is not None:
@@ -242,7 +253,7 @@ def patch_template(patch_engine, template_ids, source_database, model_version=No
                     filename = create_filename_from_id(template_id, prefix="template-partially-patched-")
                     write_to_file(patched_template, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "templates", template)
+                    write_to_mongodb(target_database, cedar_template_collection, template)
         except (HTTPError, KeyError) as error:
             create_report("error", [template_id, "Error details: " + str(error)])
     print()  # console printing separator
@@ -255,11 +266,9 @@ def validate_template_callback(template):
                       if not is_valid]
 
 
-def patch_element_from_json(patch_engine, element, model_version, output_dir, debug):
+def patch_element_from_json(patch_engine, element, output_dir, debug):
     try:
         element_id = element["@id"]
-        if model_version:
-            set_model_version(element, model_version)
         is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
         if is_success:
             if patched_element is not None:
@@ -276,15 +285,13 @@ def patch_element_from_json(patch_engine, element, model_version, output_dir, de
         create_report("error", [element_id, "Error details: " + str(error)])
 
 
-def patch_element(patch_engine, element_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_element(patch_engine, element_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
             print_progressbar(element_id, counter, total_elements)
         try:
-            element = get_element_from_mongodb(source_database, element_id)
-            if model_version:
-                set_model_version(element, model_version)
+            element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
             if is_success:
                 if patched_element is not None:
@@ -293,13 +300,13 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
                         filename = create_filename_from_id(element_id, prefix="element-patched-")
                         write_to_file(patched_element, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-elements", patched_element)
+                        write_to_mongodb(target_database, cedar_element_collection, patched_element)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(element_id, prefix="element-")
                         write_to_file(element, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-elements", element)
+                        write_to_mongodb(target_database, cedar_element_collection, element)
             else:
                 create_report("unresolved", element_id)
                 if output_dir is not None:
@@ -308,7 +315,7 @@ def patch_element(patch_engine, element_ids, source_database, model_version=None
                     filename = create_filename_from_id(element_id, prefix="element-partially-patched-")
                     write_to_file(patched_element, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "template-elements", element)
+                    write_to_mongodb(target_database, cedar_element_collection, element)
         except (HTTPError, KeyError, TypeError) as error:
             create_report("error", [element_id, "Error details: " + str(error)])
     print()  # console printing separator
@@ -321,11 +328,9 @@ def validate_element_callback(element):
                       if not is_valid]
 
 
-def patch_field_from_json(patch_engine, field, model_version, output_dir, debug):
+def patch_field_from_json(patch_engine, field, output_dir, debug):
     try:
         field_id = field["@id"]
-        if model_version:
-            set_model_version(field, model_version)
         is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
         if is_success:
             if patched_field is not None:
@@ -342,15 +347,13 @@ def patch_field_from_json(patch_engine, field, model_version, output_dir, debug)
         create_report("error", [field_id, "Error details: " + str(error)])
 
 
-def patch_field(patch_engine, field_ids, source_database, model_version=None, output_dir=None, target_database=None, debug=False):
+def patch_field(patch_engine, field_ids, source_database, output_dir=None, target_database=None, debug=False):
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
         if not debug:
             print_progressbar(field_id, counter, total_fields)
         try:
-            field = get_field_from_mongodb(source_database, field_id)
-            if model_version:
-                set_model_version(field, model_version)
+            field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
             if is_success:
                 if patched_field is not None:
@@ -359,13 +362,13 @@ def patch_field(patch_engine, field_ids, source_database, model_version=None, ou
                         filename = create_filename_from_id(field_id, prefix="field-patched-")
                         write_to_file(patched_field, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-fields", patched_field)
+                        write_to_mongodb(target_database, cedar_field_collection, patched_field)
                 else:
                     if output_dir is not None:
                         filename = create_filename_from_id(field_id, prefix="field-")
                         write_to_file(field, filename, output_dir)
                     if target_database is not None:
-                        write_to_mongodb(target_database, "template-fields", field)
+                        write_to_mongodb(target_database, cedar_field_collection, field)
             else:
                 create_report("unresolved", field_id)
                 if output_dir is not None:
@@ -374,7 +377,7 @@ def patch_field(patch_engine, field_ids, source_database, model_version=None, ou
                     filename = create_filename_from_id(field_id, prefix="field-partially-patched-")
                     write_to_file(patched_field, filename, output_dir)
                 if target_database is not None: # Save the original to the database
-                    write_to_mongodb(target_database, "template-fields", field)
+                    write_to_mongodb(target_database, cedar_field_collection, field)
         except (HTTPError, KeyError, TypeError) as error:
             create_report("error", [field_id, "Error details: " + str(error)])
     print()  # console printing separator
@@ -385,17 +388,6 @@ def validate_field_callback(field):
     return is_valid, [error_detail["message"] + " at " + error_detail["location"]
                       for error_detail in message["errors"]
                       if not is_valid]
-
-
-def set_model_version(resource, model_version):
-    if resource is None:
-        return
-    for k, v in resource.items():
-        if isinstance(v, dict):
-            set_model_version(v, model_version)
-        elif isinstance(v, str):
-            if k == "schema:schemaVersion":
-                resource[k] = model_version
 
 
 def setup_mongodb_client(mongodb_conn):
@@ -470,39 +462,15 @@ def print_progressbar(resource_id, counter, total_count):
     print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
 
 
-def get_template_ids(source_database, limit):
-    template_ids = []
+def get_resource_ids(database, collection_name, limit):
+    resource_ids = []
     if limit:
-        found_ids = source_database[cedar_template_collection].distinct("@id").limit(limit)
-        template_ids.extend(found_ids)
+        found_ids = database[collection_name].distinct("@id").limit(limit)
+        resource_ids.extend(found_ids)
     else:
-        found_ids = source_database[cedar_template_collection].distinct("@id")
-        template_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, template_ids)
-    return list(filtered_ids)
-
-
-def get_element_ids(source_database, limit):
-    element_ids = []
-    if limit:
-        found_ids = source_database[cedar_element_collection].distinct("@id").limit(limit)
-        element_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_element_collection].distinct("@id")
-        element_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, element_ids)
-    return list(filtered_ids)
-
-
-def get_field_ids(source_database, limit):
-    field_ids = []
-    if limit:
-        found_ids = source_database[cedar_field_collection].distinct("@id").limit(limit)
-        field_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_field_collection].distinct("@id")
-        field_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, field_ids)
+        found_ids = database[collection_name].distinct("@id")
+        resource_ids.extend(found_ids)
+    filtered_ids = filter(lambda x: x is not None, resource_ids)
     return list(filtered_ids)
 
 
@@ -518,19 +486,9 @@ def read_json(filename):
         return content
 
 
-def get_template_from_mongodb(source_database, template_id):
-    template = source_database[cedar_template_collection].find_one({'@id': template_id})
-    return post_read(template)
-
-
-def get_element_from_mongodb(source_database, element_id):
-    element = source_database[cedar_element_collection].find_one({'@id': element_id})
-    return post_read(element)
-
-
-def get_field_from_mongodb(source_database, field_id):
-    field = source_database[cedar_field_collection].find_one({'@id': field_id})
-    return post_read(field)
+def read_from_mongodb(database, collection_name, resource_id):
+    resource = database[collection_name].find_one({'@id': resource_id})
+    return post_read(resource)
 
 
 def post_read(resource):
