@@ -77,16 +77,16 @@ def main():
         mongodb_client = setup_mongodb_client(mongodb_conn)
         source_database = setup_source_database(mongodb_client, input_mongodb)
         if resource_type == 'template':
-            template_ids = get_template_ids(source_database, limit)
+            template_ids = get_resource_ids(source_database, cedar_template_collection, limit)
             validate_template_from_mongodb(template_ids, source_database)
         elif resource_type == 'element':
-            element_ids = get_element_ids(source_database, limit)
+            element_ids = get_resource_ids(source_database, cedar_element_collection, limit)
             validate_element_from_mongodb(element_ids, source_database)
         elif resource_type == 'field':
-            field_ids = get_field_ids(source_database, limit)
+            field_ids = get_resource_ids(source_database, cedar_field_collection, limit)
             validate_field_from_mongodb(field_ids, source_database)
         elif resource_type == 'instance':
-            instance_ids = get_instance_ids(source_database, limit)
+            instance_ids = get_resource_ids(source_database, cedar_instance_collection, limit)
             validate_instance_from_mongodb(instance_ids, source_database)
 
     show_report()
@@ -121,7 +121,7 @@ def validate_template_from_mongodb(template_ids, source_database):
     for counter, template_id in enumerate(template_ids, start=1):
         print_progressbar(template_id, counter, total_templates)
         try:
-            template = get_template_from_mongodb(source_database, template_id)
+            template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
             reporting(template_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
@@ -159,7 +159,7 @@ def validate_element_from_mongodb(element_ids, source_database):
     for counter, element_id in enumerate(element_ids, start=1):
         print_progressbar(element_id, counter, total_elements)
         try:
-            element = get_element_from_mongodb(source_database, element_id)
+            element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
             reporting(element_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
@@ -197,7 +197,7 @@ def validate_field_from_mongodb(field_ids, source_database):
     for counter, field_id in enumerate(field_ids, start=1):
         print_progressbar(field_id, counter, total_fields)
         try:
-            field = get_field_from_mongodb(source_database, field_id)
+            field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
             reporting(field_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
@@ -235,7 +235,7 @@ def validate_instance_from_mongodb(instance_ids, source_database):
     for counter, instance_id in enumerate(instance_ids, start=1):
         print_progressbar(instance_id, counter, total_instances)
         try:
-            instance = get_instance_from_mongodb(source_database, instance_id)
+            instance = read_from_mongodb(source_database, cedar_instance_collection, instance_id)
             is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
             reporting(instance_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
@@ -244,51 +244,15 @@ def validate_instance_from_mongodb(instance_ids, source_database):
             pass
 
 
-def get_template_ids(source_database, limit):
-    template_ids = []
+def get_resource_ids(database, collection_name, limit):
+    resource_ids = []
     if limit:
-        found_ids = source_database[cedar_template_collection].distinct("@id").limit(limit)
-        template_ids.extend(found_ids)
+        found_ids = database[collection_name].distinct("@id").limit(limit)
+        resource_ids.extend(found_ids)
     else:
-        found_ids = source_database[cedar_template_collection].distinct("@id")
-        template_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, template_ids)
-    return list(filtered_ids)
-
-
-def get_element_ids(source_database, limit):
-    element_ids = []
-    if limit:
-        found_ids = source_database[cedar_element_collection].distinct("@id").limit(limit)
-        element_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_element_collection].distinct("@id")
-        element_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, element_ids)
-    return list(filtered_ids)
-
-
-def get_field_ids(source_database, limit):
-    field_ids = []
-    if limit:
-        found_ids = source_database[cedar_field_collection].distinct("@id").limit(limit)
-        field_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_field_collection].distinct("@id")
-        field_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, field_ids)
-    return list(filtered_ids)
-
-
-def get_instance_ids(source_database, limit):
-    instance_ids = []
-    if limit:
-        found_ids = source_database[cedar_instance_collection].distinct("@id").limit(limit)
-        instance_ids.extend(found_ids)
-    else:
-        found_ids = source_database[cedar_instance_collection].distinct("@id")
-        instance_ids.extend(found_ids)
-    filtered_ids = filter(lambda x: x is not None, instance_ids)
+        found_ids = database[collection_name].distinct("@id")
+        resource_ids.extend(found_ids)
+    filtered_ids = filter(lambda x: x is not None, resource_ids)
     return list(filtered_ids)
 
 
@@ -320,24 +284,9 @@ def get_instance_from_server(server_address, api_key, instance_id):
     return getter.get_instance(server_address, api_key, instance_id)
 
 
-def get_template_from_mongodb(source_database, template_id):
-    template = source_database[cedar_template_collection].find_one({'@id': template_id})
-    return post_read(template)
-
-
-def get_element_from_mongodb(source_database, element_id):
-    element = source_database[cedar_element_collection].find_one({'@id': element_id})
-    return post_read(element)
-
-
-def get_field_from_mongodb(source_database, field_id):
-    element = source_database[cedar_field_collection].find_one({'@id': field_id})
-    return post_read(element)
-
-
-def get_instance_from_mongodb(source_database, instance_id):
-    instance = source_database[cedar_instance_collection].find_one({'@id': instance_id})
-    return post_read(instance)
+def read_from_mongodb(database, collection_name, resource_id):
+    resource = database[collection_name].find_one({'@id': resource_id})
+    return post_read(resource)
 
 
 def post_read(resource):
