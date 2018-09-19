@@ -73,7 +73,7 @@ usage: cedar-patch.py [-h] [-t {template,element,field}]
                       [--input-json FILENAME] [--input-mongodb DBNAME]
                       [--filter FILENAME] [--limit LIMIT]
                       [--output-dir DIRNAME] [--output-mongodb DBNAME]
-                      [--set-model-version VERSION] [--debug]
+                      [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -91,8 +91,6 @@ optional arguments:
   --output-mongodb DBNAME
                         set the MongoDB database name to store the patched
                         resources
-  --set-model-version VERSION
-                        set the CEDAR model version of the patched resources
   --debug               print the debugging messages
 ```
 
@@ -103,9 +101,9 @@ Patch all the templates and set the output to the `/tmp` directory
 $ python cedar-patch.py -t template --input-mongodb=cedar --output-dir=/tmp
 ```
 
-Patch all the templates and set the output to a MongoDB database called `cedar-patch`. Additionally, we would like also to update the model version to "1.3.0"
+Patch all the templates and set the output to a MongoDB database called `cedar-patch`
 ```buildoutcfg
-$ python cedar-patch.py -t template --input-mongodb=cedar --output-mongodb=cedar-patch --set-model-version="1.3.0" 
+$ python cedar-patch.py -t template --input-mongodb=cedar --output-mongodb=cedar-patch 
 ```
 
 Patch the first 100 elements and set the output to both a MongoDB database and the `/tmp` directory
