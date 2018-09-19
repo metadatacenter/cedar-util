@@ -98,7 +98,26 @@ def main():
 
 
 def build_patch_engine():
-    return build_patch_engine_v140()
+    return build_patch_engine_v150()
+
+
+def build_patch_engine_v150():
+    patch_engine = Engine()
+    patch_engine.add_patch(AddSchemaPropsToPropertiesPatch())
+    patch_engine.add_patch(AddProvenanceToPropertiesPatch())
+    patch_engine.add_patch(RecreateTemplateRequiredPatch())
+    patch_engine.add_patch(RecreateAdditionalValuePatch())
+    patch_engine.add_patch(AddBiboToContextPatch())
+    patch_engine.add_patch(AddBiboStatusPatch())
+    patch_engine.add_patch(AddBiboVersionPatch())
+    patch_engine.add_patch(AddVersioningPatch())
+    patch_engine.add_patch(AddValueConstraintsToFieldOrElementPatch())
+    patch_engine.add_patch(FillEmptyPropertyDescriptionPatch())
+    patch_engine.add_patch(AddSkosToContextPropertiesPatch())
+    patch_engine.add_patch(AddSkosNotationToContextPropertiesPatch())
+    patch_engine.add_patch(AddSkosPrefLabelToContextPatch())
+    patch_engine.add_patch(AddSkosAltLabelToContextPatch())
+    return patch_engine
 
 
 def build_patch_engine_v140():
