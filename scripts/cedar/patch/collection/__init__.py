@@ -64,6 +64,7 @@ from cedar.patch.collection.AddBiboStatusPatch import AddBiboStatusPatch
 from cedar.patch.collection.AddBiboVersionPatch import AddBiboVersionPatch
 from cedar.patch.collection.FillEmptyPropertyDescriptionPatch import FillEmptyPropertyDescriptionPatch
 from cedar.patch.collection.RecreateAdditionalValuePatch import RecreateAdditionalValuePatch
+from cedar.patch.collection.AddSkosToContextPatch import AddSkosToContextPatch
 from cedar.patch.collection.AddSkosToContextPropertiesPatch import AddSkosToContextPropertiesPatch
 from cedar.patch.collection.AddSkosNotationToContextPropertiesPatch import AddSkosNotationToContextPropertiesPatch
 from cedar.patch.collection.AddSkosPrefLabelToContextPatch import AddSkosPrefLabelToContextPatch
@@ -96,6 +97,7 @@ __all__ = [
     "AddValueConstraintsToFieldOrElementPatch",
     "AddXsdToContextPatch",
     "AddXsdToContextPropertiesPatch",
+    "AddSkosToContextPatch",
     "AddSkosToContextPropertiesPatch",
     "AddSkosNotationToContextPropertiesPatch",
     "AddSkosPrefLabelToContextPatch",

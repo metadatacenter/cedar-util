@@ -113,6 +113,7 @@ def build_patch_engine_v150():
     patch_engine.add_patch(AddVersioningPatch())
     patch_engine.add_patch(AddValueConstraintsToFieldOrElementPatch())
     patch_engine.add_patch(FillEmptyPropertyDescriptionPatch())
+    patch_engine.add_patch(AddSkosToContextPatch())
     patch_engine.add_patch(AddSkosToContextPropertiesPatch())
     patch_engine.add_patch(AddSkosNotationToContextPropertiesPatch())
     patch_engine.add_patch(AddSkosPrefLabelToContextPatch())
