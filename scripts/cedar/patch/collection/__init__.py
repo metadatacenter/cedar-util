@@ -66,6 +66,8 @@ from cedar.patch.collection.FillEmptyPropertyDescriptionPatch import FillEmptyPr
 from cedar.patch.collection.RecreateAdditionalValuePatch import RecreateAdditionalValuePatch
 from cedar.patch.collection.AddSkosToContextPropertiesPatch import AddSkosToContextPropertiesPatch
 from cedar.patch.collection.AddSkosNotationToContextPropertiesPatch import AddSkosNotationToContextPropertiesPatch
+from cedar.patch.collection.AddSkosPrefLabelToContextPatch import AddSkosPrefLabelToContextPatch
+from cedar.patch.collection.AddSkosAltLabelToContextPatch import AddSkosAltLabelToContextPatch
 
 
 __all__ = [
@@ -96,6 +98,8 @@ __all__ = [
     "AddXsdToContextPropertiesPatch",
     "AddSkosToContextPropertiesPatch",
     "AddSkosNotationToContextPropertiesPatch",
+    "AddSkosPrefLabelToContextPatch",
+    "AddSkosAltLabelToContextPatch",
     "FillEmptyValuePatch",
     "FillNullValuePatch",
     "MoveTitleAndDescriptionPatch",
