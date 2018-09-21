@@ -3,7 +3,6 @@ import os
 from pymongo import MongoClient
 
 
-cedar_database = "cedar"
 cedar_template_collection = "templates"
 cedar_element_collection = "template-elements"
 cedar_field_collection = "template-fields"
@@ -19,11 +18,17 @@ def main():
                         choices=['template', 'element', 'field'],
                         default="template",
                         help="the type of CEDAR resource")
-    parser.add_argument("version-number",
+    parser.add_argument("--input-mongodb",
+                        required=False,
+                        default="cedar",
+                        metavar="DBNAME",
+                        help="set the MongoDB database where resources are located")
+    parser.add_argument("--version-number",
                         help="the new version number for schema:schemaVersion field")
 
     args = parser.parse_args()
     resource_type = args.type
+    cedar_database = args.input_mongodb
     version_number = args.version_number
 
     mongodb_client = MongoClient(mongodb_conn)
