@@ -33,6 +33,11 @@ def update_element(server_address, api_key, element_id, element):
     return update_resource(api_key, request_url, element)
 
 
+def update_field(server_address, api_key, field_id, field):
+    request_url = server_address + "/template-fields/" + escape(field_id)
+    return update_resource(api_key, request_url, field)
+
+
 def update_instance(server_address, api_key, instance_id, instance):
     request_url = server_address + "/template-instances/" + escape(instance_id)
     return update_resource(api_key, request_url, instance)
