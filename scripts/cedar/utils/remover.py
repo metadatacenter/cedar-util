@@ -33,6 +33,11 @@ def remove_element(server_address, api_key, element_id):
     return remove_resource(api_key, request_url)
 
 
+def remove_field(server_address, api_key, field_id):
+    request_url = server_address + "/template-fields/" + escape(field_id)
+    return remove_resource(api_key, request_url)
+
+
 def remove_instance(server_address, api_key, instance_id):
     request_url = server_address + "/template-instances/" + escape(instance_id)
     return remove_resource(api_key, request_url)

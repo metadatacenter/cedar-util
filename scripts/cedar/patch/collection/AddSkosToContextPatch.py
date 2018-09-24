@@ -11,6 +11,9 @@ class AddSkosToContextPatch(object):
         self.to_version = "1.5.0"
 
     def is_applied(self, error_message, doc=None):
+        resource_root = utils.get_parent_path(utils.get_error_location(error_message))
+        if not utils.is_template_field(doc, resource_root):
+            return False
         if not utils.is_compatible(doc, self.from_version):
             return False
         pattern = re.compile(

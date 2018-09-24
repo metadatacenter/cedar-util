@@ -48,6 +48,11 @@ def search_elements(server_address, api_key, query='*', max_count=None, limit_pe
     return search_resources(api_key, request_url, max_count, limit_per_page)
 
 
+def search_fields(server_address, api_key, query='*', max_count=None, limit_per_page=500):
+    request_url = server_address + "/search?q=" + query + "&resource_types=field"
+    return search_resources(api_key, request_url, max_count, limit_per_page)
+
+
 def search_instances(server_address, api_key, query='*', max_count=None, limit_per_page=500):
     request_url = server_address + "/search?q=" + query + "&resource_types=instance"
     return search_resources(api_key, request_url, max_count, limit_per_page)
