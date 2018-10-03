@@ -78,7 +78,7 @@ def set_model_version(resource, model_version):
     for k, v in resource.items():
         if isinstance(v, dict):
             set_model_version(v, model_version)
-        elif isinstance(v, str):
+        elif v is None or isinstance(v, str):
             if k == "schema:schemaVersion":
                 resource[k] = model_version
 
