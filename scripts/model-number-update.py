@@ -16,20 +16,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--type",
                         choices=['template', 'element', 'field'],
-                        default="template",
                         help="the type of CEDAR resource")
     parser.add_argument("--input-mongodb",
                         required=False,
-                        default="cedar",
                         metavar="DBNAME",
                         help="set the MongoDB database where resources are located")
-    parser.add_argument("--version-number",
+    parser.add_argument("--set-version-number",
                         help="the new version number for schema:schemaVersion field")
 
     args = parser.parse_args()
     resource_type = args.type
     cedar_database = args.input_mongodb
-    version_number = args.version_number
+    version_number = args.set_version_number
 
     mongodb_client = MongoClient(mongodb_conn)
     database = mongodb_client[cedar_database]
