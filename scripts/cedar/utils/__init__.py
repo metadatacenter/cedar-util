@@ -42,3 +42,16 @@ def write_to_file(patched_template, filename, output_dir=None):
     output_path = output_dir + "/" + filename
     with open(output_path, "w") as outfile:
         json.dump(patched_template, outfile)
+
+
+def print_progressbar(resource_iri, progress_counter, total_count, message="Making a progress"):
+    resource_hash = extract_resource_hash(resource_iri)
+    percent = 100 * (progress_counter / total_count)
+    filled_length = int(percent)
+    bar = "#" * filled_length + '-' * (100 - filled_length)
+    print("%s (%d/%d): |%s| %d%% Complete [%s]"
+          % (message, progress_counter, total_count, bar, percent, resource_hash), end='\r')
+
+
+def extract_resource_hash(iri):
+    return iri[iri.rfind('/')+1:]

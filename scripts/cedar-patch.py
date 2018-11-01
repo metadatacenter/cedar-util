@@ -4,7 +4,7 @@ import json
 from pymongo import MongoClient
 from requests import HTTPError
 
-from cedar.utils import validator, to_json_string, write_to_file
+from cedar.utils import validator, to_json_string, write_to_file, print_progressbar, extract_resource_hash
 from cedar.patch.collection import *
 from cedar.patch.Engine import Engine
 
@@ -227,7 +227,7 @@ def patch_template(patch_engine, template_ids, source_database, output_dir=None,
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
-            print_progressbar(template_id, counter, total_templates)
+            print_progressbar(template_id, counter, total_templates, message="Patching")
         try:
             template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
@@ -289,7 +289,7 @@ def patch_element(patch_engine, element_ids, source_database, output_dir=None, t
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
-            print_progressbar(element_id, counter, total_elements)
+            print_progressbar(element_id, counter, total_elements, message="Patching")
         try:
             element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
@@ -351,7 +351,7 @@ def patch_field(patch_engine, field_ids, source_database, output_dir=None, targe
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
         if not debug:
-            print_progressbar(field_id, counter, total_fields)
+            print_progressbar(field_id, counter, total_fields, message="Patching")
         try:
             field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)
@@ -454,14 +454,6 @@ def create_filename_from_id(resource_id, prefix=""):
     return prefix + resource_hash + ".json"
 
 
-def print_progressbar(resource_id, counter, total_count):
-    resource_hash = extract_resource_hash(resource_id)
-    percent = 100 * (counter / total_count)
-    filled_length = int(percent)
-    bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("Patching (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
-
-
 def get_resource_ids(database, collection_name, limit):
     resource_ids = []
     if limit:
@@ -500,10 +492,6 @@ def post_read(resource):
             v = post_read(v)
         new[k.replace('_$schema', '$schema')] = v
     return new
-
-
-def extract_resource_hash(resource_id):
-    return resource_id[resource_id.rfind('/')+1:]
 
 
 def show_report():

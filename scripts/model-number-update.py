@@ -1,5 +1,6 @@
 import argparse
 import os
+from cedar.utils import print_progressbar
 from pymongo import MongoClient
 
 
@@ -45,7 +46,7 @@ def main():
 def update_template_model_version(template_ids, database, model_version):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
-        print_progressbar(template_id, counter, total_templates)
+        print_progressbar(template_id, counter, total_templates, message="Updating")
         template = read_from_mongodb(database, cedar_template_collection, template_id)
         set_model_version(template, model_version)
         write_to_mongodb(database, cedar_template_collection, template)
@@ -55,7 +56,7 @@ def update_template_model_version(template_ids, database, model_version):
 def update_element_model_version(element_ids, database, model_version):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
-        print_progressbar(element_id, counter, total_elements)
+        print_progressbar(element_id, counter, total_elements, message="Updating")
         element = read_from_mongodb(database, cedar_element_collection, element_id)
         set_model_version(element, model_version)
         write_to_mongodb(database, cedar_element_collection, element)
@@ -65,7 +66,7 @@ def update_element_model_version(element_ids, database, model_version):
 def update_field_model_version(field_ids, database, model_version):
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
-        print_progressbar(field_id, counter, total_fields)
+        print_progressbar(field_id, counter, total_fields, message="Updating")
         field = read_from_mongodb(database, cedar_field_collection, field_id)
         set_model_version(field, model_version)
         write_to_mongodb(database, cedar_field_collection, field)
@@ -97,18 +98,6 @@ def read_from_mongodb(database, collection_name, resource_id):
 
 def write_to_mongodb(database, collection_name, resource):
     database[collection_name].replace_one({'@id': resource['@id']}, resource)
-
-
-def print_progressbar(resource_id, counter, total_count):
-    resource_hash = extract_resource_hash(resource_id)
-    percent = 100 * (counter / total_count)
-    filled_length = int(percent)
-    bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("Updating (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
-
-
-def extract_resource_hash(resource_id):
-    return resource_id[resource_id.rfind('/')+1:]
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import argparse
 import os
 import re
-from cedar.utils import to_json_string
+from cedar.utils import to_json_string, print_progressbar
 from pymongo import MongoClient
 
 
@@ -45,7 +45,7 @@ def check_uuid_in_templates(template_ids, database):
     report = []
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
-        print_progressbar(template_id, counter, total_templates)
+        print_progressbar(template_id, counter, total_templates, message="Checking")
         template = read_from_mongodb(database, cedar_template_collection, template_id)
         report_item = perform_check(template)
         if report_item["locations"]:
@@ -57,7 +57,7 @@ def check_uuid_in_elements(element_ids, database):
     report = []
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
-        print_progressbar(element_id, counter, total_elements)
+        print_progressbar(element_id, counter, total_elements, message="Checking")
         element = read_from_mongodb(database, cedar_element_collection, element_id)
         report_item = perform_check(element)
         if report_item["locations"]:
@@ -69,7 +69,7 @@ def check_uuid_in_fields(field_ids, database):
     report = []
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
-        print_progressbar(field_id, counter, total_fields)
+        print_progressbar(field_id, counter, total_fields, message="Checking")
         field = read_from_mongodb(database, cedar_field_collection, field_id)
         report_item = perform_check(field)
         if report_item["locations"]:
@@ -106,18 +106,6 @@ def get_resource_ids(database, collection_name):
 
 def read_from_mongodb(database, collection_name, resource_id):
     return database[collection_name].find_one({'@id': resource_id})
-
-
-def print_progressbar(resource_id, counter, total_count):
-    resource_hash = extract_resource_hash(resource_id)
-    percent = 100 * (counter / total_count)
-    filled_length = int(percent)
-    bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("Checking (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
-
-
-def extract_resource_hash(resource_id):
-    return resource_id[resource_id.rfind('/')+1:]
 
 
 def valid_uuid(uuid):
