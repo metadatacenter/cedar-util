@@ -321,7 +321,9 @@ def setup_source_database(mongodb_client, source_db_name):
 def reporting(resource_id, is_valid, validation_message):
     if not is_valid:
         for error_details in validation_message["errors"]:
-            error_message = error_details['message'] + " at " + error_details['location']
+            error_message = error_details['message']
+            if error_details['location']:
+                error_message += " at " + error_details['location']
             report.setdefault(error_message,[]).append(resource_id)
 
 
