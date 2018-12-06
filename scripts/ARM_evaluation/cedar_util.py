@@ -117,8 +117,8 @@ def post_instance(instance, template_id, server, folder_id, api_key):
     }
     response = requests.request("POST", url_instances, json=instance, headers=headers, params=querystring, verify=False)
     print("POST instance response: " + str(response.status_code))
-    # print("POST instance response: " + str(response.url))
-    # print("POST instance response: " + str(response.text))
+    print("POST instance response: " + str(response.url))
+    print("POST instance response: " + str(response.text))
 
 
 def delete_instance(server, instance_id, api_key):
@@ -144,25 +144,25 @@ def delete_instances_from_template(server, template_id, max_count, limit_per_cal
 
 
 # # Reads all instances in a folder al pushes them to the server
-# def load_instances_from_folder(server, root_folder, template_id, target_cedar_folder_id, api_key):
-#     # Disable InsecureRequestWarning
-#     requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-#     pattern = "*.json"
-#     instance_paths = []
-#     for path, subdirs, files in os.walk(root_folder):
-#         for name in files:
-#             if fnmatch(name, pattern):
-#                 instance_paths.append(os.path.join(path, name))
-#     print(len(instance_paths))
-#     # Load each instance and push it to the system
-#     count = 1;
-#     total_count = len(instance_paths)
-#     for instance_path in instance_paths:
-#         with open(instance_path) as data_file:
-#             try:
-#                 instance_json = json.load(data_file)
-#                 post_instance(instance_json, server, template_id, target_cedar_folder_id, api_key)
-#                 print("Posted instance no. " + str(count) + " (" + str(float((100 * count) / total_count)) + "%)")
-#                 count += 1
-#             except ValueError:
-#                 print('Decoding JSON has failed for this instance')
+def upload_instances(server, root_folder, template_id, target_cedar_folder_id, api_key):
+    # Disable InsecureRequestWarning
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    pattern = "*.json"
+    instance_paths = []
+    for path, subdirs, files in os.walk(root_folder):
+        for name in files:
+            if fnmatch(name, pattern):
+                instance_paths.append(os.path.join(path, name))
+    print(len(instance_paths))
+    # Load each instance and push it to the system
+    count = 1;
+    total_count = len(instance_paths)
+    for instance_path in instance_paths:
+        with open(instance_path) as data_file:
+            try:
+                instance_json = json.load(data_file)
+                post_instance(instance_json, template_id, server, target_cedar_folder_id, api_key)
+                print("Posted instance no. " + str(count) + " (" + str(float((100 * count) / total_count)) + "%)")
+                count += 1
+            except ValueError:
+                print('Decoding JSON has failed for this instance')

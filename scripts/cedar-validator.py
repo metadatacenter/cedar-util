@@ -3,7 +3,7 @@ import os
 import json
 import requests
 from pymongo import MongoClient
-from cedar.utils import validator, getter, to_json_string
+from cedar.utils import validator, getter, to_json_string, print_progressbar
 
 
 cedar_template_collection = "templates"
@@ -105,7 +105,7 @@ def validate_template_from_json(template):
 def validate_template_from_list(template_ids):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
-        print_progressbar(template_id, counter, total_templates)
+        print_progressbar(template_id, counter, total_templates, message="Validating")
         try:
             template = get_template_from_server(cedar_server_address, cedar_api_key, template_id)
             is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
@@ -119,7 +119,7 @@ def validate_template_from_list(template_ids):
 def validate_template_from_mongodb(template_ids, source_database):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
-        print_progressbar(template_id, counter, total_templates)
+        print_progressbar(template_id, counter, total_templates, message="Validating")
         try:
             template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_valid, validation_message = validator.validate_template(cedar_server_address, cedar_api_key, template)
@@ -143,7 +143,7 @@ def validate_element_from_json(element):
 def validate_element_from_list(element_ids):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
-        print_progressbar(element_id, counter, total_elements)
+        print_progressbar(element_id, counter, total_elements, message="Validating")
         try:
             element = get_element_from_server(cedar_server_address, cedar_api_key, element_id)
             is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
@@ -157,7 +157,7 @@ def validate_element_from_list(element_ids):
 def validate_element_from_mongodb(element_ids, source_database):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
-        print_progressbar(element_id, counter, total_elements)
+        print_progressbar(element_id, counter, total_elements, message="Validating")
         try:
             element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_valid, validation_message = validator.validate_element(cedar_server_address, cedar_api_key, element)
@@ -181,7 +181,7 @@ def validate_field_from_json(field):
 def validate_field_from_list(field_ids):
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
-        print_progressbar(field_id, counter, total_fields)
+        print_progressbar(field_id, counter, total_fields, message="Validating")
         try:
             field = get_field_from_server(cedar_server_address, cedar_api_key, field_id)
             is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
@@ -195,7 +195,7 @@ def validate_field_from_list(field_ids):
 def validate_field_from_mongodb(field_ids, source_database):
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
-        print_progressbar(field_id, counter, total_fields)
+        print_progressbar(field_id, counter, total_fields, message="Validating")
         try:
             field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_valid, validation_message = validator.validate_field(cedar_server_address, cedar_api_key, field)
@@ -219,7 +219,7 @@ def validate_instance_from_json(instance):
 def validate_instance_from_list(instance_ids):
     total_instances = len(instance_ids)
     for counter, instance_id in enumerate(instance_ids, start=1):
-        print_progressbar(instance_id, counter, total_instances)
+        print_progressbar(instance_id, counter, total_instances, message="Validating")
         try:
             instance = get_instance_from_server(cedar_server_address, cedar_api_key, instance_id)
             is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
@@ -233,7 +233,7 @@ def validate_instance_from_list(instance_ids):
 def validate_instance_from_mongodb(instance_ids, source_database):
     total_instances = len(instance_ids)
     for counter, instance_id in enumerate(instance_ids, start=1):
-        print_progressbar(instance_id, counter, total_instances)
+        print_progressbar(instance_id, counter, total_instances, message="Validating")
         try:
             instance = read_from_mongodb(source_database, cedar_instance_collection, instance_id)
             is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
@@ -321,20 +321,10 @@ def setup_source_database(mongodb_client, source_db_name):
 def reporting(resource_id, is_valid, validation_message):
     if not is_valid:
         for error_details in validation_message["errors"]:
-            error_message = error_details['message'] + " at " + error_details['location']
+            error_message = error_details['message']
+            if error_details['location']:
+                error_message += " at " + error_details['location']
             report.setdefault(error_message,[]).append(resource_id)
-
-
-def print_progressbar(resource_id, counter, total_count):
-    resource_hash = extract_resource_hash(resource_id)
-    percent = 100 * (counter / total_count)
-    filled_length = int(percent)
-    bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("\rValidating (%d/%d): |%s| %d%% Complete [%s]" % (counter, total_count, bar, percent, resource_hash), end='\r')
-
-
-def extract_resource_hash(resource_id):
-    return resource_id[resource_id.rfind('/')+1:]
 
 
 def show_report():
