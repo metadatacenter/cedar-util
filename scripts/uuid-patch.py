@@ -53,7 +53,7 @@ def patch_uuid_in_templates(template_ids, database):
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         try:
-            print_progressbar(template_id, counter, total_templates, message="Checking")
+            print_progressbar(template_id, counter, total_templates, message="Patching")
             if not has_instances(template_id):
                 template = read_from_mongodb(database, cedar_template_collection, template_id)
                 if contains_uuid(template):
@@ -70,7 +70,7 @@ def patch_uuid_in_elements(element_ids, database):
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         try:
-            print_progressbar(element_id, counter, total_elements, message="Checking")
+            print_progressbar(element_id, counter, total_elements, message="Patching")
             element = read_from_mongodb(database, cedar_element_collection, element_id)
             if contains_uuid(element):
                 patched_element = patch_uuid(element)
