@@ -139,7 +139,10 @@ def patch_recursively(resource):
     # with a proper name found in the "schema:name" field
     for fieldName in propertiesList:
         if is_uuid(fieldName):
-            newName = resource["properties"][fieldName]["schema:name"]
+            if "items" in resource["properties"][fieldName]:
+                newName = resource["properties"][fieldName]["items"]["schema:name"]
+            else:
+                newName = resource["properties"][fieldName]["schema:name"]
             resource["properties"][newName] = resource["properties"].pop(fieldName)
             if fieldName in resource["properties"]["@context"]["properties"]:
                 resource["properties"]["@context"]["properties"][newName] = resource["properties"]["@context"][
