@@ -128,11 +128,11 @@ def patch_recursively(resource):
             resource["required"].remove(fieldName)
         if fieldName in resource["properties"]["@context"]["required"]:
             resource["properties"]["@context"]["required"].remove(fieldName)
-        if fieldName in resource["_ui"]["order"]:
+        if "order" in resource["_ui"] and fieldName in resource["_ui"]["order"]:
             resource["_ui"]["order"].remove(fieldName)
-        if fieldName in resource["_ui"]["propertyLabels"]:
+        if "propertyLabels" in resource["_ui"] and fieldName in resource["_ui"]["propertyLabels"]:
             del resource["_ui"]["propertyLabels"][fieldName]
-        if fieldName in resource["_ui"]["propertyDescriptions"]:
+        if "propertyDescriptions" in resource["_ui"] and fieldName in resource["_ui"]["propertyDescriptions"]:
             del resource["_ui"]["propertyDescriptions"][fieldName]
 
     # Rename all UUID fields that occur in "@context", "required", "_ui"
@@ -150,13 +150,13 @@ def patch_recursively(resource):
             if fieldName in resource["properties"]["@context"]["required"]:
                 resource["properties"]["@context"]["required"].remove(fieldName)
                 resource["properties"]["@context"]["required"].append(newName)
-            if fieldName in resource["_ui"]["order"]:
+            if  "order" in resource["_ui"] and fieldName in resource["_ui"]["order"]:
                 resource["_ui"]["order"].remove(fieldName)
                 resource["_ui"]["order"].append(newName)
-            if fieldName in resource["_ui"]["propertyLabels"]:
+            if "propertyLabels" in resource["_ui"] and fieldName in resource["_ui"]["propertyLabels"]:
                 del resource["_ui"]["propertyLabels"][fieldName]
                 resource["_ui"]["propertyLabels"][newName] = newName
-            if fieldName in resource["_ui"]["propertyDescriptions"]:
+            if "propertyDescriptions" in resource["_ui"] and fieldName in resource["_ui"]["propertyDescriptions"]:
                 resource["_ui"]["propertyDescriptions"][newName] = resource["_ui"]["propertyDescriptions"].pop(fieldName)
 
     propertiesList = [x for x in resource["properties"].keys() if x not in ignoreList]
