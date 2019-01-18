@@ -8,8 +8,6 @@ cedar_template_collection = "templates"
 cedar_element_collection = "template-elements"
 cedar_field_collection = "template-fields"
 
-cedar_server_address = "https://resource." + os.environ['CEDAR_HOST']
-cedar_api_key = "apiKey " + os.environ['CEDAR_ADMIN_USER_API_KEY']
 mongodb_conn = "mongodb://" + os.environ['CEDAR_MONGO_ROOT_USER_NAME'] + ":" + os.environ['CEDAR_MONGO_ROOT_USER_PASSWORD'] + "@localhost:27017/admin"
 
 
