@@ -4,6 +4,7 @@ jdk:
 branches:
   only:
   - develop
+  - master
 notifications:
   slack:
     on_success: change
