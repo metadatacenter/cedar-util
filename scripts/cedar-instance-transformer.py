@@ -9,7 +9,6 @@ import json
 # with those values. This utility can be used to update an old instance to a most recent version of the template model.
 # Limitation: it only works for flat instances. It needs to be updated to work with nested elements.
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-path",
@@ -36,7 +35,7 @@ def main():
                         nargs=1,
                         type=int,
                         metavar=("LIMIT"),
-                        help="maximum number of instances not be transformed")
+                        help="maximum number of instances to be transformed")
     args = parser.parse_args()
     source_path = args.source_path[0]
     dest_path = args.dest_path[0]
