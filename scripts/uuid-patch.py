@@ -3,9 +3,8 @@ import os
 import re
 from requests import HTTPError
 from cedar.patch.utils import is_template_field, is_static_template_field
-from cedar.utils import print_progressbar, searcher
+from cedar.utils import print_progressbar
 from pymongo import MongoClient
-
 
 
 cedar_template_collection = "templates"
@@ -17,8 +16,6 @@ ignoreList = ["@id", "@type", "@value", "@context", "_$schema", "_ui", "oslc:mod
                "schema:isBasedOn", "schema:schemaVersion", "required", "type",
                "additionalProperties", "skos", "xsd", "pav", "schema", "oslc", "rdfs"]
 
-cedar_server_address = "https://resource." + os.environ['CEDAR_HOST']
-cedar_api_key = "apiKey " + os.environ['CEDAR_ADMIN_USER_API_KEY']
 mongodb_conn = "mongodb://" + os.environ['CEDAR_MONGO_ROOT_USER_NAME'] + ":" + os.environ['CEDAR_MONGO_ROOT_USER_PASSWORD'] + "@localhost:27017/admin"
 
 
@@ -54,12 +51,11 @@ def patch_uuid_in_templates(template_ids, database):
     for counter, template_id in enumerate(template_ids, start=1):
         try:
             print_progressbar(template_id, counter, total_templates, message="Patching")
-            if not has_instances(template_id):
-                template = read_from_mongodb(database, cedar_template_collection, template_id)
-                if contains_uuid(template):
-                    patched_template = patch_uuid(template)
-                    patched_templates.append(template_id)
-                    write_to_mongodb(database, cedar_template_collection, patched_template)
+            template = read_from_mongodb(database, cedar_template_collection, template_id)
+            if contains_uuid(template):
+                patched_template = patch_uuid(template)
+                patched_templates.append(template_id)
+                write_to_mongodb(database, cedar_template_collection, patched_template)
         except (HTTPError, KeyError) as error:
             pass
     print(len(patched_templates), "templates were successfully patched.")
@@ -79,11 +75,6 @@ def patch_uuid_in_elements(element_ids, database):
         except KeyError as error:
             pass
     print(len(patched_elements), "elements were successfully patched.")
-
-
-def has_instances(template_id):
-    instances = searcher.search_instances_of(cedar_server_address, cedar_api_key, template_id)
-    return len(instances) > 0
 
 
 def contains_uuid(obj):
