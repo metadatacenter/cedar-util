@@ -9,6 +9,7 @@ import json
 # with those values. This utility can be used to update an old instance to a most recent version of the template model.
 # Limitation: it only works for flat instances. It needs to be updated to work with nested elements.
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-path",
@@ -68,7 +69,10 @@ def transform(source_path, dest_path, ref_instance_path, limit):
             instance_json = json.load(open(instance_path))
 
             transformed_instance_path = os.path.join(dest_path, os.path.relpath(instance_path, source_path))
-            transformed_instance_json = transform_instance(instance_json, ref_instance_json)
+
+            # Use transform_instance_generic or transform_instance_biosample according to your needs
+            #transformed_instance_json = transform_instance_generic(instance_json, ref_instance_json)
+            transformed_instance_json = transform_instance_biosample(instance_json, ref_instance_json)
 
             # Save transformed instance
             if not os.path.exists(os.path.dirname(transformed_instance_path)):
@@ -85,7 +89,7 @@ def transform(source_path, dest_path, ref_instance_path, limit):
             print('Decoding JSON has failed for this instance')
 
 
-def transform_instance(instance_json, ref_instance_json):
+def transform_instance_generic(instance_json, ref_instance_json):
     """
     It takes the values of instance_json and fills out ref_instance_json with them
     :param instance_json:
@@ -96,6 +100,35 @@ def transform_instance(instance_json, ref_instance_json):
         if ref_field not in ['@context', 'schema:isBasedOn']:
             if ref_field in instance_json:
                 ref_instance_json[ref_field] = instance_json[ref_field]
+
+    # Removes the @id field to be able to post the transformed instance
+    if '@id' in ref_instance_json:
+        del ref_instance_json['@id']
+
+    return ref_instance_json
+
+
+def transform_instance_biosample(instance_json, ref_instance_json):
+    """
+    Custom transformation for BioSample instances
+    :param instance_json:
+    :param ref_instance_json:
+    :return: the reference instance filled out with the values from the original instance
+    """
+    for ref_field in ref_instance_json:
+
+        # Set up the organism field to 'Homo sapiens'
+        if ref_field == 'organism':
+            ref_instance_json[ref_field] = {'@id': 'http://purl.obolibrary.org/obo/NCBITaxon_9606',
+                                            'rdfs:label': "Homo sapiens"}
+        else:
+            if ref_field not in ['@context', 'schema:isBasedOn']:
+                if ref_field in instance_json:
+                    ref_instance_json[ref_field] = instance_json[ref_field]
+
+                    # remove the @type field if it is there. We are not using it anymore
+                    if '@type' in ref_instance_json[ref_field]:
+                        del ref_instance_json[ref_field]['@type']
 
     # Removes the @id field to be able to post the transformed instance
     if '@id' in ref_instance_json:
