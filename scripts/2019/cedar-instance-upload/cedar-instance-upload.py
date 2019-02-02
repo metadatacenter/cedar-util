@@ -8,6 +8,7 @@ from fnmatch import fnmatch
 import os
 import json
 import argparse
+import sys
 
 # Disable InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -107,7 +108,9 @@ def upload_instances(server, root_folder, template_id, target_cedar_folder_id, a
                 with open(instance_path) as data_file:
                     try:
                         instance_json = json.load(data_file)
-                        post_instance(instance_json, template_id, server, target_cedar_folder_id, api_key)
+                        response = post_instance(instance_json, template_id, server, target_cedar_folder_id, api_key)
+                        if response.status_code != 201:
+                            sys.exit(1)
                         print("Uploaded instance no. " + str(count) + " (" + str(float((100 * count) / total_count)) + "%)")
                         uploaded.append(instance_path)
                         uploaded_instances_file.write(instance_path + '\n')
@@ -135,6 +138,7 @@ def post_instance(instance, template_id, server, folder_id, api_key):
     print("POST instance response: " + str(response.status_code))
     # print("POST instance response: " + str(response.url))
     # print("POST instance response: " + str(response.text))
+    return response
 
 
 if __name__ == "__main__":
