@@ -115,46 +115,20 @@ def transform_instance_biosample(instance_json, ref_instance_json):
     :param ref_instance_json:
     :return: the reference instance filled out with the values from the original instance
     """
-    id_field = '@id'
-    label_field = 'rdfs:label'
     for ref_field in ref_instance_json:
 
         # Set up the organism field to 'Homo sapiens'
         if ref_field == 'organism':
-            ref_instance_json[ref_field] = {id_field: 'http://purl.obolibrary.org/obo/NCBITaxon_9606',
-                                            label_field: 'Homo sapiens'}
+            ref_instance_json[ref_field] = {'@id': 'http://purl.obolibrary.org/obo/NCBITaxon_9606',
+                                            'rdfs:label': "Homo sapiens"}
         else:
             if ref_field not in ['@context', 'schema:isBasedOn']:
                 if ref_field in instance_json:
+                    ref_instance_json[ref_field] = instance_json[ref_field]
 
-                    if ref_field == 'disease' or ref_field == 'tissue':
-                        if label_field in instance_json[ref_field]:
-                            # print(instance_json[ref_field])
-                            current_label = instance_json[ref_field][label_field]
-                            if current_label.lower() == 'hcc':
-                                ref_instance_json[ref_field] = \
-                                    {id_field: 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C3099',
-                                     label_field: 'Hepatocellular Carcinoma'}
-                            elif current_label.lower() == 'healthy':
-                                ref_instance_json[ref_field] = {}
-                            elif current_label.lower() == 'control':
-                                ref_instance_json[ref_field] = {}
-                            elif current_label.lower() == 'benign':
-                                ref_instance_json[ref_field] = {}
-                            elif current_label.lower().startswith('doid_'):
-                                ref_instance_json[ref_field] = {}
-                            elif current_label.lower().startswith('brca'):
-                                ref_instance_json[ref_field] = {}
-                            else:
-                                ref_instance_json[ref_field] = instance_json[ref_field]
-                                # remove the @type field if it is there. We are not using it anymore
-                                if '@type' in ref_instance_json[ref_field]:
-                                    del ref_instance_json[ref_field]['@type']
-                    else:
-                        ref_instance_json[ref_field] = instance_json[ref_field]
-                        # remove the @type field if it is there. We are not using it anymore
-                        if '@type' in ref_instance_json[ref_field]:
-                            del ref_instance_json[ref_field]['@type']
+                    # remove the @type field if it is there. We are not using it anymore
+                    if '@type' in ref_instance_json[ref_field]:
+                        del ref_instance_json[ref_field]['@type']
 
     # Removes the @id field to be able to post the transformed instance
     if '@id' in ref_instance_json:
