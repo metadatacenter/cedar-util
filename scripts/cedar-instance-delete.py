@@ -20,7 +20,7 @@ def main():
                         required=True,
                         nargs=1,
                         metavar=("API_KEY"),
-                        help="the address of the CEDAR server. Example: https://cedar.metadatacenter.orgx/")
+                        help="CEDAR API key")
     parser.add_argument("--template-id",
                         dest='template_id',
                         required=True,
