@@ -69,6 +69,7 @@ from cedar.patch.collection.AddSkosToContextPropertiesPatch import AddSkosToCont
 from cedar.patch.collection.AddSkosNotationToContextPropertiesPatch import AddSkosNotationToContextPropertiesPatch
 from cedar.patch.collection.AddSkosPrefLabelToContextPatch import AddSkosPrefLabelToContextPatch
 from cedar.patch.collection.AddSkosAltLabelToContextPatch import AddSkosAltLabelToContextPatch
+from cedar.patch.collection.AllowNullForInstanceId import AllowNullForInstanceId
 
 
 __all__ = [
@@ -142,4 +143,5 @@ __all__ = [
     "AddBiboStatusPatch",
     "AddBiboVersionPatch",
     "FillEmptyPropertyDescriptionPatch",
-    "RecreateAdditionalValuePatch"]
+    "RecreateAdditionalValuePatch",
+    "AllowNullForInstanceId"]
