@@ -98,7 +98,15 @@ def main():
 
 
 def build_patch_engine():
-    return build_patch_engine_v150()
+    return build_patch_engine_v160()
+
+
+def build_patch_engine_v160():
+    patch_engine = Engine()
+    patch_engine.add_patch(AllowNullForInstanceId())
+    patch_engine.add_patch(AddPavDerivedFromToPropertiesPatch())
+    patch_engine.add_patch(AddPavDerivedFromToContextPropertiesPatch())
+    return patch_engine
 
 
 def build_patch_engine_v150():

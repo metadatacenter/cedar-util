@@ -40,12 +40,15 @@ def main():
                         required=False,
                         type=int,
                         help="the maximum number of resources to validate (useful when --input-mongodb is used)")
+    parser.add_argument("-X",
+                        help="Excludes metadata instances produced from the given template ID from the validation")
     args = parser.parse_args()
     resource_type = args.type
     input_file = args.input_json
     input_list = args.input_list
     input_mongodb = args.input_mongodb
     limit = args.limit
+    filtered_template = args.X
 
     if input_file is not None:
         if resource_type == 'template':
@@ -87,7 +90,7 @@ def main():
             validate_field_from_mongodb(field_ids, source_database)
         elif resource_type == 'instance':
             instance_ids = get_resource_ids(source_database, cedar_instance_collection, limit)
-            validate_instance_from_mongodb(instance_ids, source_database)
+            validate_instance_from_mongodb(instance_ids, filtered_template, source_database)
 
     show_report()
 
@@ -230,18 +233,23 @@ def validate_instance_from_list(instance_ids):
             pass
 
 
-def validate_instance_from_mongodb(instance_ids, source_database):
+def validate_instance_from_mongodb(instance_ids, template_id, source_database):
     total_instances = len(instance_ids)
     for counter, instance_id in enumerate(instance_ids, start=1):
         print_progressbar(instance_id, counter, total_instances, message="Validating")
         try:
             instance = read_from_mongodb(source_database, cedar_instance_collection, instance_id)
-            is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
-            reporting(instance_id, is_valid, validation_message)
+            if not based_on(instance, template_id):
+                is_valid, validation_message = validator.validate_instance(cedar_server_address, cedar_api_key, instance)
+                reporting(instance_id, is_valid, validation_message)
         except requests.exceptions.HTTPError as error:
             error_obj = json.loads(error.response.text)
             error_messages.append(error_obj["message"])
             pass
+
+
+def based_on(instance, template_id):
+    return instance["schema:isBasedOn"] == template_id
 
 
 def get_resource_ids(database, collection_name, limit):
