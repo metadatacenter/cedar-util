@@ -85,6 +85,10 @@ def get_json_node(doc, at):
     return json_node
 
 
+def path_exists(doc, path):
+    return dpath.util.values(doc, path)
+
+
 def to_json(string):
     return json.loads(string)
 
