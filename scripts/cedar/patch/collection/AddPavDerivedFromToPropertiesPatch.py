@@ -7,7 +7,7 @@ class AddPavDerivedFromToPropertiesPatch(object):
 
     def __init__(self):
         self.description = "Add pav:derivedFrom field in the /properties/@context/properties field"
-        self.from_version = "1.5.0"
+        self.from_version = "1.4.0"
         self.to_version = "1.6.0"
 
     def is_applied(self, error_message, doc=None):
