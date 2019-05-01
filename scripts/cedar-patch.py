@@ -105,7 +105,8 @@ def build_patch_engine_v160():
     patch_engine = Engine()
     patch_engine.add_patch(AllowNullForInstanceId())
     patch_engine.add_patch(NotAllowNullForElementId())
-    patch_engine.add_patch(NotAllowNullForTermFieldId())
+    patch_engine.add_patch(NotAllowNullForControlledTermFieldId())
+    patch_engine.add_patch(NotAllowNullForNestedControlledTermFieldId())
     patch_engine.add_patch(AddPavDerivedFromToPropertiesPatch())
     patch_engine.add_patch(AddPavDerivedFromToContextPropertiesPatch())
     return patch_engine

@@ -3,7 +3,7 @@ import re
 from cedar.patch import utils
 
 
-class NotAllowNullForTermFieldId(object):
+class NotAllowNullForNestedControlledTermFieldId(object):
 
     def __init__(self):
         self.description = "Removes the option to have a 'null' value in the @id field of a controlled-term field"
@@ -14,7 +14,7 @@ class NotAllowNullForTermFieldId(object):
         if not utils.is_compatible(doc, self.from_version):
             return False
         pattern = re.compile(
-            "instance failed to match exactly one schema \(matched 0 out of 6\) " \
+            "instance failed to match exactly one schema \(matched 0 out of [2|3|6]\) " \
             "at .*$")
         return pattern.match(error_message)
 

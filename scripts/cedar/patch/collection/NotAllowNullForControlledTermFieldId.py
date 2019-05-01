@@ -3,10 +3,10 @@ import re
 from cedar.patch import utils
 
 
-class NotAllowNullForElementId(object):
+class NotAllowNullForControlledTermFieldId(object):
 
     def __init__(self):
-        self.description = "Removes the option to have a 'null' value in the @id field of an element"
+        self.description = "Removes the option to have a 'null' value in the @id field of a controlled-term field"
         self.from_version = "1.5.0"
         self.to_version = "1.6.0"
 
@@ -15,7 +15,7 @@ class NotAllowNullForElementId(object):
             return False
         pattern = re.compile(
             "instance value \(\['string','null'\]\) not found in enum \(possible values: \['string'\]\) " \
-            "at /properties/@id/type$")
+            "at /properties/.*/properties/@id/type$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
