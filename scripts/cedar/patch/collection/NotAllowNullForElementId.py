@@ -15,7 +15,7 @@ class NotAllowNullForElementId(object):
             return False
         pattern = re.compile(
             "instance value \(\['string','null'\]\) not found in enum \(possible values: \['string'\]\) " \
-            "at /properties/.*/properties/@id/type$")
+            "at /properties/@id/type$")
         return pattern.match(error_message)
 
     def apply_patch(self, doc, error_message):
