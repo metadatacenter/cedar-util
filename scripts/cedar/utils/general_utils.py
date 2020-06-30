@@ -2,6 +2,7 @@ import re
 import dpath
 import json
 from distutils.version import StrictVersion
+import cedar.constants as const
 
 
 def is_compatible(resource, required_version):
@@ -58,6 +59,50 @@ def is_instance(resource, at=None):
     else:
         return False
 
+def get_resource_type(resource):
+    if is_template(resource):
+        return const.RESOURCE_TYPE_TEMPLATE
+    elif is_template_element(resource):
+        return const.RESOURCE_TYPE_TEMPLATE_ELEMENT
+    elif is_template_field(resource):
+        return const.RESOURCE_TYPE_TEMPLATE_FIELD
+    elif is_instance(resource):
+        return const.RESOURCE_TYPE_TEMPLATE_INSTANCE
+    else:
+        raise NameError('Resource type not found for resource: ' + resource)
+
+def get_resource_type_from_id(resource_id):
+    if 'templates' in resource_id:
+        return const.RESOURCE_TYPE_TEMPLATE
+    elif 'template-elements' in resource_id:
+        return const.RESOURCE_TYPE_TEMPLATE_ELEMENT
+    elif 'template-fields' in resource_id:
+        return const.RESOURCE_TYPE_TEMPLATE_FIELD
+    elif 'template-instances' in resource_id:
+        return const.RESOURCE_TYPE_TEMPLATE_INSTANCE
+    else:
+        raise NameError('Resource type not found in resource id: ' + resource_id)
+
+
+def get_mongodb_collection_name_from_resource_type(resource_type):
+    if resource_type == const.RESOURCE_TYPE_TEMPLATE:
+        return const.MONGODB_TEMPLATE_COLLECTION
+    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_ELEMENT:
+        return const.MONGODB_TEMPLATE_ELEMENT_COLLECTION
+    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_FIELD:
+        return const.MONGODB_TEMPLATE_FIELD_COLLECTION
+    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_INSTANCE:
+        return const.MONGODB_TEMPLATE_INSTANCE_COLLECTION
+    else:
+        raise NameError('Resource type not found: ' + resource_type)
+
+
+def matches_target_resource_types(resource, target_resource_types):
+    if get_resource_type(resource) in target_resource_types:
+        return True
+    else:
+        return False
+
 
 def is_multivalued_field(resource, at=None):
     if at:
@@ -109,3 +154,12 @@ def get_error_location(text):
     except AttributeError:
         found = ''
     return found
+
+
+def jsonpath_to_xpath(path):
+    """
+    Converts a path in Json Path format (dot based) to Json Patch format (slash based)
+    :param pathDotNotation:
+    :return:
+    """
+    return '/' + path.replace('.', "/")

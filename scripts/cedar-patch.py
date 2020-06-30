@@ -98,7 +98,12 @@ def main():
 
 
 def build_patch_engine():
-    return build_patch_engine_v160()
+    return build_patch_engine_v150_to_v160()
+
+
+def build_patch_engine_v150_to_v160():
+    patch_engine = Engine()
+    return patch_engine
 
 
 def build_patch_engine_v160():
@@ -411,7 +416,7 @@ def setup_source_database(mongodb_client, source_db_name):
     if mongodb_client is None or source_db_name is None:
         return None
 
-    db_names = mongodb_client.database_names()
+    db_names = mongodb_client.list_database_names()
     if source_db_name not in db_names:
         print(" ERROR    | Input MongoDB database not found: " + source_db_name)
         exit(0)
