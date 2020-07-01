@@ -138,7 +138,7 @@ def setup_source_database(mongodb_client, source_db_name):
     if mongodb_client is None or source_db_name is None:
         return None
 
-    db_names = mongodb_client.list_database_names()
+    db_names = mongodb_client.database_names()
     if source_db_name not in db_names:
         print(" ERROR    | Input MongoDB database not found: " + source_db_name)
         exit(0)
@@ -153,7 +153,7 @@ def setup_target_database(mongodb_client, output_mongodb):
     if output_mongodb == "cedar":
         raise Exception("Refused to store the patched resources into the main 'cedar' database")
 
-    db_names = mongodb_client.list_database_names()
+    db_names = mongodb_client.database_names()
     if output_mongodb in db_names:
         print("Existing databases: " + str(db_names))
         if confirm("The patch database '" + output_mongodb + "' already exists. Drop the content to proceed (Y/[N])?", default_response=False):
