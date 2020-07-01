@@ -10,16 +10,14 @@ class UpdateSchemaVersion:
     def __init__(self, new_version):
         self.description = "Updates the schema version"
         self.target_resource_types = [const.RESOURCE_TYPE_TEMPLATE, const.RESOURCE_TYPE_TEMPLATE_ELEMENT,
-                                      const.RESOURCE_TYPE_TEMPLATE_FIELD, const.RESOURCE_TYPE_TEMPLATE_INSTANCE]
+                                      const.RESOURCE_TYPE_TEMPLATE_FIELD]
         self.new_version = new_version
 
     def apply_patch(self, doc):
         if util.matches_target_resource_types(doc, self.target_resource_types):
             print('Applying patch: ' + type(self).__name__)
             doc = self.patch_update_schema_version(doc, self.new_version)
-            return doc
-        else:
-            print('Patching for this resource type: ' + doc['@id'])
+        return doc
 
     @staticmethod
     def patch_update_schema_version(doc, new_version):

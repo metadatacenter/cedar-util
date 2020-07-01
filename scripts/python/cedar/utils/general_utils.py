@@ -60,6 +60,7 @@ def is_instance(resource, at=None):
     else:
         return False
 
+
 def get_resource_type(resource):
     if is_template(resource):
         return const.RESOURCE_TYPE_TEMPLATE

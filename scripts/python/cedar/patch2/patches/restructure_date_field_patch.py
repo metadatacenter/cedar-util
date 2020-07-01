@@ -17,9 +17,7 @@ class RestructureDateFieldPatch:
             print('Applying patch: ' + type(self).__name__)
             doc = self.patch_value_constraints(doc)
             doc = self.patch_ui(doc)
-            return doc
-        else:
-            print('Patching skipped for this resource type: ' + doc['@id'])
+        return doc
 
     @staticmethod
     def patch_value_constraints(doc):
