@@ -15,6 +15,7 @@ class AddMissingColonToDatetimePatch:
 
     def apply_patch(self, doc):
         if util.matches_target_resource_types(doc, self.target_resource_types):
+            print('Applying patch: ' + type(self).__name__)
             doc = self.patch_missing_colon_datetime(doc)
             return doc
         else:

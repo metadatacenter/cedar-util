@@ -240,7 +240,13 @@ def show_report():
     print('EXECUTION SUMMARY: ')
     print('- Patched and valid: ' + str(len(report["resolved"])))
     print('- Patched but invalid: ' + str(len(report["unresolved"])))
+    if len(report["unresolved"]) > 0:
+        for unresolved_id in report["unresolved"]:
+            print('    - ' + unresolved_id)
     print('- Errored during patching: ' + str(len(report["error"])))
+    if len(report["error"]) > 0:
+        for errored_id in report["error"]:
+            print('    - ' + errored_id)
 
 
 # def create_report_message(solved_size, unsolved_size, error_size):

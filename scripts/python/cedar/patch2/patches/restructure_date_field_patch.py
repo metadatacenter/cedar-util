@@ -14,6 +14,7 @@ class RestructureDateFieldPatch:
 
     def apply_patch(self, doc):
         if util.matches_target_resource_types(doc, self.target_resource_types):
+            print('Applying patch: ' + type(self).__name__)
             doc = self.patch_value_constraints(doc)
             doc = self.patch_ui(doc)
             return doc
