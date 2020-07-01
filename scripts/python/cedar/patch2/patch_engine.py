@@ -15,5 +15,8 @@ class PatchingEngine(object):
         resource_copy = copy.deepcopy(resource)
         for patch in self.patches:
             resource_copy = patch.apply_patch(resource_copy)
+        changed = False
+        if resource != resource_copy:
+            changed = True
         is_valid, report = validation_callback(resource_copy)
-        return is_valid, resource_copy
+        return changed, is_valid, resource_copy

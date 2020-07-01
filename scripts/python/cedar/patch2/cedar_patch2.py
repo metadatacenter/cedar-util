@@ -4,6 +4,7 @@ import json
 from pymongo import MongoClient
 from requests import HTTPError
 import cedar.patch2.constants as const
+from datetime import datetime
 
 from cedar.patch2.patches.update_schema_version_patch import UpdateSchemaVersion
 import cedar.utils.general_utils as util
@@ -13,13 +14,17 @@ from cedar.patch2.patches.restructure_date_field_patch import RestructureDateFie
 from cedar.patch2.patch_engine import PatchingEngine
 
 report = {
-    "resolved": [],
-    "unresolved": [],
-    "error": []
+    "different_after_patching-valid-save_patched": [],
+    "different_after_patching-invalid-save_original": [],
+    "same_after_patching-valid-save_original": [],
+    "same_after_patching-invalid-save_original": [],
+    "errored_during_patching-save_original": []
 }
 
 
 def main():
+
+    start_time = datetime.now()
 
     print("Execution path: " + str(sys.path))
 
@@ -47,7 +52,6 @@ def main():
     input_mongodb = args.input_mongodb
     limit = args.limit
     output_mongodb = args.output_mongodb
-
     patch_engine = build_patch_engine()
 
     if input_mongodb is not None and output_mongodb is not None:
@@ -70,7 +74,9 @@ def main():
             instance_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_INSTANCE_COLLECTION, limit)
             print('Patching ' + str(len(instance_ids)) + ' Instances:')
             patch_resources(patch_engine, instance_ids, source_database, target_database)
-    show_report()
+
+    end_time = datetime.now()
+    print_report(vars(args), end_time - start_time)
 
 
 def build_patch_engine():
@@ -93,22 +99,39 @@ def patch_resources(patch_engine, resource_ids, source_database, target_database
             print('Patching ' + resource_type + ": " + resource_id)
             mongo_collection = util.get_mongodb_collection_name_from_resource_type(resource_type)
             resource = read_from_mongodb(source_database, mongo_collection, resource_id)
-            is_success, patched_resource = patch_engine.execute(resource, validate_resource_callback)
+            changed, is_valid, patched_resource = patch_engine.execute(resource, validate_resource_callback)
 
-            if is_success:
-                if patched_resource is not None:
-                    create_report("resolved", resource_id)
-                    if target_database is not None:
-                        write_to_mongodb(target_database, mongo_collection, patched_resource)
+            if changed:
+                if is_valid:
+                    if patched_resource is not None:
+                        create_report("different_after_patching-valid-save_patched", resource_id)
+                        if target_database is not None:
+                            write_to_mongodb(target_database, mongo_collection, patched_resource)
+                    else:
+                        raise Exception("Patched resource is None!")
+                        # if target_database is not None:
+                        #     write_to_mongodb(target_database, mongo_collection, resource)
                 else:
-                    if target_database is not None:
+                    create_report("different_after_patching-invalid-save_original", resource_id)
+                    if target_database is not None:  # Save the original to the database
                         write_to_mongodb(target_database, mongo_collection, resource)
             else:
-                create_report("unresolved", resource_id)
-                if target_database is not None:  # Save the original to the database
-                    write_to_mongodb(target_database, mongo_collection, resource)
+                if is_valid:
+                    if patched_resource is not None:
+                        create_report("same_after_patching-valid-save_original", resource_id)
+                        if target_database is not None:
+                            write_to_mongodb(target_database, mongo_collection, patched_resource)
+                    else:
+                        raise Exception("Patched resource is None!")
+                        # if target_database is not None:
+                        #     write_to_mongodb(target_database, mongo_collection, resource)
+                else:
+                    create_report("same_after_patching-invalid-save_original", resource_id)
+                    if target_database is not None:  # Save the original to the database
+                        write_to_mongodb(target_database, mongo_collection, resource)
+
         except (HTTPError, KeyError) as error:
-            create_report("error", [resource_id, "Error details: " + str(error)])
+            create_report("errored_during_patching-save_original", [resource_id, "Error details: " + str(error)])
     print()  # console printing separator
 
 
@@ -236,17 +259,15 @@ def post_read(resource):
     return new
 
 
-def show_report():
+def print_report(input_args, duration):
     print('EXECUTION SUMMARY: ')
-    print('- Patched and valid: ' + str(len(report["resolved"])))
-    print('- Patched but invalid: ' + str(len(report["unresolved"])))
-    if len(report["unresolved"]) > 0:
-        for unresolved_id in report["unresolved"]:
-            print('    - ' + unresolved_id)
-    print('- Errored during patching: ' + str(len(report["error"])))
-    if len(report["error"]) > 0:
-        for errored_id in report["error"]:
-            print('    - ' + errored_id)
+    print('Input settings: ' + str(input_args))
+    print('Duration: {}'.format(duration))
+    for report_type in report:
+        print('- ' + report_type + ': ' + str(len(report[report_type])))
+        if 'invalid' in report_type or 'error' in report_type:
+            for invalid_resource_id in report[report_type]:
+                print('    - ' + invalid_resource_id)
 
 
 # def create_report_message(solved_size, unsolved_size, error_size):
