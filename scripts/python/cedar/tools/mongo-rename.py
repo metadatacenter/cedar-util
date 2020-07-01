@@ -1,7 +1,7 @@
  #!/usr/local/bin/python3
 
 # Created: 2017-Oct-25
-# Last update: 2020-Jun-30
+# Last update: 2017-Oct-25
 # mongo-rename.py: Utility to (1) copy a MongoDB database and (2) swap the content of two MongoDB databases.
 
 # Import the modules needed to run the script.
@@ -62,7 +62,7 @@ def exec_menu(choice):
 def choice_list_dbs():
     c = get_mongo_client()
     print('\nList of MongoDB databases at ' + MONGO_HOST + ':')
-    for n in c.list_database_names():
+    for n in c.database_names():
         print('- ' + n)
     main_menu()
     return
@@ -73,7 +73,7 @@ def choice_copy_db():
     print("\nEnter the name of the DB that you want to copy:")
     db_name = input(">>  ")
     c = get_mongo_client()
-    db_names = c.list_database_names()
+    db_names = c.database_names()
     if db_name in db_names:
         choice_copy_db_step2(c, db_name, db_names)
     else:
@@ -102,11 +102,11 @@ def choice_swap_dbs():
     c = get_mongo_client()
     print("\nEnter the names of the databases that you want to swap:")
     db1_name = input("database 1 >>  ")
-    if db1_name not in c.list_database_names():
+    if db1_name not in c.database_names():
         print("The database '" + db1_name + "' does not exist. Please try again.")
         choice_swap_dbs()
     db2_name = input("database 2 >>  ")
-    if db2_name not in c.list_database_names():
+    if db2_name not in c.database_names():
         print("The database '" + db2_name + "' does not exist. Please try again.")
         choice_swap_dbs()
     print("Do you want to swap the content of '" + db1_name + "' and '" + db2_name + "'?")
