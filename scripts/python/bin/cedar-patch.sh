@@ -52,8 +52,8 @@ if [ "$HOSTNAME" == "$HOSTNAME_CEDAR_STAGING" ] || [ "$HOSTNAME" == "$HOSTNAME_C
 				echo "Your are running this script on CEDAR's Staging server"
 			else
 				echo "Your are running this script on CEDAR's Production server"
-			source activate py34
 		fi
+		source activate py34
 		python -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
 	else
 		python3 -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
