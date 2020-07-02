@@ -58,22 +58,28 @@ def main():
         mongodb_client = setup_mongodb_client(const.MONGODB_CONNECTION_STRING)
         source_database = setup_source_database(mongodb_client, input_mongodb)
         target_database = setup_target_database(mongodb_client, output_mongodb)
+        resource_ids = []
         if resource_type == 'templates' or resource_type == 'all':
             template_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_COLLECTION, limit)
-            print('Patching ' + str(len(template_ids)) + ' Templates:')
-            patch_resources(patch_engine, template_ids, source_database, target_database)
+            print('No. templates to patch: ' + str(len(template_ids)))
+            resource_ids.extend(template_ids)
         if resource_type == 'elements' or resource_type == 'all':
             element_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_ELEMENT_COLLECTION, limit)
-            print('Patching ' + str(len(element_ids)) + ' Elements:')
-            patch_resources(patch_engine, element_ids, source_database, target_database)
+            print('No. elements to patch: ' + str(len(element_ids)))
+            resource_ids.extend(element_ids)
         if resource_type == 'fields' or resource_type == 'all':
             field_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_FIELD_COLLECTION, limit)
-            print('Patching ' + str(len(field_ids)) + ' Fields:')
-            patch_resources(patch_engine, field_ids, source_database, target_database)
+            print('No. fiels to patch: ' + str(len(field_ids)))
+            resource_ids.extend(field_ids)
         if resource_type == 'instances' or resource_type == 'all':
             instance_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_INSTANCE_COLLECTION, limit)
-            print('Patching ' + str(len(instance_ids)) + ' Instances:')
-            patch_resources(patch_engine, instance_ids, source_database, target_database)
+            print('No. instances to patch: ' + str(len(instance_ids)))
+            resource_ids.extend(instance_ids)
+
+        if len(resource_ids) > 0:
+            patch_resources(patch_engine, resource_ids, source_database, target_database)
+        else:
+            print("There are not resources to be patched.")
 
     end_time = datetime.now()
     print_report(vars(args), end_time - start_time)
@@ -93,10 +99,10 @@ def build_patch_engine_v150_to_v160():
 
 def patch_resources(patch_engine, resource_ids, source_database, target_database):
     for counter, resource_id in enumerate(resource_ids, start=1):
-        util.print_progressbar(resource_id, counter, len(resource_ids), message="Patching")
+        util.print_progressbar(counter, len(resource_ids), message="Patching " + resource_id)
         try:
             resource_type = util.get_resource_type_from_id(resource_id)
-            print('Patching ' + resource_type + ": " + resource_id)
+            #print('Patching ' + resource_type + ": " + resource_id)
             mongo_collection = util.get_mongodb_collection_name_from_resource_type(resource_type)
             resource = read_from_mongodb(source_database, mongo_collection, resource_id)
             changed, is_valid, patched_resource = patch_engine.execute(resource, validate_resource_callback)
@@ -179,7 +185,7 @@ def setup_target_database(mongodb_client, output_mongodb):
     db_names = mongodb_client.database_names()
     if output_mongodb in db_names:
         print("Existing databases: " + str(db_names))
-        if confirm("The patch database '" + output_mongodb + "' already exists. Drop the content to proceed (Y/[N])?", default_response=False):
+        if confirm("The patch database '" + output_mongodb + "' already exists. Drop the content to proceed (y/[n])? ", default_response=False):
             print("Dropping '" + output_mongodb + "' database...")
             mongodb_client.drop_database(output_mongodb)
         else:

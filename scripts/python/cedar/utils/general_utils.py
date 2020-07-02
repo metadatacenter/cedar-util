@@ -166,6 +166,7 @@ def jsonpath_to_xpath(path):
     """
     return '/' + path.replace('.', "/")
 
+
 def get_server_address(alias):
     address = "http://localhost"
     if alias == 'local':
@@ -200,14 +201,13 @@ def write_to_file(patched_template, filename, output_dir=None):
         json.dump(patched_template, outfile)
 
 
-def print_progressbar(resource_iri, progress_counter, total_count, message="Making a progress"):
-    resource_hash = extract_resource_hash(resource_iri)
+def print_progressbar(progress_counter, total_count, message="Making a progress"):
     percent = 100 * (progress_counter / total_count)
-    filled_length = int(percent)
-    bar = "#" * filled_length + '-' * (100 - filled_length)
-    print("%s (%d/%d): |%s| %d%% Complete [%s]"
-          % (message, progress_counter, total_count, bar, percent, resource_hash), end='\r')
-
+    bar_width_decrease_factor = 4
+    filled_length = int(percent/bar_width_decrease_factor)
+    bar = "#" * filled_length + '-' * (int(100/bar_width_decrease_factor) - filled_length)
+    print("%s (%d/%d): |%s| %d%% Complete"
+          % (message, progress_counter, total_count, bar, percent))
 
 def extract_resource_hash(iri):
     return iri[iri.rfind('/')+1:]

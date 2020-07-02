@@ -35,13 +35,8 @@ fi
 
 LOG_FILE_PATH="${CEDAR_HOME}/log/cedar-patch/${CURRENTDATETIME}_patch.log"
 
-read -p "This script will patch all CEDAR artifacts in your MongoDB 'cedar' database and will store them into a new database '$OUTPUTDB'. The original 'cedar' database will remain untouched. After running this script, you can use the CEDAR tool 'mongo-rename.py' to replace the original database with the patched one. Do you want to continue? [y/n] " -n 1 -r
-echo    # (optional) move to a new line
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    exit 1
-fi
+echo "This script will patch all CEDAR artifacts in your MongoDB 'cedar' database and will store them into a new database '$OUTPUTDB'. The original 'cedar' database will remain untouched. After running this script, you can use the CEDAR tool 'mongo-rename.py' to replace the original database with the patched one."
+read -p "Press enter to continue "
 
 sleep 1
 
@@ -53,10 +48,13 @@ if [ "$HOSTNAME" == "$HOSTNAME_CEDAR_STAGING" ] || [ "$HOSTNAME" == "$HOSTNAME_C
 			else
 				echo "Your are running this script on CEDAR's Production server"
 		fi
-		source activate py34
-		python -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+		echo "Activating Python environment..."
+        source activate py34
+        echo "Python environment activated."
+        echo "Starting CEDAR patch Python script..."
+		python -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
 	else
-		python3 -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+		python3 -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
 fi
 
 echo

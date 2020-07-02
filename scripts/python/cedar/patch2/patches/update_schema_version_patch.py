@@ -15,7 +15,7 @@ class UpdateSchemaVersion:
 
     def apply_patch(self, doc):
         if util.matches_target_resource_types(doc, self.target_resource_types):
-            print('Applying patch: ' + type(self).__name__)
+            # print('- Applying patch: ' + type(self).__name__)
             doc = self.patch_update_schema_version(doc, self.new_version)
         return doc
 
