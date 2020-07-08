@@ -166,9 +166,10 @@ def validate_resource_callback(resource):
     elif resource_type == const.RESOURCE_TYPE_TEMPLATE_INSTANCE:
         is_valid, message = validator.validate_instance(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
 
-    return is_valid, [error_detail["message"] + " at " + error_detail["location"]
-                      for error_detail in message["errors"]
-                      if not is_valid]
+    # return is_valid, [str(error_detail["message"]) + " at " + str(error_detail["location"])
+    #                   for error_detail in message["errors"]
+    #                   if not is_valid]
+    return is_valid
 
 
 def setup_mongodb_client(mongodb_conn):
