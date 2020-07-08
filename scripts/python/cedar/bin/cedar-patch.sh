@@ -44,7 +44,7 @@ echo
 sleep 1
 
 while true; do
-    read -p "What do you want to do when a patched resource is invalid? Enter 'y' to save the patched resource or 'n' to save the original one. " yn
+    read -p "If a patched resource is invalid, do you want to save it? Enter 'y' to save the patched resource or 'n' to save the original one. " yn
     case $yn in
         [Yy]* ) FORCE=true; break;;
         [Nn]* ) FORCE=false; break;;
