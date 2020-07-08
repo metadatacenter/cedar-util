@@ -288,7 +288,7 @@ def print_report(input_args, duration):
         print('- ' + report_type + ': ' + str(len(report[report_type])))
         if 'invalid' in report_type or 'error' in report_type:
             for invalid_resource_id in report[report_type]:
-                print('    - ' + invalid_resource_id)
+                print('    - ' + str(invalid_resource_id))
 
 
 # def create_report_message(solved_size, unsolved_size, error_size):
