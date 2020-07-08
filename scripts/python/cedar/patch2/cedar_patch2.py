@@ -16,6 +16,7 @@ from cedar.patch2.patch_engine import PatchingEngine
 report = {
     "different_after_patching-valid-save_patched": [],
     "different_after_patching-invalid-save_original": [],
+    "different_after_patching-invalid-save_patched": [],
     "same_after_patching-valid-save_original": [],
     "same_after_patching-invalid-save_original": [],
     "errored_during_patching-save_original": []
@@ -46,6 +47,12 @@ def main():
                         required=False,
                         type=int,
                         help="the maximum number of resources to patch")
+    parser.add_argument("-f", "--force",
+                        dest="force",
+                        default=False,
+                        required=False,
+                        action="store_true",
+                        help="forces patching when the patched resource is invalid")
 
     args = parser.parse_args()
     resource_type = args.resource_type
@@ -53,6 +60,7 @@ def main():
     limit = args.limit
     output_mongodb = args.output_mongodb
     patch_engine = build_patch_engine()
+    force = args.force
 
     if input_mongodb is not None and output_mongodb is not None:
         mongodb_client = setup_mongodb_client(const.MONGODB_CONNECTION_STRING)
@@ -77,7 +85,7 @@ def main():
             resource_ids.extend(instance_ids)
 
         if len(resource_ids) > 0:
-            patch_resources(patch_engine, resource_ids, source_database, target_database)
+            patch_resources(patch_engine, resource_ids, source_database, target_database, force)
         else:
             print("There are not resources to be patched.")
 
@@ -97,7 +105,7 @@ def build_patch_engine_v150_to_v160():
     return patch_engine
 
 
-def patch_resources(patch_engine, resource_ids, source_database, target_database):
+def patch_resources(patch_engine, resource_ids, source_database, target_database, force):
     for counter, resource_id in enumerate(resource_ids, start=1):
         util.print_progressbar(counter, len(resource_ids), message="Patching " + resource_id)
         try:
@@ -108,19 +116,25 @@ def patch_resources(patch_engine, resource_ids, source_database, target_database
             changed, is_valid, patched_resource = patch_engine.execute(resource, validate_resource_callback)
 
             if changed:
-                if is_valid:
-                    if patched_resource is not None:
-                        create_report("different_after_patching-valid-save_patched", resource_id)
-                        if target_database is not None:
-                            write_to_mongodb(target_database, mongo_collection, patched_resource)
+                    if is_valid:
+                        if patched_resource is not None:
+                            create_report("different_after_patching-valid-save_patched", resource_id)
+                            if target_database is not None:
+                                write_to_mongodb(target_database, mongo_collection, patched_resource)
+                        else:
+                            raise Exception("Patched resource is None!")
+                            # if target_database is not None:
+                            #     write_to_mongodb(target_database, mongo_collection, resource)
                     else:
-                        raise Exception("Patched resource is None!")
-                        # if target_database is not None:
-                        #     write_to_mongodb(target_database, mongo_collection, resource)
-                else:
-                    create_report("different_after_patching-invalid-save_original", resource_id)
-                    if target_database is not None:  # Save the original to the database
-                        write_to_mongodb(target_database, mongo_collection, resource)
+                        if not force:
+                            create_report("different_after_patching-invalid-save_original", resource_id)
+                            if target_database is not None:  # Save the original to the database
+                                write_to_mongodb(target_database, mongo_collection, resource)
+                        else:
+                            create_report("different_after_patching-invalid-save_patched", resource_id)
+                            if target_database is not None:
+                                write_to_mongodb(target_database, mongo_collection, patched_resource)
+
             else:
                 if is_valid:
                     if patched_resource is not None:

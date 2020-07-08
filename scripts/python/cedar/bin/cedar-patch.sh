@@ -35,10 +35,24 @@ fi
 
 LOG_FILE_PATH="${CEDAR_HOME}/log/cedar-patch/${CURRENTDATETIME}_patch.log"
 
-echo "This script will patch all CEDAR artifacts in your MongoDB 'cedar' database and will store them into a new database '$OUTPUTDB'. The original 'cedar' database will remain untouched. After running this script, you can use the CEDAR tool 'mongo-rename.py' to replace the original database with the patched one."
-read -p "Press enter to continue "
-
+echo "This script will patch all CEDAR artifacts in your MongoDB 'cedar' database and will store them into a new"
+echo "database '$OUTPUTDB'. The original 'cedar' database will remain untouched. After running this script,"
+echo "you can use the CEDAR tool 'mongo-rename.py' to replace the original database with the patched one."
+echo
+read -p "Press Enter to continue "
+echo
 sleep 1
+
+while true; do
+    read -p "What do you want to do when a patched resource is invalid? Enter 'y' to save the patched resource or 'n' to save the original one. " yn
+    case $yn in
+        [Yy]* ) FORCE=true; break;;
+        [Nn]* ) FORCE=false; break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+echo
 
 if [ "$HOSTNAME" == "$HOSTNAME_CEDAR_STAGING" ] || [ "$HOSTNAME" == "$HOSTNAME_CEDAR_PRODUCTION" ];
 	then
@@ -49,12 +63,22 @@ if [ "$HOSTNAME" == "$HOSTNAME_CEDAR_STAGING" ] || [ "$HOSTNAME" == "$HOSTNAME_C
 				echo "Your are running this script on CEDAR's Production server"
 		fi
 		echo "Activating Python environment..."
-        source activate py34
-        echo "Python environment activated."
-        echo "Starting CEDAR patch Python script..."
-		python -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+    source activate py34
+    echo "Python environment activated."
+    echo "Starting CEDAR patch Python script..."
+    if [ "$FORCE" == true ];
+      then
+		    python -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" -f | tee "$LOG_FILE_PATH"
+		  else
+		    python -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+		fi
 	else
-		python3 -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+	  if [ "$FORCE" == true ];
+	    then
+		    python3 -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" -f | tee "$LOG_FILE_PATH"
+		  else
+		    python3 -u -m cedar.patch2.cedar_patch2 -r all -i cedar -o "$OUTPUTDB" | tee "$LOG_FILE_PATH"
+		fi
 fi
 
 echo
