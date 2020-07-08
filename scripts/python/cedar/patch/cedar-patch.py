@@ -4,7 +4,8 @@ import json
 from pymongo import MongoClient
 from requests import HTTPError
 
-from cedar import to_json_string, write_to_file, print_progressbar, extract_resource_hash
+from cedar.patch.collection import *
+from cedar.utils.general_utils import to_json_string, write_to_file, print_progressbar, extract_resource_hash
 from cedar.utils import validator
 from cedar.patch.Engine import Engine
 
@@ -243,7 +244,7 @@ def patch_template(patch_engine, template_ids, source_database, output_dir=None,
     total_templates = len(template_ids)
     for counter, template_id in enumerate(template_ids, start=1):
         if not debug:
-            print_progressbar(template_id, counter, total_templates, message="Patching")
+            print_progressbar(counter, total_templates, message="Patching")
         try:
             template = read_from_mongodb(source_database, cedar_template_collection, template_id)
             is_success, patched_template = patch_engine.execute(template, validate_template_callback, debug=debug)
@@ -305,7 +306,7 @@ def patch_element(patch_engine, element_ids, source_database, output_dir=None, t
     total_elements = len(element_ids)
     for counter, element_id in enumerate(element_ids, start=1):
         if not debug:
-            print_progressbar(element_id, counter, total_elements, message="Patching")
+            print_progressbar(counter, total_elements, message="Patching")
         try:
             element = read_from_mongodb(source_database, cedar_element_collection, element_id)
             is_success, patched_element = patch_engine.execute(element, validate_element_callback, debug=debug)
@@ -367,7 +368,7 @@ def patch_field(patch_engine, field_ids, source_database, output_dir=None, targe
     total_fields = len(field_ids)
     for counter, field_id in enumerate(field_ids, start=1):
         if not debug:
-            print_progressbar(field_id, counter, total_fields, message="Patching")
+            print_progressbar(counter, total_fields, message="Patching")
         try:
             field = read_from_mongodb(source_database, cedar_field_collection, field_id)
             is_success, patched_field = patch_engine.execute(field, validate_field_callback, debug=debug)

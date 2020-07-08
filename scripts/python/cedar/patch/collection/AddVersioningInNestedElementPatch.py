@@ -1,6 +1,6 @@
 import jsonpatch
 import re
-from python.cedar.patch import utils
+from cedar.utils import general_utils
 
 
 class AddVersioningInNestedElementPatch(object):

@@ -2,7 +2,7 @@ import jsonpatch
 import re
 import dpath
 from collections import OrderedDict
-from python.cedar.patch import utils
+from cedar.utils import general_utils as utils
 
 
 class RemoveArrayDuplicatesPatch(object):

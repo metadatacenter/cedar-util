@@ -1,4 +1,4 @@
-from python.cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
+from cedar.patch.collection.AddVersioningInNestedElementPatch import AddVersioningInNestedElementPatch
 
 __all__ = [
     "AddContentToUiPatch",

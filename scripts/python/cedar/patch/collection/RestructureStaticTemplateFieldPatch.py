@@ -1,7 +1,7 @@
 import jsonpatch
 import re
 import dpath
-from python.cedar.patch import utils
+from cedar.utils import general_utils as utils
 
 
 class RestructureStaticTemplateFieldPatch(object):
