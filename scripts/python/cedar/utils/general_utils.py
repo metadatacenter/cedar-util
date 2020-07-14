@@ -71,7 +71,7 @@ def get_resource_type(resource):
     elif is_instance(resource):
         return const.RESOURCE_TYPE_TEMPLATE_INSTANCE
     else:
-        raise NameError('Resource type not found for resource: ' + resource)
+        raise NameError('Resource type not found for resource: ' + str(resource))
 
 def get_resource_type_from_id(resource_id):
     if 'templates' in resource_id:
