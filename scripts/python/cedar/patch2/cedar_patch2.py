@@ -72,21 +72,21 @@ def main():
             print('No. instances to patch: ' + str(len(instance_ids)))
             resource_ids.extend(instance_ids)
 
-        if resource_type == 'fields' or resource_type == 'all':
-            field_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_FIELD_COLLECTION, limit)
-            print('No. fiels to patch: ' + str(len(field_ids)))
-            resource_ids.extend(field_ids)
+        if resource_type == 'templates' or resource_type == 'all':
+            template_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_COLLECTION, limit)
+            print('No. templates to patch: ' + str(len(template_ids)))
+            resource_ids.extend(template_ids)
 
         if resource_type == 'elements' or resource_type == 'all':
             element_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_ELEMENT_COLLECTION, limit)
             print('No. elements to patch: ' + str(len(element_ids)))
             resource_ids.extend(element_ids)
 
-        if resource_type == 'templates' or resource_type == 'all':
-            template_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_COLLECTION, limit)
-            print('No. templates to patch: ' + str(len(template_ids)))
-            resource_ids.extend(template_ids)
-            
+        if resource_type == 'fields' or resource_type == 'all':
+            field_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_FIELD_COLLECTION, limit)
+            print('No. fiels to patch: ' + str(len(field_ids)))
+            resource_ids.extend(field_ids)
+
         if len(resource_ids) > 0:
             patch_resources(patch_engine, resource_ids, source_database, target_database, force)
         else:
