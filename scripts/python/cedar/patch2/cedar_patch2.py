@@ -65,7 +65,16 @@ def main():
     if input_mongodb is not None and output_mongodb is not None:
         mongodb_client = setup_mongodb_client(const.MONGODB_CONNECTION_STRING)
         source_database = setup_source_database(mongodb_client, input_mongodb)
-        target_database = setup_target_database(mongodb_client, output_mongodb)
+
+        if output_mongodb != input_mongodb: # Copy resources to a new DB and patch the new DB
+            target_database = setup_target_database(mongodb_client, input_mongodb, output_mongodb)
+        else:  # Apply patches directly to the given DB
+            print("The input and output DB names are the same. The patching will be applied directly to the given DB")
+            backup_mongodb = input_mongodb + "-backup-" + datetime.today().strftime("%Y-%m-%d")
+            print("Creating DB backup: " + backup_mongodb)
+            copy_database(mongodb_client, input_mongodb, backup_mongodb)  # Create backup
+            target_database = source_database
+
         resource_ids = []
 
         if resource_type == 'templates' or resource_type == 'all':
@@ -193,7 +202,7 @@ def setup_source_database(mongodb_client, source_db_name):
     return mongodb_client[source_db_name]
 
 
-def setup_target_database(mongodb_client, output_mongodb):
+def setup_target_database(mongodb_client, input_mongodb, output_mongodb):
     if mongodb_client is None or output_mongodb is None:
         return None
 
@@ -209,8 +218,25 @@ def setup_target_database(mongodb_client, output_mongodb):
         else:
             exit(0)
 
-    mongodb_client.admin.command("copydb", fromdb="cedar", todb=output_mongodb)
+    mongodb_client.admin.command("copydb", fromdb=input_mongodb, todb=output_mongodb)
 
+    return mongodb_client[output_mongodb]
+
+
+def copy_database(mongodb_client, input_mongodb, output_mongodb):
+    if mongodb_client is None or input_mongodb is None or output_mongodb is None:
+        return None
+
+    db_names = mongodb_client.database_names()
+    if output_mongodb in db_names:
+        print("Existing databases: " + str(db_names))
+        if confirm("The database '" + output_mongodb + "' already exists. Drop the content to proceed (y/[n])? ", default_response=False):
+            print("Dropping '" + output_mongodb + "' database...")
+            mongodb_client.drop_database(output_mongodb)
+        else:
+            exit(0)
+
+    mongodb_client.admin.command("copydb", fromdb=input_mongodb, todb=output_mongodb)
     return mongodb_client[output_mongodb]
 
 
