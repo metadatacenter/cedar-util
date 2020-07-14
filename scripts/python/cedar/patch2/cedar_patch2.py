@@ -67,10 +67,6 @@ def main():
         source_database = setup_source_database(mongodb_client, input_mongodb)
         target_database = setup_target_database(mongodb_client, output_mongodb)
         resource_ids = []
-        if resource_type == 'instances' or resource_type == 'all':
-            instance_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_INSTANCE_COLLECTION, limit)
-            print('No. instances to patch: ' + str(len(instance_ids)))
-            resource_ids.extend(instance_ids)
 
         if resource_type == 'templates' or resource_type == 'all':
             template_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_COLLECTION, limit)
@@ -86,6 +82,11 @@ def main():
             field_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_FIELD_COLLECTION, limit)
             print('No. fiels to patch: ' + str(len(field_ids)))
             resource_ids.extend(field_ids)
+
+        if resource_type == 'instances' or resource_type == 'all':
+            instance_ids = get_resource_ids(source_database, const.MONGODB_TEMPLATE_INSTANCE_COLLECTION, limit)
+            print('No. instances to patch: ' + str(len(instance_ids)))
+            resource_ids.extend(instance_ids)
 
         if len(resource_ids) > 0:
             patch_resources(patch_engine, resource_ids, source_database, target_database, force)
