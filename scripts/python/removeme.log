@@ -1,9 +1,0 @@
-Execution path: ['/Users/marcosmr/Development/CEDAR/cedar-util/scripts/python', '/usr/local/Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib/python37.zip', '/usr/local/Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7', '/usr/local/Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib/python3.7/lib-dynload', '/usr/local/lib/python3.7/site-packages']
-/Users/marcosmr/Development/CEDAR/cedar-util/scripts/python/cedar/patch2/cedar_patch2.py:197: DeprecationWarning: database_names is deprecated. Use list_database_names instead.
-  db_names = mongodb_client.database_names()
-The input and output DB names are the same. The patching will be applied directly to the given DB
-Creating DB backup: cedar-backup-2020-07-14
-/Users/marcosmr/Development/CEDAR/cedar-util/scripts/python/cedar/patch2/cedar_patch2.py:230: DeprecationWarning: database_names is deprecated. Use list_database_names instead.
-  db_names = mongodb_client.database_names()
-Existing databases: ['admin', 'cedar', 'cedar-backup-2020-07-14', 'cedar-patched', 'cedar-patched-2020-07-02', 'cedar-patched-2020-07-07', 'cedar-patched-2020-07-08', 'cedar-patched-2020-07-13', 'cedar-patched-2020-07-14', 'local', 'ncats-demo']
-The database 'cedar-backup-2020-07-14' already exists. Drop the content to proceed (y/[n])? 
