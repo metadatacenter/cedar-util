@@ -73,6 +73,7 @@ def get_resource_type(resource):
     else:
         raise NameError('Resource type not found for resource: ' + str(resource))
 
+
 def get_resource_type_from_id(resource_id):
     if 'templates' in resource_id:
         return const.RESOURCE_TYPE_TEMPLATE
@@ -100,10 +101,13 @@ def get_mongodb_collection_name_from_resource_type(resource_type):
 
 
 def matches_target_resource_types(resource, target_resource_types):
-    if get_resource_type(resource) in target_resource_types:
-        return True
-    else:
-        return False
+    try:
+        if get_resource_type(resource) in target_resource_types:
+            return True
+        else:
+            return False
+    except NameError:
+        pass # Ignore
 
 
 def is_multivalued_field(resource, at=None):
@@ -179,9 +183,9 @@ def get_server_address(alias):
 
 
 def to_boolean(value):
-    if str(value).lower() in ("yes", "y", "true",  "t", "1"):
+    if str(value).lower() in ("yes", "y", "true", "t", "1"):
         return True
-    if str(value).lower() in ("no",  "n", "false", "f", "0", "0.0", "", "none", "[]", "{}"):
+    if str(value).lower() in ("no", "n", "false", "f", "0", "0.0", "", "none", "[]", "{}"):
         return False
     raise Exception('Invalid value for boolean conversion: ' + str(value))
 
@@ -204,10 +208,11 @@ def write_to_file(patched_template, filename, output_dir=None):
 def print_progressbar(progress_counter, total_count, message="Making a progress"):
     percent = 100 * (progress_counter / total_count)
     bar_width_decrease_factor = 4
-    filled_length = int(percent/bar_width_decrease_factor)
-    bar = "#" * filled_length + '-' * (int(100/bar_width_decrease_factor) - filled_length)
+    filled_length = int(percent / bar_width_decrease_factor)
+    bar = "#" * filled_length + '-' * (int(100 / bar_width_decrease_factor) - filled_length)
     print("%s (%d/%d): |%s| %d%% Complete"
           % (message, progress_counter, total_count, bar, percent))
 
+
 def extract_resource_hash(iri):
-    return iri[iri.rfind('/')+1:]
+    return iri[iri.rfind('/') + 1:]

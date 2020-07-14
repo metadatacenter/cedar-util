@@ -156,20 +156,19 @@ def patch_resources(patch_engine, resource_ids, source_database, target_database
 
 
 def validate_resource_callback(resource):
-    resource_type = util.get_resource_type(resource)
-    if resource_type == const.RESOURCE_TYPE_TEMPLATE:
-        is_valid, message = validator.validate_template(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
-    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_ELEMENT:
-        is_valid, message = validator.validate_element(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
-    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_FIELD:
-        is_valid, message = validator.validate_field(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
-    elif resource_type == const.RESOURCE_TYPE_TEMPLATE_INSTANCE:
-        is_valid, message = validator.validate_instance(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
-
-    # return is_valid, [str(error_detail["message"]) + " at " + str(error_detail["location"])
-    #                   for error_detail in message["errors"]
-    #                   if not is_valid]
-    return is_valid
+    try:
+        resource_type = util.get_resource_type(resource)
+        if resource_type == const.RESOURCE_TYPE_TEMPLATE:
+            is_valid, message = validator.validate_template(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
+        elif resource_type == const.RESOURCE_TYPE_TEMPLATE_ELEMENT:
+            is_valid, message = validator.validate_element(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
+        elif resource_type == const.RESOURCE_TYPE_TEMPLATE_FIELD:
+            is_valid, message = validator.validate_field(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
+        elif resource_type == const.RESOURCE_TYPE_TEMPLATE_INSTANCE:
+            is_valid, message = validator.validate_instance(const.CEDAR_SERVER_ADDRESS, const.CEDAR_ADMIN_API_KEY, resource)
+        return is_valid
+    except (HTTPError, KeyError, NameError) as error:
+        create_report("errored_during_patching-save_original", [resource, "Error details: " + str(error)])
 
 
 def setup_mongodb_client(mongodb_conn):
