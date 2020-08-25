@@ -15,10 +15,9 @@
   <packaging>pom</packaging>
 
   <scm>
-    <connection>scm:git:git@github.com:metadatacenter/cedar-util.git</connection>
-    <developerConnection>scm:git:git@github.com:metadatacenter/cedar-util.git</developerConnection>
+    <connection>scm:git:https://github.com/metadatacenter/cedar-util.git</connection>
+    <developerConnection>scm:git:https://github.com/metadatacenter/cedar-util.git</developerConnection>
     <url>https://github.com/metadatacenter/cedar-util</url>
-    <tag>HEAD</tag>
   </scm>
 
 </project>
