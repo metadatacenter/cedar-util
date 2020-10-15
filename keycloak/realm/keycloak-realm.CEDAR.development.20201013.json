@@ -47,7 +47,7 @@
       "description" : "${role_offline-access}",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "CEDAR2",
+      "containerId" : "CEDAR",
       "attributes" : { }
     }, {
       "id" : "30b55246-3f09-498b-993e-0e8e26e73574",
@@ -55,7 +55,7 @@
       "description" : "${role_uma_authorization}",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "CEDAR2",
+      "containerId" : "CEDAR",
       "attributes" : { }
     }, {
       "id" : "e93a846b-18ca-4ca2-8e22-2b53cb88dc4f",
@@ -63,7 +63,7 @@
       "description" : "Add special capabilities in CEDAR to the built in cedar-admin user through this role",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "CEDAR2",
+      "containerId" : "CEDAR",
       "attributes" : { }
     }, {
       "id" : "5eae9550-94b6-4e30-bba9-f98616bb8222",
@@ -71,7 +71,7 @@
       "description" : "Add regular capabilities in CEDAR to all users through this role",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "CEDAR2",
+      "containerId" : "CEDAR",
       "attributes" : { }
     } ],
     "client" : {
@@ -518,13 +518,13 @@
     "clientId" : "account-console",
     "name" : "${client_account-console}",
     "rootUrl" : "${authBaseUrl}",
-    "baseUrl" : "/realms/CEDAR2/account/",
+    "baseUrl" : "/realms/CEDAR/account/",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "075d9f8e-651e-4769-93c2-8312cc8f2aaf",
-    "redirectUris" : [ "/realms/CEDAR2/account/*" ],
+    "redirectUris" : [ "/realms/CEDAR/account/*" ],
     "webOrigins" : [ ],
     "notBefore" : 0,
     "bearerOnly" : false,
