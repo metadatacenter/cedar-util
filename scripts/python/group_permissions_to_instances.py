@@ -1,5 +1,5 @@
 import os
-from python.cedar.utils import getter, updater, searcher
+from cedar.utils import getter, updater, searcher
 
 
 def main():
