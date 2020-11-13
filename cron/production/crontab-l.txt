@@ -1,0 +1,4 @@
+SHELL=/bin/bash
+MAILTO="marcosmr@stanford.edu,egyedia@stanford.edu,jgraybeal@stanford.edu"
+0 2 * * * source /home/cedar/.bash_profile;/srv/cedar/cedar-util/cron/production/cadsr-cde-update/cadsr-cde-update.sh
+*/10 * * * * source /home/cedar/.bash_profile;/srv/cedar/cedar-util/cron/production/ccp-share-instances/share-instances.sh

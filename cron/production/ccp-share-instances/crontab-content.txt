@@ -1,0 +1,1 @@
+*/10 * * * * source /home/cedar/.bash_profile;/srv/cedar/cedar-util/cron/production/ccp-share-instances/share-instances.sh

@@ -1,3 +1,0 @@
-SHELL=/bin/bash
-MAILTO="egyedia@stanford.edu,sunid@stanford.edu,marcosmr@stanford.edu,johardi@stanford.edu"
-*/10 * * * * source /home/cedar/.bash_profile;/srv/cedar/cron/share-instances.sh
