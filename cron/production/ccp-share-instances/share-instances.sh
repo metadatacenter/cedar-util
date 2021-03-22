@@ -1,8 +1,7 @@
 #!/bin/bash
 #echo "Starting script to share instances of a given template with a given group:"
 #echo "--------------------------------------------------------------------------"
-#export PATH="/home/cedar/anaconda3/bin:$PATH" # Not needed anymore
-#source activate py34 # Not needed anymore
+
 # Share instances of the 'CCP Digital Object' template
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/62c8b5f2-7dc9-4fff-9008-07c95a746411 https://repo.metadatacenter.org/groups/fd473979-33ab-4154-a316-de828dcf8cc0 read
 # Share instances of 'COVID Project Admin' template with 'CEDAR Dev Team' group
