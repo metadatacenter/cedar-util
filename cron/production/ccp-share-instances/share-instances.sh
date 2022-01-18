@@ -19,5 +19,7 @@ python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py h
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/28d58a30-1a42-4715-a742-d2f46690563e https://repo.metadatacenter.org/groups/89ae032c-48e1-4448-8c42-ca39c72f900b read
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/22925909-9fb2-4ac8-a986-6db5ae7049e7 https://repo.metadatacenter.org/groups/89ae032c-48e1-4448-8c42-ca39c72f900b read
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/de169781-7f75-4aef-a0cb-ac435fe3a4c7 https://repo.metadatacenter.org/groups/89ae032c-48e1-4448-8c42-ca39c72f900b read
+# Share instances of 'Virtual Fly Brain Neuron' template with 'vfb crawler' group.
+python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/3179bbc0-8956-4ac5-9107-9cfa5ee3c7ee https://repo.metadatacenter.org/groups/6d7003fb-2a11-4077-b1fa-1a9b5a667a23 read
 #echo "--------------------------------------------------------------------------"
 #echo "Script execution finished."
