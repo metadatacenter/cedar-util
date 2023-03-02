@@ -15,14 +15,17 @@ def main():
 
     instance_ids = searcher.search_instances_of(server_address, api_key, template_id)
     for instance_id in instance_ids:
-        add_group_permission_to_instance(server_address, api_key, instance_id, group_id, permission_type)
+        add_group_permission_to_instance(server_address, api_key, template_id, instance_id, group_id, permission_type)
 
 
-def add_group_permission_to_instance(server_address, api_key, instance_id, group_id, permission_type):
+def add_group_permission_to_instance(server_address, api_key, template_id, instance_id, group_id, permission_type):
     instance_permissions = getter.get_instance_permissions(server_address, api_key, instance_id)
     group_permissions = instance_permissions['groupPermissions']
     if has_no_group_id(group_permissions, group_id):
         print("Adding a new group permission to " + instance_id)
+        print("Group id: " + group_id)
+        print("Template: " + template_id)
+        print("-------------------------------------")
         instance_permissions['groupPermissions'].append(create_group_permission(group_id, permission_type))
         updater.update_instance_permission(server_address, api_key, instance_id, instance_permissions)
 
