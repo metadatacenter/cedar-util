@@ -1,1 +1,1 @@
-*/10 * * * * source /home/cedar/.bash_profile;/srv/cedar/cedar-util/cron/production/ccp-share-instances/share-instances.sh
+*/10 * * * * source /home/cedar/.bash_profile;export JAVA_HOME=/usr/lib/jvm/jdk-17-oracle-x64;/srv/cedar/cedar-util/cron/production/ccp-share-instances/share-instances.sh
