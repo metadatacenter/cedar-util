@@ -23,5 +23,7 @@ python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py h
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/3179bbc0-8956-4ac5-9107-9cfa5ee3c7ee https://repo.metadatacenter.org/groups/6d7003fb-2a11-4077-b1fa-1a9b5a667a23 read
 # Share instances of 'Virtual Fly Brain Dataset' template with 'vfb crawler' group.
 python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/24d95aea-88c2-477f-855c-42c1a0051289 https://repo.metadatacenter.org/groups/6d7003fb-2a11-4077-b1fa-1a9b5a667a23 read
+# Share instances of 'ADVANCE metadata templateV3' template with 'ADVANCE' group.
+python3 /srv/cedar/cedar-util/scripts/python/group_permissions_to_instances.py https://repo.metadatacenter.org/templates/6530ee0d-23cc-4680-b368-76881372e514 https://repo.metadatacenter.org/groups/992a9fe3-891f-4640-b83b-86d8f17af87c read
 #echo "--------------------------------------------------------------------------"
 #echo "Script execution finished."
