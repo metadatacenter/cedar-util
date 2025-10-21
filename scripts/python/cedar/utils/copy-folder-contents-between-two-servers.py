@@ -152,6 +152,15 @@ def rewrite_all_repo_iris(obj: Any, src_repo_host: str, dst_repo_host: str) -> A
 # Will recreate every artifact on the target server
 # Does not dive into subfolders
 # pass in --wet-run to actually execute the copy
+
+# Set env vars prior to run:
+# export CEDARSCRIPT_SOURCE_SERVER_URL=https://cedar.metadatacenter.org/
+# export CEDARSCRIPT_TARGET_SERVER_URL=https://cedar.staging.metadatacenter.org/
+# export CEDARSCRIPT_SOURCE_API_KEY=K1
+# export CEDARSCRIPT_TARGET_API_KEY=K3
+# export CEDARSCRIPT_SOURCE_FOLDER_ID=https://repo.metadatacenter.org/folders/UUID1
+# export CEDARSCRIPT_TARGET_FOLDER_ID=https://repo.staging.metadatacenter.org/folders/UUID2
+
 def main():
     ap = argparse.ArgumentParser(description="Copy top-level CEDAR artifacts from a source folder to a target folder, preserving UUIDs.")
     ap.add_argument("--wet-run", action="store_true", help="Actually PUT to target. Default is dry-run.")
