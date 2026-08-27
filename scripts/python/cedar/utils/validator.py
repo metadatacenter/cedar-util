@@ -11,8 +11,6 @@ status followed by the validation message
 import requests
 import json
 import cedar.utils.general_utils as util
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def validate_resource(api_key, request_url, resource):
@@ -49,5 +47,5 @@ def send_post_request(api_key, request_url, data):
         "Content-Type": "application/json",
         "Authorization": api_key
     }
-    response = requests.request("POST", request_url, headers=headers, data=json.dumps(data), verify=False)
+    response = requests.request("POST", request_url, headers=headers, data=json.dumps(data))
     return response

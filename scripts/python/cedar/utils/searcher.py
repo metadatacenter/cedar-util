@@ -14,8 +14,6 @@ return all the items (perform a "search all" call)
 import math
 import requests
 import json
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def search_resources(api_key, request_url, max_count=None, limit_per_page=500):
@@ -91,6 +89,6 @@ def send_get_request(api_key, request_url):
         'Content-Type': "application/json",
         'Authorization': api_key
     }
-    response = requests.request("GET", request_url, headers=headers, verify=False)
+    response = requests.request("GET", request_url, headers=headers)
     document = json.loads(response.text)
     return document

@@ -10,8 +10,6 @@ resource (template/element/instance) via a DELETE request.
 import requests
 import json
 from urllib.parse import quote
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def remove_resource(api_key, request_url):
@@ -48,7 +46,7 @@ def send_delete_request(api_key, request_url):
         'Content-Type': "application/json",
         'Authorization': api_key
     }
-    response = requests.request("DELETE", request_url, headers=headers, verify=False)
+    response = requests.request("DELETE", request_url, headers=headers)
     return response
 
 

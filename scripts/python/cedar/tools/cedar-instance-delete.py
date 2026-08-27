@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import argparse
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import urllib.parse
 import json
 
@@ -39,8 +38,6 @@ def main():
 # Returns summaries of the instances of the given template
 def get_template_instances_summaries(server, template_id, max_count, limit_per_call, api_key):
     # print('*** Retrieving instance summaries of template: ' + template_id + ' ***')
-    # Disable InsecureRequestWarning
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     instances_summary = []
     url = server + "search"
     offset = 0
@@ -55,7 +52,7 @@ def get_template_instances_summaries(server, template_id, max_count, limit_per_c
             'content-type': "application/json",
             'authorization': "apiKey " + api_key
         }
-        response_instances_summary = requests.request("GET", url, headers=headers, params=querystring, verify=False)
+        response_instances_summary = requests.request("GET", url, headers=headers, params=querystring)
         # print("GET instances summary URL: " + str(response_instances_summary.url))
         # print("GET instances summary response: " + str(response_instances_summary.status_code))
         response_json = json.loads(response_instances_summary.text)
@@ -85,14 +82,12 @@ def get_template_instances_ids(server, template_id, max_count, limit_per_call, a
     return ids
 
 def delete_instance(server, instance_id, api_key):
-    # Disable InsecureRequestWarning
-    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     url = server + "template-instances/" + urllib.parse.quote(instance_id, safe='')
     print(url)
     headers = {
         'authorization': "apiKey " + api_key
     }
-    response = requests.request("DELETE", url, headers=headers, verify=False)
+    response = requests.request("DELETE", url, headers=headers)
     print("DELETE instance response: " + str(response.status_code))
 
 

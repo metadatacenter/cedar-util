@@ -10,8 +10,6 @@ resource (template/element/instance) via a PUT request.
 import requests
 import json
 from urllib.parse import quote
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def update_resource(api_key, request_url, resource):
@@ -68,7 +66,7 @@ def send_put_request(api_key, request_url, resource):
         'Content-Type': "application/json",
         'Authorization': api_key
     }
-    response = requests.request("PUT", request_url, json=resource, headers=headers, verify=False)
+    response = requests.request("PUT", request_url, json=resource, headers=headers)
     return response
 
 
